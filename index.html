@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pl" class="size-medium dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCYTHED - Demo</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+      let currentBrandColor = '#ff0033';
+      
+      function updateTailwindConfig(colorHex) {
+          tailwind.config = {
+            darkMode: 'class',
+            theme: {
+              extend: {
+                colors: {
+                  brand: {
+                    card: '#0d0d0feb',
+                    border: '#1f1f23cc',
+                    red: colorHex,
+                    hoverRed: '#cc0029'
+                  }
+                },
+                fontFamily: {
+                  orbitron: ['Orbitron', 'sans-serif'],
+                  rajdhani: ['Rajdhani', 'sans-serif']
+                }
+              }
+            }
+          }
+      }
+      updateTailwindConfig(currentBrandColor);
+    </script>
+
+    <style>
+        :root {
+            --brand-red: #ff0033;
+            --brand-scroll-track: #100305;
+            --brand-scroll-thumb: #ff0033;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--brand-scroll-track, #090909);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--brand-red, #ff0033);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            filter: brightness(1.2);
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--brand-red, #ff0033) var(--brand-scroll-track, #090909);
+        }
+
+        html.size-small { font-size: 13px; }
+        html.size-medium { font-size: 16px; }
+        html.size-large { font-size: 19px; }
+
+        .card-scale { transition: all 0.2s ease-in-out; }
+        html.size-small .card-scale { padding: 0.75rem; }
+        html.size-medium .card-scale { padding: 1.25rem; }
+        html.size-large .card-scale { padding: 1.75rem; }
+
+        .glow-effect {
+            box-shadow: 0 0 15px rgba(255, 0, 51, 0.35);
+        }
+
+        .animated-gradient-text {
+            background: linear-gradient(90deg, currentColor, var(--brand-red, #ff0033), currentColor);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 4s linear infinite;
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-zinc-100 dark:bg-black text-zinc-900 dark:text-white selection:bg-brand-red selection:text-white pb-24 md:pb-28 transition-colors duration-300">
+
+    <!-- Górny pasek demonstracyjny -->
+    <div class="w-full bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-700/60 py-2.5 px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-white shadow-lg relative z-50">
+        <div class="flex items-center gap-2 text-xs md:text-sm font-orbitron font-bold tracking-wider text-center sm:text-left">
+            <i class="fas fa-triangle-exclamation text-amber-400 animate-pulse"></i>
+            <span>WERSJA DEMONSTRACYJNA – BRAK MOŻLIWOŚCI EDYCJI I WPROWADZANIA ZMIAN!</span>
+        </div>
+        <a href="scythed.zip" download class="px-4 py-1.5 bg-black/40 hover:bg-black/60 border border-red-500/50 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
+            <i class="fas fa-download text-brand-red"></i> POBIERZ PEŁNĄ WERSJĘ
+        </a>
+    </div>
+
+    <div id="toast" class="fixed top-24 right-4 md:right-8 z-50 transform translate-x-[150%] transition-all duration-300 ease-in-out max-w-sm w-full bg-white dark:bg-brand-card border-r-4 border-brand-red p-4 rounded-xl shadow-2xl text-zinc-900 dark:text-white flex items-start justify-between hidden backdrop-blur-md border border-zinc-200 dark:border-brand-border">
+        <div class="flex items-start space-x-3 mr-2 overflow-hidden flex-grow">
+            <i id="toast-icon" class="fas font-bold text-brand-red flex-shrink-0 mt-0.5"></i>
+            <span id="toast-message" class="text-xs md:text-sm font-semibold break-words leading-relaxed">Komunikat</span>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0 ml-1">
+            <button onclick="window.scythedApp.hideToast()" class="text-zinc-500 dark:text-gray-400 hover:text-zinc-900 dark:hover:text-white p-1"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <header class="border-b border-zinc-200 dark:border-brand-border bg-white/85 dark:bg-black/85 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 py-3 flex items-center justify-between transition-colors duration-300">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg border border-transparent bg-transparent flex items-center justify-center overflow-hidden">
+                <img src="logo.gif" alt="SCYTHED Logo" class="w-full h-full object-contain p-0.5" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-shield-halved text-brand-red text-xl\'></i>';">
+            </div>
+            <span class="font-orbitron font-extrabold text-xl md:text-2xl tracking-wider text-zinc-900 dark:text-white">SCYTH<span class="text-brand-red">ED</span></span>
+        </div>
+
+        <div class="flex items-center gap-2 md:gap-3">
+            <button onclick="window.scythedApp.toggleTheme()" class="px-3 py-1.5 bg-zinc-200/80 dark:bg-zinc-900/95 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-200 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5 shadow-sm" title="Przełącz motyw Light/Dark">
+                <i id="theme-mode-icon" class="fas fa-moon text-brand-red"></i>
+                <span id="theme-mode-text" class="hidden sm:inline">TRYB</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+
+        <div id="header-card" class="relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/90 dark:bg-brand-card backdrop-blur-md p-5 md:p-6 border border-zinc-200 dark:border-brand-border rounded-2xl card-scale shadow-2xl transition-colors duration-300">
+            <canvas id="header-bg-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0 rounded-2xl"></canvas>
+
+            <div class="relative z-10">
+                <h1 class="font-orbitron text-xl md:text-2xl font-black text-zinc-900 dark:text-white flex items-center gap-3">
+                    <i class="fas fa-shield-halved text-brand-red"></i> MENADŻER HASEŁ (DEMO)
+                </h1>
+                <p class="text-xs text-zinc-600 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-1.5">
+                    <span>Liczba wpisów:</span> <span id="vault-count-badge" class="text-brand-red font-bold">0</span>
+                    <span class="text-zinc-400 dark:text-zinc-600">|</span>
+                    <span class="text-[11px] text-zinc-500 dark:text-gray-400">Wersja demonstracyjna strony bez logowania.</span>
+                </p>
+            </div>
+            
+            <div class="relative z-10 flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="window.scythedApp.blockedAction()" class="flex-grow sm:flex-grow-0 px-6 py-3 bg-brand-red/60 text-white font-orbitron font-bold text-xs md:text-sm rounded-xl cursor-not-allowed transition flex items-center justify-center gap-2 opacity-75" title="Zablokowane w wersji demo">
+                    <i class="fas fa-lock"></i> DODAJ KONTO
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/90 dark:bg-brand-card backdrop-blur-md p-4 border border-zinc-200 dark:border-brand-border rounded-2xl shadow-xl transition-colors duration-300">
+            <div class="flex items-center justify-between bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 rounded-xl">
+                <span class="text-xs font-mono uppercase text-zinc-700 dark:text-gray-300">Wszystkie maile/loginy</span>
+                <button id="global-toggle-emails" onclick="window.scythedApp.toggleGlobalEmails()" class="px-3 py-1.5 bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-brand-red border border-zinc-300 dark:border-zinc-700 text-xs font-bold rounded-lg transition flex items-center gap-1.5">
+                    <i id="global-emails-icon" class="fas fa-eye-slash"></i>
+                    <span id="global-emails-text">UKRYJ WSZYSTKIE</span>
+                </button>
+            </div>
+            <div class="flex items-center justify-between bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 rounded-xl">
+                <span class="text-xs font-mono uppercase text-zinc-700 dark:text-gray-300">Wszystkie hasła</span>
+                <button id="global-toggle-passwords" onclick="window.scythedApp.toggleGlobalPasswords()" class="px-3 py-1.5 bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-brand-red border border-zinc-300 dark:border-zinc-700 text-xs font-bold rounded-lg transition flex items-center gap-1.5">
+                    <i id="global-pass-icon" class="fas fa-eye"></i>
+                    <span id="global-pass-text">POKAŻ WSZYSTKIE</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-3">
+            <div class="relative flex-grow">
+                <i class="fas fa-search absolute left-4 top-3.5 text-zinc-400 dark:text-gray-500 text-xs"></i>
+                <input type="text" id="vault-search-input" oninput="window.scythedApp.renderVaultEntries()" placeholder="Szukaj konta, loginu lub platformy..." class="w-full bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
+            </div>
+            
+            <div class="flex gap-2">
+                <select id="vault-filter-platform" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none flex-grow shadow-xl transition-colors duration-300">
+                    <option value="ALL">Wszystkie</option>
+                </select>
+
+                <select id="vault-sort-order" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
+                    <option value="NEWEST">Najnowsze</option>
+                    <option value="OLDEST">Najstarsze</option>
+                    <option value="NAME_ASC">Nazwa (A-Z)</option>
+                    <option value="PLATFORM">Platforma</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="vault-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        </div>
+
+        <div id="vault-empty-state" class="hidden text-center py-16 bg-white/70 dark:bg-brand-card/70 backdrop-blur-md border border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl shadow-xl transition-colors duration-300">
+            <i class="fas fa-shield-halved text-5xl text-zinc-400 dark:text-zinc-700 mb-3"></i>
+            <p class="text-zinc-600 dark:text-gray-400 text-base font-semibold">Brak zapisanych haseł w menadżerze</p>
+        </div>
+
+    </main>
+
+    <!-- Panel użytkownika -->
+    <div class="fixed bottom-4 left-4 z-40 bg-white/95 dark:bg-black/95 border border-zinc-200 dark:border-brand-red/60 rounded-2xl p-4 shadow-2xl backdrop-blur-md max-w-md w-auto flex items-center justify-between gap-4 glow-effect transition-colors duration-300">
+        <div class="flex items-center gap-4 overflow-hidden">
+            <div class="overflow-hidden flex-grow min-w-[160px]">
+                <div class="flex items-center gap-1.5">
+                    <span class="font-orbitron font-extrabold text-base md:text-lg tracking-wider animated-gradient-text truncate w-full">Demo</span>
+                    <i class="fas fa-lock text-[10px] text-zinc-400 dark:text-gray-500 flex-shrink-0" title="Zablokowane w demo"></i>
+                </div>
+                <div class="text-xs text-zinc-600 dark:text-gray-300 flex flex-col mt-1 font-semibold">
+                    <span class="text-brand-red font-bold">Tryb demonstracyjny</span>
+                    <span id="profile-created-date" class="text-zinc-500 dark:text-gray-400 font-mono text-[11px] font-normal">Konto od: 10.10.2010</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel dolny prawy -->
+    <div class="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-1">
+        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">v.beta 31 (DEMO)</span>
+        
+        <div class="bg-white/95 dark:bg-black/95 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-2.5 shadow-2xl backdrop-blur-md flex items-center gap-3 sm:gap-4 flex-wrap justify-end transition-colors duration-300">
+            
+            <button id="sound-toggle-btn" onclick="window.scythedApp.toggleSound()" class="text-xs font-bold text-zinc-700 dark:text-gray-300 hover:text-brand-red flex items-center gap-1.5 transition">
+                <i id="sound-icon" class="fas fa-volume-high text-brand-red"></i>
+                <span id="sound-text" class="hidden sm:inline">DŹWIĘK</span>
+            </button>
+
+            <div class="h-4 w-px bg-zinc-300 dark:bg-zinc-800"></div>
+
+            <div class="flex items-center gap-2">
+                <i class="fas fa-font text-zinc-400 dark:text-gray-500 text-[10px]"></i>
+                <input type="range" id="ui-scale-slider" min="1" max="3" step="1" value="2" onchange="window.scythedApp.updateUIScale(this.value)" class="w-16 sm:w-20 accent-brand-red cursor-pointer">
+                <span id="scale-label-text" class="text-[11px] font-mono font-bold text-brand-red w-10 text-center">ŚREDNI</span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full max-w-xl mx-auto text-center px-4 mt-8 space-y-1 relative z-10">
+        <p class="text-[11px] md:text-xs text-zinc-600 dark:text-gray-400 font-mono leading-tight">
+            &copy; 2026 <span class="font-orbitron font-bold text-zinc-900 dark:text-white">SCYTH<span class="text-brand-red">ED</span></span> Menadżer Haseł. Projekt stworzony przez @yzke (discord).
+        </p>
+    </footer>
+
+    <!-- Główny Skrypt Aplikacji -->
+    <script>
+        (function() {
+            const PLATFORMS = {
+                'discord': { name: 'Discord', icon: 'fab fa-discord', color: '#5865F2' },
+                'steam': { name: 'Steam', icon: 'fab fa-steam', color: '#171a21' },
+                'google': { name: 'Google', icon: 'fab fa-google', color: '#EA4335' },
+                'github': { name: 'GitHub', icon: 'fab fa-github', color: '#ffffff' },
+                'netflix': { name: 'Netflix', icon: 'fas fa-film', color: '#E50914' },
+                'spotify': { name: 'Spotify', icon: 'fab fa-spotify', color: '#1DB954' },
+                'twitch': { name: 'Twitch', icon: 'fab fa-twitch', color: '#9146FF' },
+                'epicgames': { name: 'Epic Games', icon: 'fas fa-gamepad', color: '#313131' },
+                'battlenet': { name: 'Battle.net', icon: 'fas fa-bolt', color: '#009ae2' },
+                'other': { name: 'Inne / Własne', icon: 'fas fa-globe', color: '#ff0033' }
+            };
+
+            const DEFAULT_ENTRIES = [
+                {
+                    id: 'demo_1',
+                    platform: 'battlenet',
+                    account: 'SigmaBoy59',
+                    password: 'Szybkininja59!',
+                    notes: 'Konto demonstracyjne!',
+                    createdAt: Date.now() - 86400000 * 3
+                },
+                {
+                    id: 'demo_2',
+                    platform: 'discord',
+                    account: 'cyberdog69',
+                    password: 'cyberdoggie49',
+                    notes: 'Konto społecznościowe demonstracyjne.',
+                    createdAt: Date.now() - 86450000 * 2
+                },
+                {
+                    id: 'demo_3',
+                    platform: 'github',
+                    account: 'tymek.kocha.vibecode@outlook.com',
+                    password: 'githubtriplet67',
+                    notes: 'Demonstracyjne konto - Repozytorium projektów open-source i klucze API.',
+                    createdAt: Date.now() - 86404000
+                }
+            ];
+
+            let vaultEntries = [...DEFAULT_ENTRIES];
+            let soundEnabled = true;
+            let globalEmailsVisible = false;
+            let globalPasswordsVisible = false;
+
+            const audioCtx = (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) ? new (window.AudioContext || window.webkitAudioContext)() : null;
+
+            function playSound(type) {
+                if (!soundEnabled || !audioCtx) return;
+                try {
+                    if (audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    if (type === 'click') {
+                        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
+                        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 0.05);
+                    } else if (type === 'error') {
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                        osc.frequency.setValueAtTime(100, audioCtx.currentTime + 0.1);
+                        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 0.2);
+                    }
+                } catch(e) {}
+            }
+
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toast-message');
+                const toastIcon = document.getElementById('toast-icon');
+
+                toastMsg.textContent = message;
+                toastIcon.className = 'fas font-bold flex-shrink-0 mt-0.5 ' + (type === 'success' ? 'fa-circle-check text-brand-red' : 'fa-triangle-exclamation text-amber-500');
+
+                toast.classList.remove('hidden', 'translate-x-[150%]');
+                playSound(type === 'success' ? 'click' : 'error');
+
+                clearTimeout(window._toastTimeout);
+                window._toastTimeout = setTimeout(() => {
+                    hideToast();
+                }, 4000);
+            }
+
+            function hideToast() {
+                const toast = document.getElementById('toast');
+                toast.classList.add('translate-x-[150%]');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }
+
+            function blockedAction() {
+                showToast('Ta funkcja jest zablokowana w wersji demonstracyjnej!', 'error');
+            }
+
+            function initAppUI() {
+                populatePlatformSelect();
+                renderVaultEntries();
+                initCanvasBackground();
+            }
+
+            function populatePlatformSelect() {
+                const selectFilter = document.getElementById('vault-filter-platform');
+                let htmlFilter = '<option value="ALL">Wszystkie platformy</option>';
+
+                for (let key in PLATFORMS) {
+                    htmlFilter += `<option value="${key}">${PLATFORMS[key].name}</option>`;
+                }
+                selectFilter.innerHTML = htmlFilter;
+            }
+
+            function toggleEmailVisibility(entryId) {
+                playSound('click');
+                const el = document.getElementById(`acc-text-${entryId}`);
+                const icon = document.getElementById(`acc-icon-${entryId}`);
+                if (el.dataset.masked === 'true') {
+                    el.textContent = el.dataset.raw;
+                    el.dataset.masked = 'false';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    el.textContent = '••••••••••••';
+                    el.dataset.masked = 'true';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            }
+
+            function togglePasswordEntryVisibility(entryId) {
+                playSound('click');
+                const el = document.getElementById(`pass-text-${entryId}`);
+                const icon = document.getElementById(`pass-icon-${entryId}`);
+                if (el.dataset.masked === 'true') {
+                    el.textContent = el.dataset.raw;
+                    el.dataset.masked = 'false';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    el.textContent = '••••••••••••';
+                    el.dataset.masked = 'true';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            }
+
+            function toggleGlobalEmails() {
+                playSound('click');
+                globalEmailsVisible = !globalEmailsVisible;
+                const textSpan = document.getElementById('global-emails-text');
+                const icon = document.getElementById('global-emails-icon');
+
+                if (globalEmailsVisible) {
+                    textSpan.textContent = 'POKAŻ WSZYSTKIE';
+                    icon.className = 'fas fa-eye';
+                } else {
+                    textSpan.textContent = 'UKRYJ WSZYSTKIE';
+                    icon.className = 'fas fa-eye-slash';
+                }
+                renderVaultEntries();
+            }
+
+            function toggleGlobalPasswords() {
+                playSound('click');
+                globalPasswordsVisible = !globalPasswordsVisible;
+                const textSpan = document.getElementById('global-pass-text');
+                const icon = document.getElementById('global-pass-icon');
+
+                if (globalPasswordsVisible) {
+                    textSpan.textContent = 'UKRYJ WSZYSTKIE';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    textSpan.textContent = 'POKAŻ WSZYSTKIE';
+                    icon.className = 'fas fa-eye';
+                }
+                renderVaultEntries();
+            }
+
+            function renderVaultEntries() {
+                const grid = document.getElementById('vault-grid');
+                const emptyState = document.getElementById('vault-empty-state');
+                const searchInput = document.getElementById('vault-search-input').value.toLowerCase();
+                const filterPlatform = document.getElementById('vault-filter-platform').value;
+                const sortOrder = document.getElementById('vault-sort-order').value;
+                const countBadge = document.getElementById('vault-count-badge');
+
+                let filtered = vaultEntries.filter(entry => {
+                    const platformName = (entry.platform === 'other' ? 'Własna' : (PLATFORMS[entry.platform]?.name || '')).toLowerCase();
+                    const matchesSearch = entry.account.toLowerCase().includes(searchInput) ||
+                                          platformName.includes(searchInput) ||
+                                          (entry.notes && entry.notes.toLowerCase().includes(searchInput));
+                    const matchesPlatform = filterPlatform === 'ALL' || entry.platform === filterPlatform;
+                    return matchesSearch && matchesPlatform;
+                });
+
+                filtered.sort((a, b) => {
+                    if (sortOrder === 'NEWEST') return b.createdAt - a.createdAt;
+                    if (sortOrder === 'OLDEST') return a.createdAt - b.createdAt;
+                    if (sortOrder === 'NAME_ASC') return a.account.localeCompare(b.account);
+                    if (sortOrder === 'PLATFORM') return a.platform.localeCompare(b.platform);
+                    return 0;
+                });
+
+                countBadge.textContent = vaultEntries.length;
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                emptyState.classList.add('hidden');
+                let html = '';
+
+                filtered.forEach(entry => {
+                    const platInfo = PLATFORMS[entry.platform] || PLATFORMS['other'];
+                    const platName = platInfo.name;
+                    const iconHtml = `<i class="${platInfo.icon} text-lg" style="color: ${platInfo.color};"></i>`;
+
+                    const showAcc = globalEmailsVisible;
+                    const showPass = globalPasswordsVisible;
+
+                    // Układ paneli dokładnie zgodny z nadesłanym wzorem użytkownika
+                    html += `
+                        <div class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-brand-border rounded-2xl p-5 card-scale shadow-xl flex flex-col justify-between space-y-4 hover:border-brand-red/50 transition">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-black/60 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
+                                        ${iconHtml}
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <h3 class="font-orbitron font-bold text-base text-zinc-900 dark:text-white truncate">${escapeHtml(platName)}</h3>
+                                        <div class="text-[11px] text-zinc-500 font-mono flex items-center gap-1.5 mt-0.5">
+                                            <i class="far fa-clock text-[10px]"></i>
+                                            <span>${new Date(entry.createdAt).toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 pt-1">
+                                    <button onclick="window.scythedApp.blockedAction()" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition" title="Edycja zablokowana w demo">
+                                        <i class="fas fa-pen text-sm"></i>
+                                    </button>
+                                    <button onclick="window.scythedApp.blockedAction()" class="text-zinc-400 hover:text-red-500 transition" title="Usuwanie zablokowane w demo">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Login / Email</span>
+                                    <div class="bg-zinc-100 dark:bg-black/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
+                                        <span id="acc-text-${entry.id}" data-masked="${!showAcc}" data-raw="${escapeHtml(entry.account)}" class="font-mono font-semibold text-zinc-800 dark:text-gray-200 truncate mr-2">${showAcc ? escapeHtml(entry.account) : '••••••••••••'}</span>
+                                        <div class="flex items-center gap-3 flex-shrink-0">
+                                            <button onclick="window.scythedApp.toggleEmailVisibility('${entry.id}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white"><i id="acc-icon-${entry.id}" class="fas ${showAcc ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i></button>
+                                            <button onclick="window.scythedApp.copyToClipboard('${escapeHtml(entry.account)}')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj login"><i class="fas fa-copy text-xs"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Hasło</span>
+                                    <div class="bg-zinc-100 dark:bg-black/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
+                                        <span id="pass-text-${entry.id}" data-masked="${!showPass}" data-raw="${escapeHtml(entry.password)}" class="font-mono font-semibold text-brand-red truncate mr-2">${showPass ? escapeHtml(entry.password) : '••••••••••••••••'}</span>
+                                        <div class="flex items-center gap-3 flex-shrink-0">
+                                            <button onclick="window.scythedApp.togglePasswordEntryVisibility('${entry.id}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white"><i id="pass-icon-${entry.id}" class="fas ${showPass ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i></button>
+                                            <button onclick="window.scythedApp.copyToClipboard('${escapeHtml(entry.password)}')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj hasło"><i class="fas fa-copy text-xs"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800/80 rounded-xl p-3 text-xs text-zinc-600 dark:text-gray-400 font-mono italic">
+                                ${escapeHtml(entry.notes || '')}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                grid.innerHTML = html;
+            }
+
+            function copyToClipboard(text) {
+                playSound('click');
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Skopiowano do schowka!', 'success');
+                }).catch(() => {
+                    showToast('Nie udało się skopiować.', 'error');
+                });
+            }
+
+            function toggleSound() {
+                soundEnabled = !soundEnabled;
+                const icon = document.getElementById('sound-icon');
+                if (soundEnabled) {
+                    icon.className = 'fas fa-volume-high text-brand-red';
+                    showToast('Dźwięki włączone.', 'success');
+                } else {
+                    icon.className = 'fas fa-volume-xmark text-zinc-400';
+                    showToast('Dźwięki wyłączone.', 'success');
+                }
+            }
+
+            function updateUIScale(val) {
+                playSound('click');
+                const htmlEl = document.documentElement;
+                htmlEl.classList.remove('size-small', 'size-medium', 'size-large');
+                const scaleText = document.getElementById('scale-label-text');
+                if (val === '1') {
+                    htmlEl.classList.add('size-small');
+                    scaleText.textContent = 'MAŁY';
+                } else if (val === '2') {
+                    htmlEl.classList.add('size-medium');
+                    scaleText.textContent = 'ŚREDNI';
+                } else {
+                    htmlEl.classList.add('size-large');
+                    scaleText.textContent = 'DUŻY';
+                }
+            }
+
+            function toggleTheme() {
+                playSound('click');
+                const html = document.documentElement;
+                const icon = document.getElementById('theme-mode-icon');
+                if (html.classList.contains('dark')) {
+                    html.classList.remove('dark');
+                    icon.className = 'fas fa-sun text-brand-red';
+                    showToast('Przełączono na motyw jasny.', 'success');
+                } else {
+                    html.classList.add('dark');
+                    icon.className = 'fas fa-moon text-brand-red';
+                    showToast('Przełączono na motyw ciemny.', 'success');
+                }
+            }
+
+            function initCanvasBackground() {
+                const canvas = document.getElementById('header-bg-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                let width = canvas.width = canvas.parentElement.offsetWidth;
+                let height = canvas.height = canvas.parentElement.offsetHeight;
+
+                window.addEventListener('resize', () => {
+                    if(canvas.parentElement) {
+                        width = canvas.width = canvas.parentElement.offsetWidth;
+                        height = canvas.height = canvas.parentElement.offsetHeight;
+                    }
+                });
+
+                let particles = [];
+                for(let i=0; i<30; i++) {
+                    particles.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        radius: Math.random() * 2 + 1
+                    });
+                }
+
+                function animate() {
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.fillStyle = '#ff003322';
+                    particles.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        if(p.x < 0) p.x = width;
+                        if(p.x > width) p.x = 0;
+                        if(p.y < 0) p.y = height;
+                        if(p.y > height) p.y = 0;
+
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    requestAnimationFrame(animate);
+                }
+                animate();
+            }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/&/g, "&amp;")
+                          .replace(/</g, "&lt;")
+                          .replace(/>/g, "&gt;")
+                          .replace(/"/g, "&quot;")
+                          .replace(/'/g, "&#039;");
+            }
+
+            window.scythedApp = {
+                toggleEmailVisibility,
+                togglePasswordEntryVisibility,
+                toggleGlobalEmails,
+                toggleGlobalPasswords,
+                renderVaultEntries,
+                toggleSound,
+                updateUIScale,
+                copyToClipboard,
+                hideToast,
+                toggleTheme,
+                blockedAction
+            };
+
+            initAppUI();
+        })();
+    </script>
+</body>
+</html>
