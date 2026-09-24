@@ -1,805 +1,220 @@
-<!DOCTYPE html>
-<html lang="pl" class="size-medium dark">
+<!doctype html>
+<html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scythed Demo</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="logo.png">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    <!-- Open Graph / Discord Embed Tags -->
-    <meta property="og:title" content="SCYTHED MENADŻER HASEŁ">
-    <meta property="og:description" content="Kliknij w link, aby przejść do Scythed Beta.">
-    <meta property="og:image" content="https://scythed.xyz/link.png">
-    <meta property="og:url" content="https://scythed.xyz">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-    
-    <script>
-      let currentBrandColor = '#ff0033';
-      
-      function updateTailwindConfig(colorHex) {
-          tailwind.config = {
-            darkMode: 'class',
-            theme: {
-              extend: {
-                colors: {
-                  brand: {
-                    card: '#0d0d0feb',
-                    border: '#1f1f23cc',
-                    red: colorHex,
-                    hoverRed: adjustBrightness(colorHex, -20)
-                  }
-                },
-                fontFamily: {
-                  orbitron: ['Orbitron', 'sans-serif'],
-                  rajdhani: ['Rajdhani', 'sans-serif']
-                }
-              }
-            }
-          }
-      }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <title>SCYTHED</title>
+  <link rel="icon" href="assets/logos/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--red:#ff0033;--red2:#b00024;--bg:#050505;--card:#0b0b0d;--line:#25252a;--muted:#96969e}
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:#fff;font-family:Rajdhani,Arial,sans-serif;overflow-x:hidden}
+    a{text-decoration:none;color:inherit}.wrap{max-width:1180px;margin:auto;padding:0 24px}
+    #bg{position:fixed;inset:-8%;z-index:-3;background:
+      radial-gradient(circle at 50% 25%,rgba(255,0,51,.18),transparent 28%),
+      radial-gradient(circle at 10% 90%,rgba(255,0,51,.09),transparent 25%),
+      #050505}
+    #grid{position:fixed;inset:0;z-index:-2;opacity:.28;background-image:linear-gradient(rgba(255,0,51,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,0,51,.08) 1px,transparent 1px);background-size:65px 65px;mask-image:linear-gradient(to bottom,#000,transparent 85%)}
+    #grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
 
-      function adjustBrightness(hex, percent) {
-          let num = parseInt(hex.replace("#",""), 16);
-          let amt = Math.round(2.55 * percent);
-          let R = (num >> 16) + amt;
-          let G = (num >> 8 & 0x00FF) + amt;
-          let B = (num & 0x0000FF) + amt;
-          return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
-      }
+    #squareField{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;opacity:.72}
+    .square{position:absolute;width:var(--s);height:var(--s);left:var(--x);top:var(--y);border:1px solid rgba(255,0,51,.22);background:rgba(255,0,51,.018);box-shadow:0 0 18px rgba(255,0,51,.05),inset 0 0 14px rgba(255,0,51,.025);transform:translate3d(0,0,0) scale(.45);animation:squarePulse var(--d) ease-in-out infinite;animation-delay:var(--delay)}
+    .square:nth-child(3n){border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.012)}
+    .square:nth-child(4n){animation-name:squarePulseReverse}
+    @keyframes squarePulse{0%,100%{transform:translate3d(var(--mx,0px),var(--my,0px),0) scale(.35);opacity:.12}50%{transform:translate3d(var(--mx,0px),var(--my,0px),0) scale(1);opacity:.7}}
+    @keyframes squarePulseReverse{0%,100%{transform:translate3d(var(--mx,0px),var(--my,0px),0) scale(1);opacity:.45}50%{transform:translate3d(var(--mx,0px),var(--my,0px),0) scale(.35);opacity:.1}}
+    #cursorGlow{position:fixed;z-index:-1;width:280px;height:280px;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,0,51,.13),rgba(255,0,51,.035) 34%,transparent 70%);filter:blur(4px);mix-blend-mode:screen}
 
-      updateTailwindConfig(currentBrandColor);
-    </script>
+    #logoMist{position:fixed;left:50%;top:52%;z-index:-2;width:min(720px,75vw);height:min(720px,75vw);pointer-events:none;transform:translate(-50%,-50%) translate3d(0,var(--logoPy,0px),0) rotate(-8deg) scale(1.18);opacity:.035;filter:blur(9px) saturate(.65);mix-blend-mode:screen}
+    #logoMist:after{content:"";position:absolute;inset:-25%;background:radial-gradient(circle,rgba(255,0,51,.13),transparent 62%);filter:blur(35px)}
+    #logoMist img{width:100%;height:100%;object-fit:contain;display:block}
 
-    <style>
-        :root {
-            --brand-red: #ff0033;
-            --brand-scroll-track: #100305;
-            --brand-scroll-thumb: #ff0033;
-            --app-bg-blur: 0px;
-            --app-bg-overlay-color: rgba(0, 0, 0, 0.4);
-        }
+    .eyebrow .dot{animation:eyebrowDotBlink 1.15s ease-in-out infinite}
+    @keyframes eyebrowDotBlink{0%,100%{opacity:1;box-shadow:0 0 8px rgba(255,0,51,.65)}50%{opacity:.18;box-shadow:0 0 2px rgba(255,0,51,.15)}}
+    .update-date-inline{color:#ff6682;font-weight:800}
+    .download-btn{position:relative;isolation:isolate;min-width:235px;background:linear-gradient(135deg,#ff0033,#c40028);box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 0 35px rgba(255,0,51,.28),0 8px 30px rgba(255,0,51,.16);animation:downloadAttention 2.8s ease-in-out infinite}
+    .download-btn:before{content:"";position:absolute;inset:-2px;border-radius:14px;border:1px solid rgba(255,90,120,.45);opacity:.7;animation:downloadRing 2.8s ease-in-out infinite;z-index:-1}
+    .download-btn:hover{transform:translateY(-3px) scale(1.025);filter:brightness(1.13)}
+    .download-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;background:rgba(255,255,255,.8);color:#050505;font-size:9px;letter-spacing:.08em}
+    .demo-btn{opacity:.78}
 
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--brand-scroll-track, #090909);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--brand-red, #ff0033);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            filter: brightness(1.2);
-        }
+    .update-box{text-align:center;padding:70px 48px}
+    .update-box>.section-kicker,.update-box>.section-title,.update-date,.update-intro{display:block;text-align:center}
+    .update-date{font:800 13px Rajdhani,Arial,sans-serif;letter-spacing:.18em;color:#ff6682;margin:-25px 0 22px}
+    .update-intro{max-width:700px;margin:0 auto 30px;color:#8f8f97;line-height:1.6}
+    .update-list{display:none}
+    .update-item{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:18px 20px;border:1px solid #202026;border-radius:14px;background:rgba(255,255,255,.018)}
+    .update-item>span{font:800 12px Rajdhani,Arial,sans-serif;color:var(--red);padding-top:2px}
+    .update-item strong{font:800 14px Rajdhani,Arial,sans-serif;letter-spacing:.08em}
+    .update-item p{margin:5px 0 0;color:#777780;font-size:14px;line-height:1.5}
+    .update-actions{display:none}
 
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: var(--brand-red, #ff0033) var(--brand-scroll-track, #090909);
-        }
+    @keyframes downloadAttention{0%,100%{box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 0 30px rgba(255,0,51,.22),0 8px 30px rgba(255,0,51,.12)}50%{box-shadow:0 0 0 1px rgba(255,255,255,.13) inset,0 0 55px rgba(255,0,51,.4),0 10px 38px rgba(255,0,51,.2)}}
+    @keyframes downloadRing{0%,100%{transform:scale(.98);opacity:.25}50%{transform:scale(1.045);opacity:.75}}
 
-        html.size-small { font-size: 13px; }
-        html.size-medium { font-size: 16px; }
-        html.size-large { font-size: 19px; }
 
-        .card-scale { transition: all 0.2s ease-in-out; }
-        html.size-small .card-scale { padding: 0.75rem; }
-        html.size-medium .card-scale { padding: 1.25rem; }
-        html.size-large .card-scale { padding: 1.75rem; }
-
-        .glow-effect {
-            box-shadow: 0 0 15px var(--brand-red-glow, rgba(255, 0, 51, 0.35));
-        }
-
-        .animated-gradient-text {
-            background: linear-gradient(90deg, currentColor, var(--brand-red, #ff0033), currentColor);
-            background-size: 200% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            background-clip: text;
-            animation: shine 4s linear infinite;
-        }
-
-        @keyframes shine {
-            to {
-                background-position: 200% center;
-            }
-        }
-
-        #app-custom-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            transition: opacity 0.5s ease-in-out, filter 0.3s ease;
-            filter: blur(var(--app-bg-blur, 0px));
-            transform: scale(1.02);
-        }
-
-        #app-bg-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            pointer-events: none;
-            transition: background-color 0.3s ease;
-            background-color: var(--app-bg-overlay-color, rgba(0, 0, 0, 0.4));
-        }
-
-        .default-banner {
-            background: linear-gradient(135deg, #09090b 0%, #18181b 50%, #000000 100%);
-        }
-    </style>
+    nav{position:fixed;top:0;left:0;right:0;z-index:20;background:rgba(5,5,5,.72);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07)}
+    nav .inner{height:76px;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:12px;font:800 20px Rajdhani;letter-spacing:.12em}
+    .brand img{width:42px;height:42px;object-fit:contain}.brand span span{color:var(--red)}
+    .links{display:flex;gap:28px;color:#aaa;font-weight:700;font-size:14px}.links a:hover{color:#fff}
+    .navbtn{padding:10px 16px;border:1px solid rgba(255,0,51,.55);border-radius:10px;background:rgba(255,0,51,.1);color:#fff;font-weight:800}
+    .hero{min-height:100vh;display:grid;place-items:center;padding-top:90px;position:relative}
+    .hero-inner{text-align:center;transform:translateY(calc(var(--py,0px)*.18))}
+    .eyebrow{display:inline-flex;gap:8px;align-items:center;padding:7px 12px;border:1px solid rgba(255,0,51,.35);border-radius:999px;background:rgba(255,0,51,.06);color:#ff6682;font:700 11px Rajdhani;letter-spacing:.18em}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 16px var(--red)}
+    h1{font:900 clamp(58px,12vw,145px)/.85 Rajdhani;margin:28px 0 18px;letter-spacing:-.07em;text-shadow:0 0 55px rgba(255,0,51,.2)}
+    h1 span{color:var(--red)}.lead{max-width:680px;margin:auto;color:#a8a8ae;font-size:clamp(17px,2vw,22px);line-height:1.45}
+    .actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:32px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:15px 23px;border-radius:12px;font:800 13px Rajdhani;letter-spacing:.04em;transition:.2s;cursor:pointer}
+    .primary{background:var(--red);box-shadow:0 0 35px rgba(255,0,51,.22)}.primary:hover{transform:translateY(-2px);filter:brightness(1.12)}
+    .ghost{border:1px solid #303035;background:#0c0c0e}.ghost:hover{border-color:#555}
+    .scroll{margin-top:65px;color:#666;font-size:11px;letter-spacing:.22em}
+    section{padding:115px 0}.section-kicker{color:var(--red);font:800 11px Rajdhani;letter-spacing:.2em}.section-title{font:800 clamp(30px,5vw,54px) Rajdhani;margin:12px 0 45px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .stat{padding:28px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,0,51,.025));position:relative;overflow:hidden}
+    .stat:before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(255,0,51,.08),transparent);transform:translateX(-100%);animation:shine 5s infinite}
+    @keyframes shine{50%,100%{transform:translateX(100%)}}
+    .num{font:900 clamp(34px,5vw,58px) Rajdhani;color:#fff}.label{color:#85858c;font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:12px;margin-top:7px}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{border:1px solid var(--line);background:#0a0a0c;border-radius:18px;padding:28px}.icon{font-size:25px;color:var(--red);margin-bottom:18px}.card h3{font:800 18px Rajdhani;margin:0 0 8px}.card p{color:#8d8d94;line-height:1.55;margin:0}
+    .cta{border:1px solid rgba(255,0,51,.35);border-radius:24px;padding:55px 30px;text-align:center;background:radial-gradient(circle at 50% 0,rgba(255,0,51,.14),transparent 50%),#09090b}
+    footer{padding:28px 0 42px;border-top:1px solid #18181b;background:#000;color:#8a8a92;font-size:13px}.footer-inner{display:flex;justify-content:center;align-items:center;text-align:center;gap:8px 24px;flex-wrap:wrap}.footer-inner strong{color:#fff;letter-spacing:.04em}.footer-inner small{display:block;margin-top:6px;color:#666}
+    [data-reveal]{opacity:0;transform:translateY(28px);transition:.8s ease}.visible{opacity:1;transform:none}
+    @media(prefers-reduced-motion:reduce){.square{animation:none;opacity:.22;transform:none!important}#cursorGlow{display:none}[data-reveal]{transition:none}}    @media(max-width:760px){.links{display:none}.stats,.cards{grid-template-columns:1fr}.wrap{padding:0 18px}section{padding:80px 0}.hero{min-height:92vh}.download-btn{min-width:0;width:100%;max-width:320px}.demo-btn{width:100%;max-width:320px}.update-box{padding:38px 20px}.update-item{grid-template-columns:34px 1fr;padding:15px}.update-date{margin:-18px 0 18px}#logoMist{width:110vw;height:110vw;opacity:.055}}
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between bg-zinc-100 dark:bg-black text-zinc-900 dark:text-white selection:bg-brand-red selection:text-white pb-24 md:pb-28 transition-colors duration-300 relative overflow-x-hidden">
+<body>
+<div id="bg"></div><div id="logoMist" aria-hidden="true"><img src="assets/logos/logo.png" alt=""></div><div id="grid"></div><div id="squareField" aria-hidden="true"></div><div id="cursorGlow" aria-hidden="true"></div><div id="grain"></div>
 
-    <div id="app-custom-bg"></div>
-    <div id="app-bg-overlay"></div>
+<nav><div class="wrap inner">
+  <a class="brand" href="#"><img src="assets/logos/logo.gif" alt="SCYTHED"><span>SCYTH<span>ED</span></span></a>
+  <div class="links"><a href="#stats">STATYSTYKI</a><a href="#features">FUNKCJE</a><a href="#demo">DEMO</a></div>
+  <a class="navbtn" href="demo.html" id="navDemo">OTWÓRZ DEMO</a>
+</div></nav>
 
-    <!-- Pasek Informacyjny DEMO -->
-    <div class="w-full bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-700/60 py-2.5 px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-white shadow-lg relative z-50">
-        <div class="flex items-center gap-2 text-xs md:text-sm font-orbitron font-bold tracking-wider text-center sm:text-left">
-            <i class="fas fa-triangle-exclamation text-amber-400 animate-pulse"></i>
-            <span>WERSJA DEMONSTRACYJNA – BRAK MOŻLIWOŚCI EDYCJI I WPROWADZANIA ZMIAN!</span>
-        </div>
-        <a href="scythed.zip" download class="px-4 py-1.5 bg-black/40 hover:bg-black/60 border border-red-500/50 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
-            <i class="fas fa-download text-brand-red"></i> POBIERZ PEŁNĄ WERSJĘ
-        </a>
+<main>
+<section class="hero">
+  <div class="hero-inner wrap">
+    <div class="eyebrow"><i class="dot"></i>  AKTUALNA WERSJA · SCYTHED OPEN BETA 7</div>
+    <h1>SCYTH<span>ED</span></h1>
+    <p class="lead">Prosty projekt tworzony z myślą o wygodnym korzystaniu na co dzień. Sprawdź najnowszą wersję, przetestuj dostępne możliwości i zobacz, co przygotowaliśmy w ramach Open Bety 7.</p>
+    <div class="actions">
+      <a class="btn primary download-btn" href="scythed.zip" download="scythed.zip" id="downloadBtn">⬇ POBIERZ SCYTHED <span class="download-badge">BETA 7</span></a>
+      <a class="btn ghost demo-btn" href="demo.html" id="demoBtn">ODPAL DEMO</a>
+      <a class="btn ghost" href="#stats">ZOBACZ STATYSTYKI</a>
     </div>
-
-    <!-- Powiadomienie Toast -->
-    <div id="toast" class="fixed top-20 right-4 md:right-8 z-50 transform translate-x-[150%] transition-all duration-300 ease-in-out max-w-sm w-full bg-white dark:bg-brand-card border-r-4 border-brand-red p-4 rounded-xl shadow-2xl text-zinc-900 dark:text-white flex items-start justify-between hidden backdrop-blur-md border border-zinc-200 dark:border-brand-border">
-        <div class="flex items-start space-x-3 mr-2 overflow-hidden flex-grow">
-            <i id="toast-icon" class="fas font-bold text-brand-red flex-shrink-0 mt-0.5"></i>
-            <span id="toast-message" class="text-xs md:text-sm font-semibold break-words leading-relaxed">Komunikat</span>
-        </div>
-        <div class="flex items-center gap-2 flex-shrink-0 ml-1">
-            <button onclick="window.scythedApp.hideToast()" class="text-zinc-500 dark:text-gray-400 hover:text-zinc-900 dark:hover:text-white p-1"><i class="fas fa-times"></i></button>
-        </div>
-    </div>
-
-    <!-- Nagłówek Górny -->
-    <header class="border-b border-zinc-200 dark:border-brand-border bg-white/85 dark:bg-black/85 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 py-3 flex items-center justify-between transition-colors duration-300">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg border border-transparent bg-transparent flex items-center justify-center overflow-hidden">
-                <img src="logo.gif" alt="SCYTHED Logo" class="w-full h-full object-contain p-0.5" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-shield-halved text-brand-red text-xl\'></i>';">
-            </div>
-            <span class="font-orbitron font-extrabold text-xl md:text-2xl tracking-wider text-zinc-900 dark:text-white">SCYTH<span class="text-brand-red">ED</span></span>
-        </div>
-
-        <div class="flex items-center gap-2 md:gap-3">
-            <button onclick="window.scythedApp.blockedAction()" class="px-3 py-1.5 bg-zinc-200/80 dark:bg-zinc-900/90 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-200 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5 shadow-sm opacity-75 cursor-not-allowed" title="Zablokowane w wersji demo">
-                <i class="fas fa-lock text-brand-red"></i>
-                <span class="hidden sm:inline">ZABLOKUJ</span>
-            </button>
-            <button onclick="window.scythedApp.blockedAction()" class="px-3 py-1.5 bg-zinc-200/80 dark:bg-zinc-900/90 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-200 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5 shadow-sm opacity-75 cursor-not-allowed" title="Zablokowane w wersji demo">
-                <i class="fas fa-rotate-left text-brand-red"></i>
-                <span class="hidden sm:inline">RESET</span>
-            </button>
-            <button onclick="window.scythedApp.blockedAction()" class="px-3 py-1.5 bg-zinc-200/80 dark:bg-zinc-900/90 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-200 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5 shadow-sm opacity-75 cursor-not-allowed" title="Zablokowane w wersji demo">
-                <i class="fas fa-download text-brand-red"></i>
-                <span class="hidden sm:inline">POBIERZ BACKUP</span>
-            </button>
-            <button onclick="window.scythedApp.blockedAction()" class="px-3 py-1.5 bg-zinc-200/80 dark:bg-zinc-900/90 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-200 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5 shadow-sm opacity-75 cursor-not-allowed" title="Zablokowane w wersji demo">
-                <i class="fas fa-upload text-brand-red"></i>
-                <span class="hidden sm:inline">WCZYTAJ BACKUP</span>
-            </button>
-        </div>
-    </header>
-
-    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6">
-
-        <div id="header-card" class="relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/90 dark:bg-brand-card backdrop-blur-md p-5 md:p-6 border border-zinc-200 dark:border-brand-border rounded-2xl card-scale shadow-2xl transition-colors duration-300">
-            <canvas id="header-bg-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0 rounded-2xl"></canvas>
-
-            <div class="relative z-10">
-                <h1 class="font-orbitron text-xl md:text-2xl font-black text-zinc-900 dark:text-white flex items-center gap-3">
-                    <i class="fas fa-shield-halved text-brand-red"></i> MENADŻER HASEŁ (DEMO)
-                </h1>
-                <p class="text-xs text-zinc-600 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-1.5">
-                    <span>Liczba wpisów:</span> <span id="vault-count-badge" class="text-brand-red font-bold">0</span>
-                    <span class="text-zinc-400 dark:text-zinc-600">|</span>
-                    <span class="text-[11px] text-zinc-500 dark:text-gray-400">Wersja demonstracyjna strony bez logowania.</span>
-                </p>
-            </div>
-            
-            <div class="relative z-10 flex items-center gap-2 w-full sm:w-auto">
-                <button onclick="window.scythedApp.blockedAction()" class="w-full sm:w-auto px-6 py-3 bg-brand-red/60 text-white font-orbitron font-bold text-xs md:text-sm rounded-xl cursor-not-allowed transition flex items-center justify-center gap-2 opacity-75" title="Zablokowane w wersji demo">
-                    <i class="fas fa-lock"></i> DODAJ KONTO
-                </button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/90 dark:bg-brand-card backdrop-blur-md p-4 border border-zinc-200 dark:border-brand-border rounded-2xl shadow-xl transition-colors duration-300">
-            <div class="flex items-center justify-between bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 rounded-xl">
-                <span class="text-xs font-mono uppercase text-zinc-700 dark:text-gray-300">Wszystkie maile/loginy</span>
-                <button id="global-toggle-emails" onclick="window.scythedApp.toggleGlobalEmails()" class="px-3 py-1.5 bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-brand-red border border-zinc-300 dark:border-zinc-700 text-xs font-bold rounded-lg transition flex items-center gap-1.5">
-                    <i id="global-emails-icon" class="fas fa-eye-slash"></i>
-                    <span id="global-emails-text">UKRYJ WSZYSTKIE</span>
-                </button>
-            </div>
-            <div class="flex items-center justify-between bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 rounded-xl">
-                <span class="text-xs font-mono uppercase text-zinc-700 dark:text-gray-300">Wszystkie hasła</span>
-                <button id="global-toggle-passwords" onclick="window.scythedApp.toggleGlobalPasswords()" class="px-3 py-1.5 bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-brand-red border border-zinc-300 dark:border-zinc-700 text-xs font-bold rounded-lg transition flex items-center gap-1.5">
-                    <i id="global-pass-icon" class="fas fa-eye"></i>
-                    <span id="global-pass-text">POKAŻ WSZYSTKIE</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="flex flex-col md:flex-row gap-3">
-            <div class="relative flex-grow">
-                <i class="fas fa-search absolute left-4 top-3.5 text-zinc-400 dark:text-gray-500 text-xs"></i>
-                <input type="text" id="vault-search-input" oninput="window.scythedApp.renderVaultEntries()" placeholder="Szukaj konta, loginu lub platformy..." class="w-full bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
-            </div>
-            
-            <div class="flex gap-2">
-                <select id="vault-filter-platform" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none flex-grow shadow-xl transition-colors duration-300">
-                    <option value="ALL">Wszystkie</option>
-                </select>
-
-                <select id="vault-sort-order" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
-                    <option value="NEWEST">Najnowsze</option>
-                    <option value="OLDEST">Najstarsze</option>
-                    <option value="NAME_ASC">Nazwa (A-Z)</option>
-                    <option value="PLATFORM">Platforma</option>
-                </select>
-            </div>
-        </div>
-
-        <div id="vault-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        </div>
-
-        <div id="vault-empty-state" class="hidden text-center py-16 bg-white/70 dark:bg-brand-card/70 backdrop-blur-md border border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl shadow-xl transition-colors duration-300">
-            <i class="fas fa-shield-halved text-5xl text-zinc-400 dark:text-zinc-700 mb-3"></i>
-            <p class="text-zinc-600 dark:text-gray-400 text-base font-semibold">Brak zapisanych haseł w menadżerze</p>
-        </div>
-
-    </main>
-
-    <!-- PROFIL W LEWYM DOLNYM ROGU (Wersja DEMO) -->
-    <div class="fixed bottom-4 left-4 z-40 flex flex-col gap-2 max-w-[300px] w-full">
-        <div class="bg-white/95 dark:bg-black/95 border border-zinc-200 dark:border-brand-border rounded-2xl overflow-hidden shadow-2xl backdrop-blur-md transition-all duration-300 glow-effect relative">
-            <div id="profile-card-banner" class="w-full h-16 bg-cover bg-center relative group default-banner transition-all duration-300">
-            </div>
-
-            <div class="p-2.5 px-3.5 relative flex flex-col gap-2">
-                <div class="flex items-center gap-3">
-                    <div class="relative -mt-7 flex-shrink-0">
-                        <div id="profile-avatar-display" class="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 border-2 border-brand-red flex items-center justify-center overflow-hidden shadow-lg">
-                            <img id="avatar-img-preview" src="logo.png" alt="Avatar" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='logo.png';">
-                        </div>
-                    </div>
-
-                    <div class="overflow-hidden flex-grow">
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-orbitron font-extrabold text-sm animated-gradient-text truncate">Demo User</span>
-                            <i class="fas fa-lock text-[10px] text-zinc-400 dark:text-gray-500 flex-shrink-0" title="Profil zablokowany w demo"></i>
-                        </div>
-                        <div id="profile-created-date" class="text-[9px] text-zinc-500 dark:text-gray-400 font-mono">Konto od: 10.10.2010</div>
-                    </div>
-                </div>
-
-                <div id="profile-badges-container" class="flex flex-wrap items-center gap-1.5 pt-1 border-t border-zinc-200 dark:border-zinc-800/60">
-                    <div class="px-2 py-0.5 rounded-md bg-red-500/10 border border-red-500/50 text-red-500 text-[9px] font-bold font-orbitron flex items-center gap-1 shadow-sm glow-effect">
-                        <i class="fas fa-certificate text-red-500 text-[10px]"></i>
-                        <span>ODZNAKA DEMO</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- PRZYCISK KOŁA ZĘBATEGO W PRAWYM DOLNYM ROGU -->
-    <div class="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-1">
-        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">wersja - stabilna beta (DEMO)</span>
-        <button onclick="window.scythedApp.openSettingsModal()" class="w-12 h-12 rounded-2xl bg-white/95 dark:bg-black/95 border border-zinc-200 dark:border-brand-border text-brand-red hover:scale-105 active:scale-95 shadow-2xl backdrop-blur-md flex items-center justify-center text-xl transition-all glow-effect" title="Ustawienia & System">
-            <i class="fas fa-gear"></i>
-        </button>
-    </div>
-
-    <footer class="w-full max-w-xl mx-auto text-center px-4 mt-8 space-y-1 relative z-10">
-        <p class="text-[11px] md:text-xs text-zinc-600 dark:text-gray-400 font-mono leading-tight">
-            &copy; 2026 <span class="font-orbitron font-bold text-zinc-900 dark:text-white">SCYTH<span class="text-brand-red">ED</span></span> Menadżer Haseł. Projekt stworzony przez @yzke (discord).
-        </p>
-    </footer>
-
-    <!-- MODAL USTAWIEŃ I SYSTEMU -->
-    <div id="modal-settings" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-brand-card border border-zinc-200 dark:border-brand-border rounded-2xl max-w-2xl w-full p-6 space-y-6 glow-effect max-h-[90vh] overflow-y-auto backdrop-blur-md shadow-2xl">
-            
-            <div class="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-3">
-                <h3 class="font-orbitron font-bold text-lg md:text-xl text-zinc-900 dark:text-white flex items-center gap-2">
-                    <i class="fas fa-gear text-brand-red"></i> USTAWIENIA & SYSTEM
-                </h3>
-                <button onclick="window.scythedApp.closeModal('modal-settings')" class="text-zinc-500 dark:text-gray-400 hover:text-zinc-900 dark:hover:text-white"><i class="fas fa-times text-lg"></i></button>
-            </div>
-
-            <!-- KATEGORIA 1: PERSONALIZACJA TŁA I MOTYWU -->
-            <div class="space-y-3">
-                <h4 class="text-xs font-orbitron font-bold uppercase tracking-wider text-brand-red border-b border-zinc-200 dark:border-zinc-800 pb-1">
-                    <i class="fas fa-paint-roller mr-1"></i> Wygląd & Personalizacja Tła
-                </h4>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Motyw Jasny/Ciemny -->
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800">
-                        <span class="text-xs font-semibold">Tryb Wyglądu</span>
-                        <button onclick="window.scythedApp.toggleTheme()" class="px-3 py-1.5 bg-zinc-200/80 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5">
-                            <i id="theme-mode-icon" class="fas fa-moon text-brand-red"></i>
-                            <span id="theme-mode-text">TRYB</span>
-                        </button>
-                    </div>
-
-                    <!-- Skala UI -->
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800">
-                        <span class="text-xs font-semibold">Rozmiar Czcionki</span>
-                        <div class="flex items-center gap-2">
-                            <input type="range" id="ui-scale-slider" min="1" max="3" step="1" value="2" onchange="window.scythedApp.updateUIScale(this.value)" class="w-16 accent-brand-red cursor-pointer">
-                            <span id="scale-label-text" class="text-[10px] font-mono font-bold text-brand-red w-12 text-center">ŚREDNI</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- KATEGORIA 2: DŹWIĘK I SYSTEM -->
-            <div class="space-y-3">
-                <h4 class="text-xs font-orbitron font-bold uppercase tracking-wider text-brand-red border-b border-zinc-200 dark:border-zinc-800 pb-1">
-                    <i class="fas fa-sliders mr-1"></i> Audio & Preferencje
-                </h4>
-
-                <div class="grid grid-cols-1 gap-3">
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800">
-                        <span class="text-xs font-semibold">Efekty Dźwiękowe</span>
-                        <button id="sound-toggle-btn" onclick="window.scythedApp.toggleSound()" class="px-3 py-1.5 bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5">
-                            <i id="sound-icon" class="fas fa-volume-high text-brand-red"></i>
-                            <span id="sound-text">DŹWIĘK</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-2">
-                <button type="button" onclick="window.scythedApp.closeModal('modal-settings')" class="w-full py-3 bg-brand-red hover:bg-brand-hoverRed text-white font-orbitron font-bold rounded-xl text-xs transition glow-effect">
-                    ZAMKNIJ USTAWIENIA
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Skrypty Aplikacji DEMO -->
-    <script>
-        (function() {
-            'use strict';
-
-            const PLATFORMS = [
-                { id: 'battlenet', name: 'Battle.net', icon: 'fa-solid fa-bolt', color: '#00aeef' },
-                { id: 'discord', name: 'Discord', icon: 'fa-brands fa-discord', color: '#5865F2' },
-                { id: 'gmail', name: 'Gmail', icon: 'fa-brands fa-google', color: '#ea4335' },
-            ];
-
-            const DEFAULT_ENTRIES = [
-                {
-                    id: 'demo_1',
-                    platform: 'battlenet',
-                    account: 'BattlenetDemo',
-                    password: 'BattlenetDemoHasłoSigma67',
-                    description: 'Chyba jakieś gry czy coś? Konto ma 2FA.',
-                    createdAt: Date.now() - 86400000 * 3
-                },
-                {
-                    id: 'demo_2',
-                    platform: 'discord',
-                    account: 'cyberdog69',
-                    password: 'cyberdoggie49',
-                    description: 'Konto społecznościowe demonstracyjne.',
-                    createdAt: Date.now() - 86450000 * 2
-                },
-                {
-                    id: 'demo_3',
-                    platform: 'gmail',
-                    account: 'scytheddemomail@gmail.com',
-                    password: 'vibekodowaniejestdlasigiemek49',
-                    description: 'Demonstracyjne konto.',
-                    createdAt: Date.now() - 86404000
-                }
-            ];
-
-            let vaultEntries = [...DEFAULT_ENTRIES];
-            let soundEnabled = true;
-            let globalEmailsVisible = true;
-            let globalPasswordsVisible = false;
-
-            const audioCtx = (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) ? new (window.AudioContext || window.webkitAudioContext)() : null;
-
-            function playSound(type) {
-                if (!soundEnabled || !audioCtx) return;
-                try {
-                    if (audioCtx.state === 'suspended') {
-                        audioCtx.resume();
-                    }
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-
-                    if (type === 'click') {
-                        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
-                        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                        osc.start();
-                        osc.stop(audioCtx.currentTime + 0.05);
-                    } else if (type === 'error') {
-                        osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                        osc.frequency.setValueAtTime(100, audioCtx.currentTime + 0.1);
-                        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-                        osc.start();
-                        osc.stop(audioCtx.currentTime + 0.2);
-                    }
-                } catch(e) {}
-            }
-
-            function showToast(message, type = 'success') {
-                const toast = document.getElementById('toast');
-                const toastMsg = document.getElementById('toast-message');
-                const toastIcon = document.getElementById('toast-icon');
-
-                toastMsg.textContent = message;
-                toastIcon.className = 'fas font-bold flex-shrink-0 mt-0.5 ' + (type === 'success' ? 'fa-circle-check text-brand-red' : 'fa-triangle-exclamation text-amber-500');
-
-                toast.classList.remove('hidden', 'translate-x-[150%]');
-                playSound(type === 'success' ? 'click' : 'error');
-
-                clearTimeout(window._toastTimeout);
-                window._toastTimeout = setTimeout(() => {
-                    hideToast();
-                }, 4000);
-            }
-
-            function hideToast() {
-                const toast = document.getElementById('toast');
-                toast.classList.add('translate-x-[150%]');
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 300);
-            }
-
-            function blockedAction() {
-                showToast('Ta funkcja jest zablokowana w wersji demonstracyjnej!', 'error');
-            }
-
-            function openSettingsModal() {
-                playSound('click');
-                document.getElementById('modal-settings').classList.remove('hidden');
-            }
-
-            function closeModal(id) {
-                playSound('click');
-                document.getElementById(id).classList.add('hidden');
-            }
-
-            function initAppUI() {
-                populatePlatformSelect();
-                renderVaultEntries();
-                initCanvasBackground();
-            }
-
-            function populatePlatformSelect() {
-                const selectFilter = document.getElementById('vault-filter-platform');
-                let htmlFilter = '<option value="ALL">Wszystkie platformy</option>';
-
-                PLATFORMS.forEach(p => {
-                    htmlFilter += `<option value="${p.id}">${p.name}</option>`;
-                });
-                selectFilter.innerHTML = htmlFilter;
-            }
-
-            function toggleEmailVisibility(entryId) {
-                playSound('click');
-                const el = document.getElementById(`acc-text-${entryId}`);
-                const icon = document.getElementById(`acc-icon-${entryId}`);
-                if (el.dataset.masked === 'true') {
-                    el.textContent = el.dataset.raw;
-                    el.dataset.masked = 'false';
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                } else {
-                    el.textContent = '••••••••••••';
-                    el.dataset.masked = 'true';
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                }
-            }
-
-            function togglePasswordEntryVisibility(entryId) {
-                playSound('click');
-                const el = document.getElementById(`pass-text-${entryId}`);
-                const icon = document.getElementById(`pass-icon-${entryId}`);
-                if (el.dataset.masked === 'true') {
-                    el.textContent = el.dataset.raw;
-                    el.dataset.masked = 'false';
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                } else {
-                    el.textContent = '••••••••••••';
-                    el.dataset.masked = 'true';
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                }
-            }
-
-            function toggleGlobalEmails() {
-                playSound('click');
-                globalEmailsVisible = !globalEmailsVisible;
-                const textSpan = document.getElementById('global-emails-text');
-                const icon = document.getElementById('global-emails-icon');
-
-                if (globalEmailsVisible) {
-                    textSpan.textContent = 'UKRYJ WSZYSTKIE';
-                    icon.className = 'fas fa-eye-slash';
-                } else {
-                    textSpan.textContent = 'POKAŻ WSZYSTKIE';
-                    icon.className = 'fas fa-eye';
-                }
-                renderVaultEntries();
-            }
-
-            function toggleGlobalPasswords() {
-                playSound('click');
-                globalPasswordsVisible = !globalPasswordsVisible;
-                const textSpan = document.getElementById('global-pass-text');
-                const icon = document.getElementById('global-pass-icon');
-
-                if (globalPasswordsVisible) {
-                    textSpan.textContent = 'UKRYJ WSZYSTKIE';
-                    icon.className = 'fas fa-eye-slash';
-                } else {
-                    textSpan.textContent = 'POKAŻ WSZYSTKIE';
-                    icon.className = 'fas fa-eye';
-                }
-                renderVaultEntries();
-            }
-
-            function renderVaultEntries() {
-                const grid = document.getElementById('vault-grid');
-                const emptyState = document.getElementById('vault-empty-state');
-                const searchInput = document.getElementById('vault-search-input').value.toLowerCase();
-                const filterPlatform = document.getElementById('vault-filter-platform').value;
-                const sortOrder = document.getElementById('vault-sort-order').value;
-                const countBadge = document.getElementById('vault-count-badge');
-
-                let filtered = vaultEntries.filter(entry => {
-                    const platObj = PLATFORMS.find(p => p.id === entry.platform) || PLATFORMS.find(p => p.id === 'other');
-                    const platformName = (platObj ? platObj.name : '').toLowerCase();
-                    const matchesSearch = entry.account.toLowerCase().includes(searchInput) ||
-                                          platformName.includes(searchInput) ||
-                                          (entry.description && entry.description.toLowerCase().includes(searchInput));
-                    const matchesPlatform = filterPlatform === 'ALL' || entry.platform === filterPlatform;
-                    return matchesSearch && matchesPlatform;
-                });
-
-                filtered.sort((a, b) => {
-                    if (sortOrder === 'NEWEST') return b.createdAt - a.createdAt;
-                    if (sortOrder === 'OLDEST') return a.createdAt - b.createdAt;
-                    if (sortOrder === 'NAME_ASC') return a.account.localeCompare(b.account);
-                    if (sortOrder === 'PLATFORM') return a.platform.localeCompare(b.platform);
-                    return 0;
-                });
-
-                countBadge.textContent = vaultEntries.length;
-
-                if (filtered.length === 0) {
-                    grid.innerHTML = '';
-                    emptyState.classList.remove('hidden');
-                    return;
-                }
-
-                emptyState.classList.add('hidden');
-                let html = '';
-
-                filtered.forEach(entry => {
-                    const platInfo = PLATFORMS.find(p => p.id === entry.platform) || PLATFORMS.find(p => p.id === 'other');
-                    const platName = platInfo.name;
-                    const iconHtml = `<i class="${platInfo.icon} text-lg" style="color: ${platInfo.color};"></i>`;
-
-                    const showAcc = globalEmailsVisible;
-                    const showPass = globalPasswordsVisible;
-
-                    html += `
-                        <div class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-brand-border rounded-2xl p-5 card-scale shadow-xl flex flex-col justify-between space-y-4 hover:border-brand-red/50 transition">
-                            <div class="flex items-start justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-black/60 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
-                                        ${iconHtml}
-                                    </div>
-                                    <div class="overflow-hidden">
-                                        <h3 class="font-orbitron font-bold text-base text-zinc-900 dark:text-white truncate">${escapeHtml(platName)}</h3>
-                                        <div class="text-[11px] text-zinc-500 font-mono flex items-center gap-1.5 mt-0.5">
-                                            <i class="far fa-clock text-[10px]"></i>
-                                            <span>${new Date(entry.createdAt).toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3 pt-1">
-                                    <button onclick="window.scythedApp.blockedAction()" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition" title="Edycja zablokowana w demo">
-                                        <i class="fas fa-pen text-sm"></i>
-                                    </button>
-                                    <button onclick="window.scythedApp.blockedAction()" class="text-zinc-400 hover:text-red-500 transition" title="Usuwanie zablokowane w demo">
-                                        <i class="fas fa-trash text-sm"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="space-y-3">
-                                <div>
-                                    <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Login / Email</span>
-                                    <div class="bg-zinc-100 dark:bg-black/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
-                                        <span id="acc-text-${entry.id}" data-masked="${!showAcc}" data-raw="${escapeHtml(entry.account)}" class="font-mono font-semibold text-zinc-800 dark:text-gray-200 truncate mr-2">${showAcc ? escapeHtml(entry.account) : '••••••••••••'}</span>
-                                        <div class="flex items-center gap-3 flex-shrink-0">
-                                            <button onclick="window.scythedApp.toggleEmailVisibility('${entry.id}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white"><i id="acc-icon-${entry.id}" class="fas ${showAcc ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i></button>
-                                            <button onclick="window.scythedApp.copyToClipboard('${escapeHtml(entry.account)}')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj login"><i class="fas fa-copy text-xs"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Hasło</span>
-                                    <div class="bg-zinc-100 dark:bg-black/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
-                                        <span id="pass-text-${entry.id}" data-masked="${!showPass}" data-raw="${escapeHtml(entry.password)}" class="font-mono font-semibold text-brand-red truncate mr-2">${showPass ? escapeHtml(entry.password) : '••••••••••••••••'}</span>
-                                        <div class="flex items-center gap-3 flex-shrink-0">
-                                            <button onclick="window.scythedApp.togglePasswordEntryVisibility('${entry.id}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white"><i id="pass-icon-${entry.id}" class="fas ${showPass ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i></button>
-                                            <button onclick="window.scythedApp.copyToClipboard('${escapeHtml(entry.password)}')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj hasło"><i class="fas fa-copy text-xs"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800/80 rounded-xl p-3 text-xs text-zinc-600 dark:text-gray-400 font-mono italic">
-                                ${escapeHtml(entry.description || '')}
-                            </div>
-                        </div>
-                    `;
-                });
-
-                grid.innerHTML = html;
-            }
-
-            function copyToClipboard(text) {
-                playSound('click');
-                navigator.clipboard.writeText(text).then(() => {
-                    showToast('Skopiowano do schowka!', 'success');
-                }).catch(() => {
-                    showToast('Nie udało się skopiować.', 'error');
-                });
-            }
-
-            function toggleSound() {
-                soundEnabled = !soundEnabled;
-                const icon = document.getElementById('sound-icon');
-                if (soundEnabled) {
-                    icon.className = 'fas fa-volume-high text-brand-red';
-                    showToast('Dźwięki włączone.', 'success');
-                } else {
-                    icon.className = 'fas fa-volume-xmark text-zinc-400';
-                    showToast('Dźwięki wyłączone.', 'success');
-                }
-            }
-
-            function updateUIScale(val) {
-                playSound('click');
-                const htmlEl = document.documentElement;
-                htmlEl.classList.remove('size-small', 'size-medium', 'size-large');
-                const scaleText = document.getElementById('scale-label-text');
-                if (val === '1') {
-                    htmlEl.classList.add('size-small');
-                    scaleText.textContent = 'MAŁY';
-                } else if (val === '2') {
-                    htmlEl.classList.add('size-medium');
-                    scaleText.textContent = 'ŚREDNI';
-                } else {
-                    htmlEl.classList.add('size-large');
-                    scaleText.textContent = 'DUŻY';
-                }
-            }
-
-            function toggleTheme() {
-                playSound('click');
-                const html = document.documentElement;
-                const icon = document.getElementById('theme-mode-icon');
-                if (html.classList.contains('dark')) {
-                    html.classList.remove('dark');
-                    icon.className = 'fas fa-sun text-brand-red';
-                    showToast('Przełączono na motyw jasny.', 'success');
-                } else {
-                    html.classList.add('dark');
-                    icon.className = 'fas fa-moon text-brand-red';
-                    showToast('Przełączono na motyw ciemny.', 'success');
-                }
-            }
-
-            function initCanvasBackground() {
-                const canvas = document.getElementById('header-bg-canvas');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                let width = canvas.width = canvas.parentElement.offsetWidth;
-                let height = canvas.height = canvas.parentElement.offsetHeight;
-
-                window.addEventListener('resize', () => {
-                    if(canvas.parentElement) {
-                        width = canvas.width = canvas.parentElement.offsetWidth;
-                        height = canvas.height = canvas.parentElement.offsetHeight;
-                    }
-                });
-
-                let particles = [];
-                for(let i=0; i<30; i++) {
-                    particles.push({
-                        x: Math.random() * width,
-                        y: Math.random() * height,
-                        vx: (Math.random() - 0.5) * 0.5,
-                        vy: (Math.random() - 0.5) * 0.5,
-                        radius: Math.random() * 2 + 1
-                    });
-                }
-
-                function animate() {
-                    ctx.clearRect(0, 0, width, height);
-                    ctx.fillStyle = '#ff003322';
-                    particles.forEach(p => {
-                        p.x += p.vx;
-                        p.y += p.vy;
-                        if(p.x < 0) p.x = width;
-                        if(p.x > width) p.x = 0;
-                        if(p.y < 0) p.y = height;
-                        if(p.y > height) p.y = 0;
-
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                        ctx.fill();
-                    });
-                    requestAnimationFrame(animate);
-                }
-                animate();
-            }
-
-            function escapeHtml(str) {
-                if (!str) return '';
-                return str.replace(/&/g, "&amp;")
-                          .replace(/</g, "&lt;")
-                          .replace(/>/g, "&gt;")
-                          .replace(/"/g, "&quot;")
-                          .replace(/'/g, "&#039;");
-            }
-
-            window.scythedApp = {
-                toggleEmailVisibility,
-                togglePasswordEntryVisibility,
-                toggleGlobalEmails,
-                toggleGlobalPasswords,
-                renderVaultEntries,
-                toggleSound,
-                updateUIScale,
-                copyToClipboard,
-                hideToast,
-                toggleTheme,
-                blockedAction,
-                openSettingsModal,
-                closeModal
-            };
-
-            initAppUI();
-        })();
-    </script>
+    <div class="scroll">PRZEWIŃ, ABY ODKRYĆ ↓</div>
+  </div>
+</section>
+
+<section id="stats"><div class="wrap">
+  <div data-reveal><div class="section-kicker">Realna statystyka Scythed</div><div class="section-title">STATYSTYKA STRONY</div></div>
+  <div class="stats" data-reveal>
+    <div class="stat"><div class="num" id="visits">0</div><div class="label">odwiedzin strony</div></div>
+    <div class="stat"><div class="num" id="clicks">0</div><div class="label">uruchomień demo</div></div>
+    <div class="stat"><div class="num" id="downloads">0</div><div class="label">pobrań SCYTHED</div></div>
+  </div>
+</div></section>
+
+<section id="features"><div class="wrap">
+  <div data-reveal><div class="section-kicker">ZAPROJEKTOWANE Z MYŚLĄ O TOBIE</div><div class="section-title">MAŁO SZUMU. DUŻO KONTROLI.</div></div>
+  <div class="cards">
+    <article class="card" data-reveal><div class="icon">◈</div><h3>WYGODNA ORGANIZACJA</h3><p>Wszystko, czego potrzebujesz, możesz mieć uporządkowane w jednym miejscu i łatwo do tego wrócić.</p></article>
+    <article class="card" data-reveal><div class="icon">⌁</div><h3>WSZYSTKO POD RĘKĄ</h3><p>Najważniejsze opcje są łatwe do znalezienia, a cały interfejs został ułożony tak, żeby korzystanie z projektu było naturalne i szybkie.</p></article>
+    <article class="card" data-reveal><div class="icon">▣</div><h3>OPEN BETA 7</h3><p>Najnowsza wersja projektu jest dostępna do testowania. Możesz sprawdzić ją bezpośrednio albo pobrać na swój komputer.</p></article>
+  </div>
+</div></section>
+
+<section id="demo"><div class="wrap"><div class="cta update-box" data-reveal>
+  <div class="section-kicker">Scythed Open Beta 7</div>
+  <h2 class="section-title" style="margin-bottom:15px">OSTATNIA AKTUALIZACJA</h2>
+  <p class="update-intro">Ostatnia aktualizacja projektu została wydana <strong class="update-date-inline">24 września 2026 roku</strong>.</p>
+</div></div></section>
+</main>
+
+<footer style="background:#000"><div class="wrap footer-inner"><span>© 2026 <strong>SCYTH<span style="color:var(--red)">ED</span></strong> &nbsp; Projekt stworzony przez @yzke (discord).</span></div></footer>
+
+<script>
+  // Statystyki działają od razu na hostingu statycznym jako liczniki lokalne.
+  // Po podpięciu backendu można zamienić je na globalne statystyki dla wszystkich odwiedzających.
+  const visitKey='scythed_landing_visits_v1', clickKey='scythed_demo_clicks_v1', downloadKey='scythed_downloads_v1';
+  const n=(k)=>Number(localStorage.getItem(k)||0);
+  localStorage.setItem(visitKey,n(visitKey)+1);
+  const render=()=>{document.getElementById('visits').textContent=n(visitKey).toLocaleString('pl-PL');document.getElementById('clicks').textContent=n(clickKey).toLocaleString('pl-PL');document.getElementById('downloads').textContent=n(downloadKey).toLocaleString('pl-PL')};
+  document.querySelectorAll('#demoBtn,#ctaDemo,#navDemo').forEach(a=>a.addEventListener('click',()=>{localStorage.setItem(clickKey,n(clickKey)+1);render()}));
+  document.querySelectorAll('#downloadBtn,#ctaDownload').forEach(a=>a.addEventListener('click',()=>{localStorage.setItem(downloadKey,n(downloadKey)+1);render();}));
+  render();
+
+
+  const squareField=document.getElementById('squareField');
+  const cursorGlow=document.getElementById('cursorGlow');
+  const squareCount=Math.min(42,Math.max(24,Math.floor(window.innerWidth/32)));
+  for(let i=0;i<squareCount;i++){
+    const s=document.createElement('span');
+    s.className='square';
+    s.style.setProperty('--s',`${18+Math.random()*58}px`);
+    s.style.setProperty('--x',`${Math.random()*100}%`);
+    s.style.setProperty('--y',`${Math.random()*100}%`);
+    s.style.setProperty('--d',`${4+Math.random()*5}s`);
+    s.style.setProperty('--delay',`${-Math.random()*8}s`);
+    squareField.appendChild(s);
+  }
+
+  let mouseX=window.innerWidth/2, mouseY=window.innerHeight/2;
+  let smoothX=mouseX, smoothY=mouseY;
+  addEventListener('pointermove',e=>{
+    mouseX=e.clientX; mouseY=e.clientY;
+  },{passive:true});
+
+  function animateSquares(){
+    smoothX+=(mouseX-smoothX)*.075;
+    smoothY+=(mouseY-smoothY)*.075;
+    cursorGlow.style.left=`${smoothX}px`;
+    cursorGlow.style.top=`${smoothY}px`;
+
+    const cx=smoothX/window.innerWidth-.5;
+    const cy=smoothY/window.innerHeight-.5;
+    squareField.querySelectorAll('.square').forEach((s,i)=>{
+      const strength=10+(i%5)*3;
+      s.style.setProperty('--mx',`${cx*strength}px`);
+      s.style.setProperty('--my',`${cy*strength}px`);
+    });
+    requestAnimationFrame(animateSquares);
+  }
+  animateSquares();
+
+
+  const soundPaths={
+    hover:'assets/sounds/hover.mp3',
+    click:'assets/sounds/click.mp3',
+    download:'assets/sounds/download.mp3'
+  };
+  const soundCache={};
+  function playSound(name,volume=.16){
+    if(!soundCache[name]) soundCache[name]=new Audio(soundPaths[name]);
+    const audio=soundCache[name].cloneNode();
+    audio.volume=volume;
+    audio.play().catch(()=>{});
+  }
+  document.querySelectorAll('.btn').forEach(btn=>{
+    btn.addEventListener('mouseenter',()=>playSound('hover',.07));
+  });
+  document.querySelectorAll('.demo-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>playSound('click',.12));
+  });
+  document.querySelectorAll('.download-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>playSound('download',.15));
+  });
+
+  const reveal=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.12});
+  document.querySelectorAll('[data-reveal]').forEach(e=>reveal.observe(e));
+  let py=0,target=0;
+  addEventListener('scroll',()=>target=scrollY,{passive:true});
+  function parallax(){py+=(target-py)*.08;document.documentElement.style.setProperty('--py',py+'px');document.documentElement.style.setProperty('--logoPy',(py*.12)+'px');requestAnimationFrame(parallax)} parallax();
+</script>
 </body>
 </html>

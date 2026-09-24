@@ -1,0 +1,2822 @@
+<!DOCTYPE html>
+<html lang="pl" class="size-medium dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scythed Demo</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logos/logo.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+      let currentBrandColor = localStorage.getItem('scythed_demo_brand_color_v1') || '#ff0033';
+      
+      function updateTailwindConfig(colorHex) {
+          tailwind.config = {
+            darkMode: 'class',
+            theme: {
+              extend: {
+                colors: {
+                  brand: {
+                    card: '#0d0d0feb',
+                    border: '#1f1f23cc',
+                    red: colorHex,
+                    hoverRed: adjustBrightness(colorHex, -20)
+                  }
+                },
+                fontFamily: {
+                  orbitron: ['Orbitron', 'sans-serif'],
+                  rajdhani: ['Rajdhani', 'sans-serif']
+                }
+              }
+            }
+          }
+      }
+
+      function adjustBrightness(hex, percent) {
+          let num = parseInt(hex.replace("#",""), 16);
+          let amt = Math.round(2.55 * percent);
+          let R = (num >> 16) + amt;
+          let G = (num >> 8 & 0x00FF) + amt;
+          let B = (num & 0x0000FF) + amt;
+          return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
+      }
+
+      updateTailwindConfig(currentBrandColor);
+    </script>
+
+    <style>
+        :root {
+            --brand-red: #ff0033;
+            --brand-hover-red: #cc0029;
+            --brand-red-glow: rgba(255, 0, 51, 0.35);
+            --brand-scroll-track: #100305;
+            --brand-scroll-thumb: #ff0033;
+            --app-bg-blur: 0px;
+            --app-bg-overlay-color: rgba(0, 0, 0, 0.4);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--brand-scroll-track, #090909);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--brand-red, #ff0033);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            filter: brightness(1.2);
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--brand-red, #ff0033) var(--brand-scroll-track, #090909);
+        }
+
+        html.size-small { font-size: 13px; }
+        html.size-medium { font-size: 16px; }
+        html.size-large { font-size: 19px; }
+
+        .card-scale { transition: all 0.2s ease-in-out; }
+        html.size-small .card-scale { padding: 0.75rem; }
+        html.size-medium .card-scale { padding: 1.25rem; }
+        html.size-large .card-scale { padding: 1.75rem; }
+
+        html.size-small .icon-scale { font-size: 1rem; }
+        html.size-medium .icon-scale { font-size: 1.25rem; }
+        html.size-large .icon-scale { font-size: 1.6rem; }
+
+        .glow-effect {
+            box-shadow: 0 0 15px var(--brand-red-glow, rgba(255, 0, 51, 0.35));
+        }
+        .brand-logo:hover, .platform-logo:hover { transform: scale(1.04); }
+
+        /* Wszystkie logotypy aplikacji dopasowują się do motywu:
+           ciemny motyw = białe logo, jasny motyw = czarne logo. */
+        html.dark .brand-logo, html.dark .platform-logo { filter: brightness(0) invert(1); }
+        html:not(.dark) .brand-logo, html:not(.dark) .platform-logo { filter: brightness(0); }
+
+        /* Ikony aplikacji używane jako fallback również mają kolor motywu. */
+        .theme-platform-icon { color: #111827 !important; transition: color .25s ease; }
+        html.dark .theme-platform-icon { color: #ffffff !important; }
+
+        /* Avatar nie jest logotypem — zachowuje naturalne kolory zdjęcia/obrazu. */
+        #avatar-img-preview { filter: none !important; }
+
+        /* Avatar wypełnia dokładnie wnętrze jednej obramówki — bez dodatkowej obwódki/paddingu. */
+        #profile-avatar-display {
+            padding: 0 !important;
+            box-sizing: border-box;
+        }
+        #avatar-img-preview {
+            display: block;
+            width: 100%;
+            height: 100%;
+            padding: 0 !important;
+            margin: 0;
+            object-fit: cover;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+
+        /* Odznaki profilu: układają się obok siebie i zawijają do kolejnych wierszy.
+           Przy większej liczbie odznak lista ma ograniczoną wysokość i można ją przewijać w dół,
+           dzięki czemu panel profilu nie rozciąga się bez końca. */
+        #profile-badges-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            align-content: flex-start;
+            overflow-x: hidden;
+            overflow-y: auto;
+            max-height: 5.5rem;
+            row-gap: 0.375rem;
+            column-gap: 0.375rem;
+            min-width: 0;
+            width: 100%;
+            padding-right: 0.15rem;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.45) transparent;
+        }
+
+        #profile-badges-container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #profile-badges-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #profile-badges-container::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.45);
+            border-radius: 999px;
+        }
+
+        #profile-badges-container > div {
+            flex: 0 0 auto;
+            max-width: 100%;
+        }
+
+        /* Odznaki WŁAŚCICIEL / ADMIN mają stały kolor i nie reagują na zmianę motywu. */
+        .fixed-owner-badge {
+            background-color: rgba(239, 68, 68, 0.10) !important;
+            border-color: rgba(239, 68, 68, 0.50) !important;
+            color: #ef4444 !important;
+        }
+        .fixed-owner-badge i {
+            color: #ef4444 !important;
+        }
+
+        /* Odznaka ZNANY: niebieska odznaka w stylu zweryfikowanego konta. */
+        .known-badge {
+            background-color: rgba(59, 130, 246, 0.10) !important;
+            border-color: rgba(59, 130, 246, 0.55) !important;
+            color: #60a5fa !important;
+            display: flex;
+        }
+        .known-badge i {
+            color: #3b82f6 !important;
+        }
+
+        /* Kolorowe, neutralne odznaki testowe dla konta "testodznak". */
+        .test-badge {
+            background-color: rgba(168, 85, 247, 0.10) !important;
+            border-color: rgba(168, 85, 247, 0.50) !important;
+            color: #c084fc !important;
+        }
+        .test-badge i { color: #c084fc !important; }
+
+        .animated-gradient-text {
+            background: linear-gradient(90deg, currentColor, var(--brand-red, #ff0033), currentColor);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 4s linear infinite;
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        #app-custom-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: opacity 0.5s ease-in-out, filter 0.3s ease;
+            filter: blur(var(--app-bg-blur, 0px));
+            transform: scale(1.02);
+        }
+
+        #app-bg-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            transition: background-color 0.3s ease;
+            background-color: var(--app-bg-overlay-color, rgba(0, 0, 0, 0.4));
+        }
+
+        .default-banner {
+            background: linear-gradient(135deg, #09090b 0%, #18181b 50%, #000000 100%);
+        }
+
+        /* Tryb streamera: ukrywa widoczną nazwę SCYTHED bez zmiany układu. */
+        html.streamer-mode .streamer-scythed-name {
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-zinc-100 dark:bg-black text-zinc-900 dark:text-white selection:bg-brand-red selection:text-white pb-24 md:pb-28 transition-colors duration-300 relative overflow-x-hidden">
+
+    <div id="app-custom-bg"></div>
+    <div id="app-bg-overlay"></div>
+
+    <!-- Pasek Informacyjny DEMO -->
+    <div class="w-full bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-700/60 py-2.5 px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-white shadow-lg relative z-50">
+        <div class="flex items-center gap-2 text-xs md:text-sm font-orbitron font-bold tracking-wider text-center sm:text-left">
+            <i class="fas fa-triangle-exclamation text-amber-400"></i>
+            <span>TO JEST STRONA DEMONSTRACYJNA. ABY POBRAĆ PEŁNĄ WERSJĘ, KLIKNIJ PRZYCISK „POBIERZ”.</span>
+        </div>
+        <a href="scythed.zip" download="scythed.zip" class="px-4 py-1.5 bg-black/30 hover:bg-black/50 border border-red-500/70 rounded-lg text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+            <i class="fas fa-download text-brand-red"></i> POBIERZ
+        </a>
+    </div>
+
+
+    <div id="auth-overlay" class="hidden fixed inset-0 bg-zinc-900/95 dark:bg-black/95 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
+        <div class="bg-white/95 dark:bg-brand-card border border-zinc-200 dark:border-brand-border rounded-2xl max-w-md w-full p-6 space-y-6 glow-effect text-center backdrop-blur-md shadow-2xl">
+            <div class="flex flex-col items-center justify-center space-y-2">
+                <div class="w-16 h-16 rounded-2xl border border-brand-red/50 bg-zinc-100 dark:bg-black/50 flex items-center justify-center overflow-hidden p-2 mb-2 glow-effect">
+                    <img src="assets/logos/logo.gif" alt="SCYTHED Logo" class="brand-logo w-full h-full object-contain">
+                </div>
+                <h2 class="font-orbitron font-black text-2xl tracking-wider text-zinc-900 dark:text-white">SCYTH<span class="text-brand-red">ED</span></h2>
+                <p id="auth-subtitle" class="text-xs text-zinc-600 dark:text-gray-400">Próbujesz zalogować się hasłem master (<span id="auth-username-placeholder" class="text-brand-red font-bold">@USER</span>)</p>
+            </div>
+
+            <form id="auth-form" onsubmit="window.scythedApp.handleAuthSubmit(event)" class="space-y-4">
+                <div class="relative">
+                    <input type="password" id="auth-master-password" required placeholder="Wpisz Hasło Master..." class="w-full bg-zinc-50 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-xl pl-4 pr-10 py-3 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-sm font-mono shadow-inner">
+                    <button type="button" onclick="window.scythedApp.togglePasswordVisibility('auth-master-password')" class="absolute right-3 top-3.5 text-zinc-500 dark:text-gray-400 hover:text-zinc-900 dark:hover:text-white">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <div id="auth-confirm-container" class="relative hidden">
+                    <input type="password" id="auth-master-password-confirm" placeholder="Potwierdź Hasło Master..." class="w-full bg-zinc-50 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-xl pl-4 pr-10 py-3 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-sm font-mono shadow-inner">
+                </div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-brand-red hover:bg-brand-hoverRed text-white font-orbitron font-bold text-sm rounded-xl glow-effect transition flex items-center justify-center gap-2">
+                    <i class="fas fa-lock-open"></i> ODBLOKUJ BAZĘ
+                </button>
+            </form>
+
+            <div class="border-t border-zinc-200 dark:border-zinc-800/80 pt-4 flex flex-col gap-2">
+                <button onclick="window.scythedApp.confirmResetApp()" class="text-xs text-red-600 dark:text-red-500 hover:text-red-500 dark:hover:text-red-400 font-semibold transition flex items-center justify-center gap-1.5">
+                    <i class="fas fa-triangle-exclamation"></i> Zapomniałeś hasła? Zresetuj aplikację
+                </button>
+                <p class="text-[10px] text-zinc-500 italic">Uwaga: Reset spowoduje bezpowrotne usunięcie zaszyfrowanych danych.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-16 right-4 md:right-8 z-50 transform translate-x-[150%] transition-all duration-300 ease-in-out max-w-sm w-full bg-white dark:bg-brand-card border-r-4 border-brand-red p-4 rounded-xl shadow-2xl text-zinc-900 dark:text-white flex items-start justify-between hidden backdrop-blur-md border border-zinc-200 dark:border-brand-border">
+        <div class="flex items-start space-x-3 mr-2 overflow-hidden flex-grow">
+            <i id="toast-icon" class="fas font-bold text-brand-red flex-shrink-0 mt-0.5"></i>
+            <span id="toast-message" class="text-xs md:text-sm font-semibold break-words leading-relaxed">Komunikat</span>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0 ml-1">
+            <button onclick="window.scythedApp.hideToast()" class="text-zinc-500 dark:text-gray-400 hover:text-zinc-900 dark:hover:text-white p-1"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <header class="border-b border-zinc-200 dark:border-brand-border bg-white/85 dark:bg-black/85 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 py-3 flex items-center justify-between transition-colors duration-300">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg border border-transparent bg-transparent flex items-center justify-center overflow-hidden">
+                <img src="assets/logos/logo.gif" alt="SCYTHED Logo" class="brand-logo w-full h-full object-contain p-0.5">
+            </div>
+            <span class="font-orbitron font-extrabold text-xl md:text-2xl tracking-wider text-zinc-900 dark:text-white streamer-scythed-name">SCYTH<span class="text-brand-red">ED</span></span>
+        </div>
+
+        <div class="flex items-center gap-2 md:gap-3">
+            <button onclick="window.scythedApp.confirmResetApp()" class="px-3 py-1.5 bg-zinc-200/80 dark:bg-zinc-900/90 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-200 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5 shadow-sm" title="Resetuj aplikację do stanu fabrycznego">
+                <i class="fas fa-rotate-left text-brand-red"></i>
+                <span class="hidden sm:inline">RESET</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+
+        <div id="header-card" class="relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/90 dark:bg-brand-card backdrop-blur-md p-5 md:p-6 border border-zinc-200 dark:border-brand-border rounded-2xl card-scale shadow-2xl transition-colors duration-300">
+            <canvas id="header-bg-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0 rounded-2xl"></canvas>
+
+            <div class="relative z-10">
+                <h1 class="font-orbitron text-xl md:text-2xl font-black text-zinc-900 dark:text-white flex items-center gap-3">
+                    <i class="fas fa-shield-halved text-brand-red"></i> MENADŻER HASEŁ
+                </h1>
+                <p class="text-xs text-zinc-600 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-1.5">
+                    <span>Liczba wpisów:</span> <span id="vault-count-badge" class="text-brand-red font-bold">0</span>
+                    <span class="text-zinc-400 dark:text-zinc-600">|</span>
+                    <span class="text-[11px] text-zinc-500 dark:text-gray-400 streamer-scythed-name">Wersja demonstracyjna</span>
+                </p>
+            </div>
+            
+            <div class="relative z-10 flex items-center gap-2 w-full sm:w-auto">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/90 dark:bg-brand-card backdrop-blur-md p-4 border border-zinc-200 dark:border-brand-border rounded-2xl shadow-xl transition-colors duration-300">
+            <div class="flex items-center justify-between bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 rounded-xl">
+                <span class="text-xs font-mono uppercase text-zinc-700 dark:text-gray-300">Wszystkie maile/loginy</span>
+                <button id="global-toggle-emails" onclick="window.scythedApp.toggleGlobalEmails()" class="px-3 py-1.5 bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-brand-red border border-zinc-300 dark:border-zinc-700 text-xs font-bold rounded-lg transition flex items-center gap-1.5">
+                    <i id="global-emails-icon" class="fas fa-eye-slash"></i>
+                    <span id="global-emails-text">UKRYJ WSZYSTKIE</span>
+                </button>
+            </div>
+            <div class="flex items-center justify-between bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 rounded-xl">
+                <span class="text-xs font-mono uppercase text-zinc-700 dark:text-gray-300">Wszystkie hasła</span>
+                <button id="global-toggle-passwords" onclick="window.scythedApp.toggleGlobalPasswords()" class="px-3 py-1.5 bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-brand-red border border-zinc-300 dark:border-zinc-700 text-xs font-bold rounded-lg transition flex items-center gap-1.5">
+                    <i id="global-pass-icon" class="fas fa-eye"></i>
+                    <span id="global-pass-text">POKAŻ WSZYSTKIE</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-3">
+            <div class="relative flex-grow">
+                <i class="fas fa-search absolute left-4 top-3.5 text-zinc-400 dark:text-gray-500 text-xs"></i>
+                <input type="text" id="vault-search-input" oninput="window.scythedApp.renderVaultEntries()" placeholder="Szukaj konta, loginu lub platformy..." class="w-full bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
+            </div>
+            
+            <div class="flex gap-2">
+                <select id="vault-filter-platform" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none flex-grow shadow-xl transition-colors duration-300">
+                    <option value="ALL">Wszystkie</option>
+                </select>
+
+                <select id="vault-sort-order" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
+                    <option value="NEWEST">Najnowsze</option>
+                    <option value="OLDEST">Najstarsze</option>
+                    <option value="NAME_ASC">Nazwa (A-Z)</option>
+                    <option value="PLATFORM">Platforma</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="vault-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        </div>
+
+        <div id="vault-empty-state" class="hidden text-center py-16 bg-white/70 dark:bg-brand-card/70 backdrop-blur-md border border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl shadow-xl transition-colors duration-300">
+            <i class="fas fa-shield-halved text-5xl text-zinc-400 dark:text-zinc-700 mb-3"></i>
+            <p class="text-zinc-600 dark:text-gray-400 text-base font-semibold">Brak zapisanych wpisów</p>
+            <p class="text-xs text-zinc-500 dark:text-gray-500 mt-1">Brak zapisanych wpisów do wyświetlenia.</p>
+        </div>
+
+    </main>
+
+    <!-- PROFIL W LEWYM DOLNYM ROGU -->
+    <div class="fixed bottom-4 left-4 z-40 w-[300px] max-w-[calc(100vw-2rem)] h-[135px]">
+        <div class="w-full h-full bg-black/95 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md relative">
+            <div class="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-zinc-900/80 to-transparent"></div>
+            <div class="absolute left-3.5 top-[46px] flex items-center gap-3 right-3.5">
+                <div id="profile-avatar-display" class="w-[64px] h-[64px] rounded-xl bg-red-600 border-2 border-brand-red flex items-center justify-center overflow-hidden shadow-lg flex-shrink-0">
+                    <img id="avatar-img-preview" src="assets/logos/avatar.png" alt="Avatar Demo User" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='assets/logos/avatar.png';">
+                </div>
+                <div class="overflow-hidden flex-1 min-w-0 pt-2">
+                    <div class="font-orbitron font-extrabold text-[15px] text-brand-red truncate">Demo User</div>
+                    <div id="profile-created-date" class="text-[9px] text-zinc-500 font-mono mt-0.5">Konto od: -</div>
+                </div>
+                <i class="fas fa-lock text-brand-red text-[11px] self-start mt-7 flex-shrink-0" title="Profil zablokowany w wersji demonstracyjnej"></i>
+            </div>
+            <div class="absolute left-3.5 right-3.5 bottom-3 border-t border-zinc-800"></div>
+        </div>
+    </div>
+
+    <!-- PRZYCISK KOŁA ZĘBATEGO W PRAWYM DOLNYM ROGU -->
+    <div class="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-1">
+        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">wer.demo open beta 7</span>
+        <button onclick="window.scythedApp.openSettingsModal()" class="w-12 h-12 rounded-2xl bg-white/95 dark:bg-black/95 border border-zinc-200 dark:border-brand-border text-brand-red hover:scale-105 active:scale-95 shadow-2xl backdrop-blur-md flex items-center justify-center text-xl transition-all glow-effect" title="Ustawienia & System">
+            <i class="fas fa-gear"></i>
+        </button>
+    </div>
+
+    <footer class="w-full max-w-xl mx-auto text-center px-4 mt-8 space-y-1 relative z-10">
+        <p class="text-[11px] md:text-xs text-zinc-600 dark:text-gray-400 font-mono leading-tight">
+            &copy; 2026 <span class="font-orbitron font-bold text-zinc-900 dark:text-white streamer-scythed-name">SCYTH<span class="text-brand-red">ED</span></span> Menadżer Haseł. Projekt stworzony przez @yzke (discord).
+        </p>
+        <p class="text-[9px] md:text-[10px] text-zinc-500 dark:text-gray-500 leading-tight">
+            <i class="fas fa-user-shield text-brand-red mr-1"></i>
+            <span class="font-semibold text-zinc-600 dark:text-gray-400">Informacja:</span> ta strona to tylko demo...
+        </p>
+    </footer>
+
+    <!-- MODAL USTAWIEŃ I SYSTEMU -->
+    <div id="modal-settings" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#0b0b0d] border border-zinc-800 rounded-xl max-w-[640px] w-full p-2.5 sm:p-3 space-y-3 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                <h3 class="font-orbitron font-bold text-sm md:text-base text-white flex items-center gap-2">
+                    <i class="fas fa-gear text-brand-red"></i> USTAWIENIA &amp; SYSTEM
+                </h3>
+                <button onclick="window.scythedApp.closeModal('modal-settings')" class="text-zinc-500 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+
+            <h4 class="text-[11px] font-orbitron font-bold uppercase tracking-wider text-brand-red border-b border-zinc-800 pb-1">
+                <i class="fas fa-paint-roller mr-1"></i> WYGLĄD &amp; PERSONALIZACJA TŁA
+            </h4>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-black/60 border border-zinc-800">
+                    <span class="text-xs font-semibold text-white">Animacja Nagłówka</span>
+                    <button id="theme-toggle-btn" onclick="window.scythedApp.toggleHeaderAnimation()" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-xs font-bold rounded-lg border border-zinc-700 transition flex items-center gap-1.5">
+                        <i id="theme-toggle-icon" class="fas fa-pause text-brand-red"></i>
+                        <span id="theme-toggle-text">WYŁĄCZ</span>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-black/60 border border-zinc-800">
+                    <span class="text-xs font-semibold text-white">Rozmiar Czcionki</span>
+                    <div class="flex items-center gap-2">
+                        <input type="range" id="ui-scale-slider" min="1" max="3" step="1" value="2" onchange="window.scythedApp.updateUIScale(this.value)" class="w-16 accent-brand-red cursor-pointer">
+                        <span id="scale-label-text" class="text-[10px] font-mono font-bold text-brand-red w-12 text-center">NORMALNY</span>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="text-[11px] font-orbitron font-bold uppercase tracking-wider text-brand-red border-b border-zinc-800 pb-1 pt-1">
+                <i class="fas fa-sliders mr-1"></i> AUDIO &amp; PREFERENCJE
+            </h4>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-black/60 border border-zinc-800">
+                    <span class="text-xs font-semibold text-white">Efekty Dźwiękowe</span>
+                    <button id="sound-toggle-btn" onclick="window.scythedApp.toggleSound()" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-xs font-bold rounded-lg border border-zinc-700 transition flex items-center gap-1.5">
+                        <i id="sound-icon" class="fas fa-volume-high text-brand-red"></i>
+                        <span id="sound-text">DŹWIĘK</span>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-black/60 border border-zinc-800">
+                    <span class="text-xs font-semibold text-white">Powiadomienia Toast</span>
+                    <button id="notifications-toggle-btn" onclick="window.scythedApp.toggleNotifications()" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-xs font-bold rounded-lg border border-zinc-700 transition flex items-center gap-1.5">
+                        <i id="notifications-icon" class="fas fa-bell text-brand-red"></i>
+                        <span id="notifications-text">WŁĄCZONE</span>
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" onclick="window.scythedApp.closeModal('modal-settings')" class="w-full py-2.5 bg-brand-red hover:bg-brand-hoverRed text-white font-orbitron font-bold rounded-xl text-xs transition glow-effect">
+                ZAMKNIJ USTAWIENIA
+            </button>
+        </div>
+    </div>
+
+    <div id="modal-change-master" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-brand-card border border-zinc-200 dark:border-brand-border rounded-2xl max-w-md w-full p-6 space-y-4 glow-effect backdrop-blur-md shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-3">
+                <h3 class="font-orbitron font-bold text-base md:text-lg text-zinc-900 dark:text-white">ZMIEŃ HASŁO MASTER</h3>
+                <button onclick="window.scythedApp.closeModal('modal-change-master')" class="text-zinc-500 dark:text-gray-400 hover:text-zinc-900 dark:hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="window.scythedApp.handleChangeMasterSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-mono uppercase text-zinc-600 dark:text-gray-400 mb-1">Obecne Hasło Master</label>
+                    <input type="password" id="change-old-pass" required class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono uppercase text-zinc-600 dark:text-gray-400 mb-1">Nowe Hasło Master</label>
+                    <input type="password" id="change-new-pass" required class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono uppercase text-zinc-600 dark:text-gray-400 mb-1">Potwierdź Nowe Hasło Master</label>
+                    <input type="password" id="change-confirm-pass" required class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm font-mono">
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="window.scythedApp.closeModal('modal-change-master')" class="flex-1 py-3 bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-300 font-bold rounded-lg text-xs transition">ANULUJ</button>
+                    <button type="submit" class="flex-1 py-3 bg-brand-red hover:bg-brand-hoverRed text-white font-orbitron font-bold rounded-lg text-xs transition glow-effect">ZAPISZ HASŁO</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-entry" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-brand-card border border-zinc-200 dark:border-brand-border rounded-2xl max-w-lg w-full p-6 space-y-4 glow-effect max-h-[90vh] overflow-y-auto backdrop-blur-md shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-3">
+                <h3 id="modal-entry-title" class="font-orbitron font-bold text-base md:text-lg text-zinc-900 dark:text-white">DODAJ NOWE KONTO</h3>
+                <button onclick="window.scythedApp.closeModal('modal-entry')" class="text-zinc-500 dark:text-gray-400 hover:text-zinc-900 dark:hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+
+            <form id="form-entry" onsubmit="window.scythedApp.handleSaveEntry(event)" class="space-y-4">
+                <input type="hidden" id="entry-id">
+                
+                <div>
+                    <label class="block text-xs font-mono uppercase text-zinc-600 dark:text-gray-400 mb-1">Platforma / Serwis</label>
+                    <select id="entry-platform" onchange="window.scythedApp.updateCustomPlatformFieldVisibility()" class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm">
+                    </select>
+                </div>
+
+                <div id="entry-custom-platform-container" class="hidden">
+                    <label class="block text-xs font-mono uppercase text-zinc-600 dark:text-gray-400 mb-1">Nazwa aplikacji</label>
+                    <input type="text" id="entry-custom-platform" maxlength="80" class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm" placeholder="Wpisz własną nazwę aplikacji">
+                    <p class="text-[10px] text-zinc-500 dark:text-gray-500 mt-1">Ta nazwa jest używana tylko dla tej pozycji. Logo: blank.png.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono uppercase text-zinc-600 dark:text-gray-400 mb-1">Login / Email / Nazwa użytkownika</label>
+                    <input type="text" id="entry-account" required class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm" placeholder="user@example.com lub nick">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-mono uppercase text-zinc-600 dark:text-gray-400">Hasło</label>
+                        <button type="button" onclick="window.scythedApp.generateAndSetPassword()" class="text-xs text-brand-red hover:underline"><i class="fas fa-wand-magic-sparkles mr-1"></i> Generuj Hasło</button>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="entry-password" required class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg pl-4 pr-10 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm font-mono">
+                        <button type="button" onclick="window.scythedApp.togglePasswordVisibility('entry-password')" class="absolute right-3 top-2.5 text-zinc-500 dark:text-gray-400 hover:text-zinc-900 dark:hover:text-white">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+<div>
+                    <label class="block text-xs font-mono uppercase text-zinc-600 dark:text-gray-400 mb-1">Krótka Notatka / Opis</label>
+                    <textarea id="entry-description" rows="2" class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm" placeholder="np. Konto główne..."></textarea>
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="window.scythedApp.closeModal('modal-entry')" class="flex-1 py-3 bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-300 font-bold rounded-lg text-xs transition">ANULUJ</button>
+                    <button type="submit" class="flex-1 py-3 bg-brand-red hover:bg-brand-hoverRed text-white font-orbitron font-bold rounded-lg text-xs transition glow-effect">ZAPISZ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // Każda platforma ma osobny PNG z przezroczystym tłem. Wybrane monochromatyczne logo zmieniają kolor wraz z motywem.
+            const PLATFORMS = [
+                { id: 'battlenet', name: 'Battle.net', icon: 'fa-solid fa-bolt', color: '#00aeef', logo: 'assets/logos/battlenet.png' },
+                { id: 'discord', name: 'Discord', icon: 'fa-brands fa-discord', color: '#5865F2', logo: 'assets/logos/discord.png' },
+                { id: 'ea', name: 'EA App', icon: 'fa-solid fa-gamepad', color: '#ff4500', logo: 'assets/logos/ea.png' },
+                { id: 'epic', name: 'Epic Games', icon: 'fa-solid fa-shield-cat', color: '#ffffff', logo: 'assets/logos/epic.png', themeAdaptive: true },
+                { id: 'facebook', name: 'Facebook', icon: 'fa-brands fa-facebook', color: '#1877F2', logo: 'assets/logos/facebook.png' },
+                { id: 'gmail', name: 'Gmail', icon: 'fa-brands fa-google', color: '#ea4335', logo: 'assets/logos/gmail.png' },
+                { id: 'gog', name: 'GOG Galaxy', icon: 'fa-solid fa-compact-disc', color: '#8a2be2', logo: 'assets/logos/gog.png' },
+                { id: 'icloud', name: 'iCloud Mail', icon: 'fa-brands fa-apple', color: '#a6b4c9', logo: 'assets/logos/icloud.png' },
+                { id: 'instagram', name: 'Instagram', icon: 'fa-brands fa-instagram', color: '#E4405F', logo: 'assets/logos/instagram.png' },
+                { id: 'interia', name: 'Interia Poczta', icon: 'fa-solid fa-at', color: '#0055a5', logo: 'assets/logos/interia.png' },
+                { id: 'minecraft', name: 'Minecraft', icon: 'fa-solid fa-cubes', color: '#5b8731', logo: 'assets/logos/minecraft.png' },
+                { id: 'netflix', name: 'Netflix', icon: 'fa-solid fa-tv', color: '#E50914', logo: 'assets/logos/netflix.png' },
+                { id: 'o2', name: 'o2 Poczta', icon: 'fa-solid fa-mail-bulk', color: '#27aae1', logo: 'assets/logos/o2.png' },
+                { id: 'onet', name: 'Onet Poczta', icon: 'fa-solid fa-paper-plane', color: '#f7931e', logo: 'assets/logos/onet.png' },
+                { id: 'outlook', name: 'Outlook', icon: 'fa-solid fa-envelope', color: '#0078d4', logo: 'assets/logos/outlook.png' },
+                { id: 'proton', name: 'ProtonMail', icon: 'fa-solid fa-lock', color: '#6d4aff', logo: 'assets/logos/proton.png' },
+                { id: 'riot', name: 'Riot Games', icon: 'fa-solid fa-crown', color: '#d00c14', logo: 'assets/logos/riot.png' },
+                { id: 'roblox', name: 'Roblox', icon: 'fa-solid fa-cube', color: '#e2231a', logo: 'assets/logos/roblox.png' },
+                { id: 'rockstar', name: 'Rockstar Games', icon: 'fa-solid fa-star', color: '#fcaf17', logo: 'assets/logos/rockstar.png' },
+                { id: 'snapchat', name: 'Snapchat', icon: 'fa-brands fa-snapchat', color: '#FFFC00', logo: 'assets/logos/snapchat.png' },
+                { id: 'spotify', name: 'Spotify', icon: 'fa-brands fa-spotify', color: '#1DB954', logo: 'assets/logos/spotify.png' },
+                { id: 'steam', name: 'Steam', icon: 'fa-brands fa-steam', color: '#171a21', logo: 'assets/logos/steam.png', themeAdaptive: true },
+                { id: 'tiktok', name: 'TikTok', icon: 'fa-brands fa-tiktok', color: '#ff0050', logo: 'assets/logos/tiktok.png' },
+                { id: 'twitch', name: 'Twitch', icon: 'fa-brands fa-twitch', color: '#9146FF', logo: 'assets/logos/twitch.png' },
+                { id: 'ubisoft', name: 'Ubisoft Connect', icon: 'fa-solid fa-ghost', color: '#0070ff', logo: 'assets/logos/ubisoft.png' },
+                { id: 'whatsapp', name: 'WhatsApp', icon: 'fa-brands fa-whatsapp', color: '#25D366', logo: 'assets/logos/whatsapp.png' },
+                { id: 'wp', name: 'WP Poczta', icon: 'fa-solid fa-envelope-open-text', color: '#e00000', logo: 'assets/logos/wp.png' },
+                { id: 'x', name: 'X (Twitter)', icon: 'fa-brands fa-x-twitter', color: '#ffffff', logo: 'assets/logos/x.png', themeAdaptive: true },
+                { id: 'yahoo', name: 'Yahoo Mail', icon: 'fa-brands fa-yahoo', color: '#6001d2', logo: 'assets/logos/yahoo.png' },
+                { id: 'metamask', name: 'MetaMask', icon: 'fa-solid fa-mask', color: '#f6851b', logo: 'assets/logos/metamask.png' },
+                { id: 'ledger', name: 'Ledger Live', icon: 'fa-solid fa-hard-drive', color: '#e5b80b', logo: 'assets/logos/ledger.png' },
+                { id: 'trezor', name: 'Trezor Suite', icon: 'fa-solid fa-lock', color: '#008559', logo: 'assets/logos/trezor.png' },
+                { id: 'phantom', name: 'Phantom', icon: 'fa-solid fa-ghost', color: '#ab9ff2', logo: 'assets/logos/phantom.png' },
+                { id: 'trustwallet', name: 'Trust Wallet', icon: 'fa-solid fa-shield-halved', color: '#3375bb', logo: 'assets/logos/trustwallet.png' },
+                { id: 'exodus', name: 'Exodus', icon: 'fa-solid fa-cube', color: '#262933', logo: 'assets/logos/exodus.png' },
+                { id: 'coinbase_wallet', name: 'Coinbase Wallet', icon: 'fa-solid fa-wallet', color: '#0052FF', logo: 'assets/logos/coinbase_wallet.png' },
+                { id: 'binance', name: 'Binance', icon: 'fa-solid fa-coins', color: '#F3BA2F', logo: 'assets/logos/binance.png' },
+
+                // Marketplace / gaming accounts
+                { id: 'g2a', name: 'G2A', icon: 'fa-solid fa-gamepad', color: '#ff5a00', logo: 'assets/logos/g2a.png' },
+                { id: 'eldorado', name: 'Eldorado', icon: 'fa-solid fa-coins', color: '#f5b942', logo: 'assets/logos/eldorado.png' },
+                { id: 'eneba', name: 'Eneba', icon: 'fa-solid fa-gamepad', color: '#6f3cff', logo: 'assets/logos/eneba.png' },
+                { id: 'g2g', name: 'G2G', icon: 'fa-solid fa-gamepad', color: '#00a8ff', logo: 'assets/logos/g2g.png' },
+                { id: 'kinguin', name: 'Kinguin', icon: 'fa-solid fa-crown', color: '#00a651', logo: 'assets/logos/kinguin.png' },
+                { id: 'other', name: 'Inne', icon: 'fa-solid fa-folder', color: '#9ca3af' },
+
+                // Streaming / entertainment
+                { id: 'primevideo', name: 'Prime Video', icon: 'fa-solid fa-play', color: '#00A8E1', logo: 'assets/logos/primevideo.png' },
+                { id: 'disney', name: 'Disney', icon: 'fa-solid fa-wand-magic-sparkles', color: '#113CCF', logo: 'assets/logos/disney.png' },
+                { id: 'hbo', name: 'HBO', icon: 'fa-solid fa-tv', color: '#ffffff', logo: 'assets/logos/hbo.png', themeAdaptive: true },
+                { id: 'polsatboxgo', name: 'Polsat Box Go', icon: 'fa-solid fa-tv', color: '#e30613', logo: 'assets/logos/polsatboxgo.png' },
+                { id: 'player', name: 'Player', icon: 'fa-solid fa-play', color: '#ff6b00', logo: 'assets/logos/player.png' },
+                { id: 'tvpvod', name: 'TVP VOD', icon: 'fa-solid fa-tv', color: '#0077c8', logo: 'assets/logos/tvpvod.png' },
+                { id: 'cda', name: 'CDA', icon: 'fa-solid fa-film', color: '#111111', logo: 'assets/logos/cda.png', themeAdaptive: true },
+
+                // Social / tech
+                { id: 'youtube', name: 'YouTube', icon: 'fa-brands fa-youtube', color: '#FF0000', logo: 'assets/logos/youtube.png' },
+                { id: 'google', name: 'Google', icon: 'fa-brands fa-google', color: '#4285F4', logo: 'assets/logos/google.png' },
+                { id: 'github', name: 'GitHub', icon: 'fa-brands fa-github', color: '#181717', logo: 'assets/logos/github.png', themeAdaptive: true },
+                { id: 'reddit', name: 'Reddit', icon: 'fa-brands fa-reddit', color: '#FF4500', logo: 'assets/logos/reddit.png' },
+                { id: 'telegram', name: 'Telegram', icon: 'fa-brands fa-telegram', color: '#229ED9', logo: 'assets/logos/telegram.png' },
+                { id: 'signal', name: 'Signal', icon: 'fa-solid fa-comment', color: '#3A76F0', logo: 'assets/logos/signal.png' },
+                { id: 'apple', name: 'Apple', icon: 'fa-brands fa-apple', color: '#111111', logo: 'assets/logos/apple.png', themeAdaptive: true },
+                { id: 'linkedin', name: 'LinkedIn', icon: 'fa-brands fa-linkedin', color: '#0A66C2', logo: 'assets/logos/linkedin.png' },
+                { id: 'soundcloud', name: 'SoundCloud', icon: 'fa-brands fa-soundcloud', color: '#FF5500', logo: 'assets/logos/soundcloud.png' },
+                { id: 'bluesky', name: 'Bluesky', icon: 'fa-solid fa-cloud', color: '#1185FE', logo: 'assets/logos/bluesky.png' },
+                { id: 'allegro', name: 'Allegro', icon: 'fa-solid fa-bag-shopping', color: '#FF5A00', logo: 'assets/logos/allegro.png' },
+                { id: 'olx', name: 'OLX', icon: 'fa-solid fa-tag', color: '#002F34', logo: 'assets/logos/olx.png', themeAdaptive: true },
+                { id: 'ebay', name: 'eBay', icon: 'fa-brands fa-ebay', color: '#E53238', logo: 'assets/logos/ebay.png' },
+                { id: 'vinted', name: 'Vinted', icon: 'fa-solid fa-shirt', color: '#007782', logo: 'assets/logos/vinted.png' },
+                { id: 'microsoft', name: 'Microsoft', icon: 'fa-brands fa-microsoft', color: '#737373', logo: 'assets/logos/microsoft.png', themeAdaptive: true },
+                { id: 'pinterest', name: 'Pinterest', icon: 'fa-brands fa-pinterest', color: '#E60023', logo: 'assets/logos/pinterest.png' },
+                { id: 'patreon', name: 'Patreon', icon: 'fa-brands fa-patreon', color: '#FF424D', logo: 'assets/logos/patreon.png' },
+                { id: 'paypal', name: 'PayPal', icon: 'fa-brands fa-paypal', color: '#003087', logo: 'assets/logos/paypal.png' },
+                { id: 'kick', name: 'Kick', icon: 'fa-solid fa-play', color: '#53FC18', logo: 'assets/logos/kick.png' },
+
+                // Konsole / gaming
+                { id: 'playstation', name: 'PlayStation', icon: 'fa-brands fa-playstation', color: '#003791', logo: 'assets/logos/playstation.png' },
+                { id: 'xbox', name: 'Xbox', icon: 'fa-brands fa-xbox', color: '#107C10', logo: 'assets/logos/xbox.png' },
+                { id: 'nintendo', name: 'Nintendo', icon: 'fa-solid fa-gamepad', color: '#E60012', logo: 'assets/logos/nintendo.png' }
+            ];
+
+            // Tylko te platformy są traktowane jako portfele krypto.
+            // Pole seed phrase jest dostępne wyłącznie dla nich.
+
+            const STORAGE_KEYS = {
+                ENCRYPTED_VAULT: 'scythed_demo_vault_enc_v1',
+                SALT: 'scythed_demo_salt_v1',
+                VERIFIER: 'scythed_demo_verifier_v1',
+                USERNAME: 'scythed_demo_username_v1',
+                AVATAR: 'scythed_demo_avatar_v1',
+                BANNER: 'scythed_demo_banner_v1',
+                SCALE: 'scythed_demo_scale_v1',
+                SOUND: 'scythed_demo_sound_v1',
+                NOTIFICATIONS_MUTED: 'scythed_demo_notifications_muted_v1',
+                BRAND_COLOR: 'scythed_demo_brand_color_v1',
+                CREATED_DATE: 'scythed_demo_created_date_v1',
+                BG_THEME_STATE: 'scythed_demo_bg_theme_state_v1',
+                STREAMER_MODE: 'scythed_demo_streamer_mode_v1',
+                APP_BG: 'scythed_demo_app_bg_v1',
+                APP_BG_BLUR: 'scythed_demo_app_bg_blur_v1',
+                APP_BG_OVERLAY_COLOR: 'scythed_demo_app_bg_overlay_color_v1',
+                APP_BG_OVERLAY_OPACITY: 'scythed_demo_app_bg_overlay_opacity_v1'
+            };
+
+            let masterPassword = null;
+            let masterCryptoKey = null;
+
+            let vaultEntries = [];
+            let username = 'USER';
+            let avatarUrl = 'assets/logos/avatar.png';
+            let bannerUrl = null;
+            let appBgUrl = null;
+            let appBgBlur = 0;
+            let appBgOverlayColor = '#000000';
+            let appBgOverlayOpacity = 40;
+
+            let currentScale = 2;
+            let isSoundMuted = false;
+            let areNotificationsMuted = false;
+            let activeBrandColor = '#ff0033';
+            let accountCreatedDate = null;
+            let lastDeletedEntry = null;
+            let toastTimeout = null;
+
+            let globalEmailsConfirmTimer = null;
+            let globalPasswordsConfirmTimer = null;
+
+            let titleAnimInterval = null;
+            let clipboardAutoClearTimer = null;
+
+            let globalEmailsVisible = true;
+            let globalPasswordsVisible = false;
+
+            let bgThemeState = 0;
+            let themeMode = 'dark';
+            let isStreamerMode = false;
+            let canvasAnimFrameId = null;
+            let startHeaderAnimation = null;
+
+            let audioCtx = null;
+
+            // Wersja demonstracyjna jest tylko do podglądu: istniejące wpisy zostają,
+            // ale profil i operacje na kontach są zablokowane. RESET pozostaje aktywny.
+            const DEMO_LOCKED = true;
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            function getFallbackPlatform(entry) {
+                return {
+                    name: (entry && entry.customPlatform) ? entry.customPlatform : 'Nieznana platforma',
+                    icon: 'fa-solid fa-globe',
+                    color: '#8a8a8a',
+                    logo: 'assets/logos/blank.png'
+                };
+            }
+
+            function copyToClipboard(text, typeName = "Dane") {
+                if (!navigator.clipboard) {
+                    showToast("Twoja przeglądarka nie wspiera kopiowania.", "error");
+                    return;
+                }
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(`Skopiowano ${typeName}! Schowek wyczyści się za 30 sekund.`, "success");
+                    playSound('save');
+
+                    if (clipboardAutoClearTimer) clearTimeout(clipboardAutoClearTimer);
+                    clipboardAutoClearTimer = setTimeout(() => {
+                        navigator.clipboard.writeText('').then(() => {
+                            showToast("Schowek został automatycznie wyczyszczony.", "info");
+                        }).catch(() => {});
+                    }, 30000);
+                }).catch(() => {
+                    showToast("Nie udało się skopiować danych.", "error");
+                });
+            }
+
+            function showToast(message, type = 'info') {
+                if (areNotificationsMuted) return;
+
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toast-message');
+                const toastIcon = document.getElementById('toast-icon');
+                const undoBtn = document.getElementById('toast-undo-btn');
+
+                if (!toast || !toastMessage || !toastIcon) return;
+
+                if (toastTimeout) clearTimeout(toastTimeout);
+
+                toastMessage.innerText = message;
+                toast.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-[150%]');
+                }, 10);
+
+                if (type === 'error') {
+                    toastIcon.className = 'fas fa-circle-exclamation text-red-500 text-lg';
+                } else if (type === 'success') {
+                    toastIcon.className = 'fas fa-circle-check text-green-500 text-lg';
+                } else {
+                    toastIcon.className = 'fas fa-circle-info text-brand-red text-lg';
+                }
+
+                if (type === 'delete_undo') {
+                    if (undoBtn) undoBtn.classList.remove('hidden');
+                } else {
+                    if (undoBtn) undoBtn.classList.add('hidden');
+                }
+
+                playSound('toast');
+
+                toastTimeout = setTimeout(() => {
+                    hideToast();
+                }, 4000);
+            }
+
+            function hideToast() {
+                const toast = document.getElementById('toast');
+                if (!toast) return;
+                toast.classList.add('translate-x-[150%]');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }
+
+            function closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('hidden');
+                    playSound('click');
+                }
+            }
+
+            async function deriveCryptoKey(password, salt) {
+                const enc = new TextEncoder();
+                const keyMaterial = await window.crypto.subtle.importKey(
+                    "raw",
+                    enc.encode(password),
+                    { name: "PBKDF2" },
+                    false,
+                    ["deriveKey"]
+                );
+                return await window.crypto.subtle.deriveKey(
+                    {
+                        name: "PBKDF2",
+                        salt: salt,
+                        iterations: 100000,
+                        hash: "SHA-256"
+                    },
+                    keyMaterial,
+                    { name: "AES-GCM", length: 256 },
+                    false,
+                    ["encrypt", "decrypt"]
+                );
+            }
+
+            async function encryptData(plainText, key) {
+                const enc = new TextEncoder();
+                const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                const encrypted = await window.crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    enc.encode(plainText)
+                );
+                const combined = new Uint8Array(iv.length + encrypted.byteLength);
+                combined.set(iv, 0);
+                combined.set(new Uint8Array(encrypted), iv.length);
+                // Nie używamy String.fromCharCode.apply() na całej tablicy —
+                // przy większym backupie (np. z obrazami) może to przekroczyć
+                // limit argumentów JavaScript i przerwać szyfrowanie.
+                return bytesToBase64(combined);
+            }
+
+            async function decryptData(cipherBase64, key) {
+                const binary = atob(cipherBase64);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                const iv = bytes.slice(0, 12);
+                const data = bytes.slice(12);
+                const decrypted = await window.crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    data
+                );
+                const dec = new TextDecoder();
+                return dec.decode(decrypted);
+            }
+
+            async function deriveBackupKey(password, salt) {
+                const enc = new TextEncoder();
+                const keyMaterial = await window.crypto.subtle.importKey(
+                    "raw",
+                    enc.encode(password),
+                    { name: "PBKDF2" },
+                    false,
+                    ["deriveKey"]
+                );
+                return await window.crypto.subtle.deriveKey(
+                    {
+                        name: "PBKDF2",
+                        salt: salt,
+                        iterations: 150000,
+                        hash: "SHA-256"
+                    },
+                    keyMaterial,
+                    { name: "AES-GCM", length: 256 },
+                    false,
+                    ["encrypt", "decrypt"]
+                );
+            }
+
+            function bytesToBase64(bytes) {
+                let binary = '';
+                const chunkSize = 0x8000;
+                for (let i = 0; i < bytes.length; i += chunkSize) {
+                    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+                }
+                return btoa(binary);
+            }
+
+            function base64ToBytes(base64) {
+                const binary = atob(base64);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return bytes;
+            }
+
+            function getOrGenerateSalt() {
+                let saltHex = localStorage.getItem(STORAGE_KEYS.SALT);
+                if (!saltHex) {
+                    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+                    saltHex = Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join('');
+                    localStorage.setItem(STORAGE_KEYS.SALT, saltHex);
+                }
+                const match = saltHex.match(/.{1,2}/g);
+                return new Uint8Array(match.map(byte => parseInt(byte, 16)));
+            }
+
+
+            async function initDemoMode() {
+                // Demo korzysta z własnego magazynu localStorage i automatycznie
+                // odblokowuje bazę kluczem demonstracyjnym. Nie dotyka danych
+                // normalnej wersji start.html.
+                username = 'Demo User';
+                avatarUrl = 'assets/logos/avatar.png';
+                bannerUrl = null;
+                const salt = getOrGenerateSalt();
+                masterPassword = 'SCYTHED-DEMO';
+                masterCryptoKey = await deriveCryptoKey(masterPassword, salt);
+
+                if (!localStorage.getItem(STORAGE_KEYS.CREATED_DATE)) {
+                    accountCreatedDate = new Date().toISOString();
+                    localStorage.setItem(STORAGE_KEYS.CREATED_DATE, accountCreatedDate);
+                } else {
+                    accountCreatedDate = localStorage.getItem(STORAGE_KEYS.CREATED_DATE);
+                }
+
+                await loadEncryptedVault();
+
+                if (!Array.isArray(vaultEntries) || vaultEntries.length === 0) {
+                    vaultEntries = [
+                        {
+                            id: 'demo_1',
+                            platform: 'battlenet',
+                            account: 'BattlenetDemo',
+                            password: 'BattlenetDemoHasło',
+                            description: 'Chyba jakieś gry czy coś? Konto ma 2FA.',
+                            createdAt: Date.now() - 86400000 * 3
+                        },
+                        {
+                            id: 'demo_2',
+                            platform: 'discord',
+                            account: 'ognazwaużytkownika',
+                            password: 'jakieśtamhasło?',
+                            description: 'Bardzo og nazwa konta.',
+                            createdAt: Date.now() - 86400000 * 2
+                        },
+                        {
+                            id: 'demo_3',
+                            platform: 'gmail',
+                            account: 'jakiśgmail@gmail.com',
+                            password: 'jakieśhasło',
+                            description: 'Demonstracyjne konto.',
+                            createdAt: Date.now() - 86400000
+                        }
+                    ];
+                    await saveEncryptedState();
+                }
+
+                const usernameInput = document.getElementById('username-input');
+                if (usernameInput) usernameInput.value = username;
+
+                unlockAppUI();
+                showToast('Tryb demonstracyjny został uruchomiony.', 'success');
+            }
+
+            window.addEventListener('DOMContentLoaded', async () => {
+                initStorageUI();
+                populatePlatformDropdowns();
+                applyScaleUI(currentScale);
+                applySoundUI();
+                applyNotificationsUI();
+                applyBrandColor(activeBrandColor, false);
+                applyThemeMode(themeMode, false);
+                applyAppBackgroundUI();
+                initHeaderCanvasAnimation();
+                applyBackgroundThemeStateUI(false);
+                setDocumentTitleForMode();
+                updateBadgesDisplay();
+                await initDemoMode();
+            });
+
+            function handleAppBackgroundUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    appBgUrl = e.target.result;
+                    applyAppBackgroundUI();
+                    saveEncryptedState();
+                    showToast('Pomyślnie ustawiono nowe tło aplikacji!', 'success');
+                    playSound('save');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function removeAppCustomBackground() {
+                appBgUrl = null;
+                applyAppBackgroundUI();
+                saveEncryptedState();
+                showToast('Usunięto własne tło aplikacji.', 'info');
+                playSound('click');
+            }
+
+            function updateBgBlur(val) {
+                appBgBlur = val;
+                document.getElementById('bg-blur-val').innerText = `${val}px`;
+                applyAppBackgroundUI();
+                saveEncryptedState();
+            }
+
+            function updateBgOverlayColor(hex) {
+                appBgOverlayColor = hex;
+                document.getElementById('bg-overlay-hex').innerText = hex.toUpperCase();
+                applyAppBackgroundUI();
+                saveEncryptedState();
+            }
+
+            function updateBgOverlayOpacity(val) {
+                appBgOverlayOpacity = val;
+                document.getElementById('bg-opacity-val').innerText = `${val}%`;
+                applyAppBackgroundUI();
+                saveEncryptedState();
+            }
+
+            function applyAppBackgroundUI() {
+                const bgEl = document.getElementById('app-custom-bg');
+                const overlayEl = document.getElementById('app-bg-overlay');
+                const removeBtn = document.getElementById('remove-app-bg-btn');
+                const effectsPanel = document.getElementById('app-bg-effects-panel');
+
+                if (bgEl) {
+                    bgEl.style.setProperty('--app-bg-blur', `${appBgBlur}px`);
+
+                    let hex = appBgOverlayColor.replace('#', '');
+                    let r = parseInt(hex.substring(0, 2), 16) || 0;
+                    let g = parseInt(hex.substring(2, 4), 16) || 0;
+                    let b = parseInt(hex.substring(4, 6), 16) || 0;
+                    let alpha = appBgOverlayOpacity / 100;
+                    
+                    document.documentElement.style.setProperty('--app-bg-overlay-color', `rgba(${r},${g}, ${b},${alpha})`);
+
+                    if (appBgUrl) {
+                        bgEl.style.backgroundImage = `url('${appBgUrl}')`;
+                        bgEl.style.opacity = '1';
+                        document.body.classList.add('has-custom-bg');
+                        if (removeBtn) removeBtn.classList.remove('hidden');
+                        if (effectsPanel) effectsPanel.classList.remove('hidden');
+                    } else {
+                        bgEl.style.backgroundImage = 'none';
+                        bgEl.style.opacity = '0';
+                        document.body.classList.remove('has-custom-bg');
+                        if (removeBtn) removeBtn.classList.add('hidden');
+                        if (effectsPanel) effectsPanel.classList.add('hidden');
+                    }
+                }
+            }
+
+            function setDocumentTitleForMode() {
+                if (isStreamerMode) {
+                    if (titleAnimInterval) { clearInterval(titleAnimInterval); titleAnimInterval = null; }
+                    document.title = 'TRYB STREAMERA';
+                    return;
+                }
+                startTabTitleAnimation();
+            }
+
+            function startTabTitleAnimation() {
+                if (titleAnimInterval) clearInterval(titleAnimInterval);
+
+                let charIndex = 0;
+                let isDeleting = false;
+                let waitTicks = 0;
+
+                titleAnimInterval = setInterval(() => {
+                    if (isStreamerMode) { document.title = 'TRYB STREAMERA'; return; }
+                    const fullText = username ? `@${username}` : '@USER';
+                    
+                    if (isDeleting) {
+                        if (charIndex > 1) {
+                            charIndex--;
+                            document.title = fullText.substring(0, charIndex);
+                        } else {
+                            document.title = '@';
+                            isDeleting = false;
+                            waitTicks = 0;
+                        }
+                    } else {
+                        if (waitTicks > 0) {
+                            waitTicks--;
+                            return;
+                        }
+
+                        if (charIndex < fullText.length) {
+                            charIndex++;
+                            document.title = fullText.substring(0, charIndex);
+                        } else {
+                            waitTicks = 12;
+                            isDeleting = true;
+                        }
+                    }
+                }, 250);
+            }
+
+            function checkMasterPasswordStatus() {
+                const verifier = localStorage.getItem(STORAGE_KEYS.VERIFIER);
+                const overlay = document.getElementById('auth-overlay');
+                const confirmContainer = document.getElementById('auth-confirm-container');
+                const subtitle = document.getElementById('auth-subtitle');
+                const submitBtn = document.getElementById('auth-submit-btn');
+
+                const userPlaceholder = document.getElementById('auth-username-placeholder');
+                if (userPlaceholder) {
+                    userPlaceholder.innerText = `@${username}`;
+                }
+
+                overlay.classList.remove('hidden');
+
+                if (!verifier) {
+                    subtitle.innerHTML = "Utwórz główne Hasło Master (minimalnie 4 znaki), aby zabezpieczyć aplikację.";
+                    confirmContainer.classList.remove('hidden');
+                    submitBtn.innerHTML = '<i class="fas fa-key"></i> UTWÓRZ HASŁO';
+                } else {
+                    subtitle.innerHTML = `Próbujesz zalogować się hasłem master (<span class="text-brand-red font-bold">@${escapeHtml(username)}</span>)`;
+                    confirmContainer.classList.add('hidden');
+                    submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> ODBLOKUJ BAZĘ';
+                }
+            }
+
+            async function handleAuthSubmit(e) {
+                e.preventDefault();
+                const passInput = document.getElementById('auth-master-password').value;
+                const confirmInput = document.getElementById('auth-master-password-confirm').value;
+                const verifier = localStorage.getItem(STORAGE_KEYS.VERIFIER);
+                const salt = getOrGenerateSalt();
+
+                if (!verifier) {
+                    if (passInput.length < 4) {
+                        showToast("Hasło Master musi mieć co najmniej 4 znaki!", "error");
+                        return;
+                    }
+                    if (passInput !== confirmInput) {
+                        showToast("Podane hasła nie są identyczne!", "error");
+                        return;
+                    }
+                    masterPassword = passInput;
+                    masterCryptoKey = await deriveCryptoKey(masterPassword, salt);
+                    const testEncrypted = await encryptData("SCYTHED_VERIFIED_KEY", masterCryptoKey);
+                    localStorage.setItem(STORAGE_KEYS.VERIFIER, testEncrypted);
+                    
+                    if (!accountCreatedDate) {
+                        accountCreatedDate = new Date().toLocaleDateString('pl-PL');
+                        localStorage.setItem(STORAGE_KEYS.CREATED_DATE, accountCreatedDate);
+                    }
+                    
+                    await saveEncryptedState();
+                    unlockAppUI();
+                    showToast("Pomyślnie utworzono Hasło Master!", "success");
+                } else {
+                    try {
+                        const tempKey = await deriveCryptoKey(passInput, salt);
+                        const dec = await decryptData(verifier, tempKey);
+                        if (dec === "SCYTHED_VERIFIED_KEY") {
+                            masterPassword = passInput;
+                            masterCryptoKey = tempKey;
+                            await loadEncryptedVault();
+                            unlockAppUI();
+                            showToast("Odszyfrowano i odblokowano aplikację!", "success");
+                        } else {
+                            throw new Error();
+                        }
+                    } catch (err) {
+                        showToast("Nieprawidłowe Hasło Master!", "error");
+                        playSound('delete');
+                    }
+                }
+            }
+
+            function unlockAppUI() {
+                document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('auth-master-password').value = '';
+                document.getElementById('auth-master-password-confirm').value = '';
+                updateCreatedDateDisplay();
+                updateBadgesDisplay();
+                renderVaultEntries();
+                playSound('save');
+            }
+
+            function lockVault() {
+                // Blokada = pełne odświeżenie strony. Po reloadzie zmienne sesyjne
+                // masterPassword/masterCryptoKey są ponownie ustawiane na null,
+                // a checkMasterPasswordStatus() pokaże ekran Hasła Master.
+                masterPassword = null;
+                masterCryptoKey = null;
+                vaultEntries = [];
+                if (inactivityTimer) clearTimeout(inactivityTimer);
+                window.location.reload();
+            }
+
+            async function loadEncryptedVault() {
+                const encVault = localStorage.getItem(STORAGE_KEYS.ENCRYPTED_VAULT);
+                if (!encVault) {
+                    vaultEntries = [];
+                    return;
+                }
+                try {
+                    const jsonStr = await decryptData(encVault, masterCryptoKey);
+                    vaultEntries = JSON.parse(jsonStr);
+
+                    // Migracja starej nazwy platformy po zmianie Kickstarter → Kick.
+                    let migrated = false;
+                    vaultEntries = vaultEntries.map(entry => {
+                        if (entry.platform === 'kickstarter') {
+                            migrated = true;
+                            return { ...entry, platform: 'kick' };
+                        }
+                        return entry;
+                    });
+                    if (migrated) {
+                        await saveEncryptedState();
+                    }
+                } catch (err) {
+                    showToast("Błąd podczas odszyfrowywania pamięci podręcznej!", "error");
+                    vaultEntries = [];
+                }
+            }
+
+            function getStreamerUsername() {
+                const clean = String(username || '').trim();
+                if (!clean) return 'U...';
+                return `${clean.charAt(0)}...`;
+            }
+
+            function applyStreamerModeUI() {
+                const html = document.documentElement;
+                html.classList.toggle('streamer-mode', isStreamerMode);
+                setDocumentTitleForMode();
+
+                const input = document.getElementById('username-input');
+                if (input) {
+                    input.value = isStreamerMode ? getStreamerUsername() : username;
+                    input.readOnly = isStreamerMode;
+                    input.classList.toggle('cursor-default', isStreamerMode);
+                }
+
+                const text = document.getElementById('streamer-mode-text');
+                const icon = document.getElementById('streamer-mode-icon');
+                if (text) text.innerText = isStreamerMode ? 'WŁĄCZONY' : 'WYŁĄCZONY';
+                if (icon) icon.className = `fas ${isStreamerMode ? 'fa-video text-brand-red' : 'fa-video-slash text-brand-red'}`;
+            }
+
+            async function toggleStreamerMode() {
+                isStreamerMode = !isStreamerMode;
+                applyStreamerModeUI();
+                await saveEncryptedState();
+                showToast(isStreamerMode ? 'Włączono tryb streamera.' : 'Wyłączono tryb streamera.', 'success');
+                playSound('click');
+            }
+
+            async function saveEncryptedState() {
+                if (!masterCryptoKey) return;
+                const jsonStr = JSON.stringify(vaultEntries);
+                const encrypted = await encryptData(jsonStr, masterCryptoKey);
+                localStorage.setItem(STORAGE_KEYS.ENCRYPTED_VAULT, encrypted);
+
+                localStorage.setItem(STORAGE_KEYS.USERNAME, username);
+                localStorage.setItem(STORAGE_KEYS.AVATAR, avatarUrl);
+                
+                if (bannerUrl) {
+                    localStorage.setItem(STORAGE_KEYS.BANNER, bannerUrl);
+                } else {
+                    localStorage.removeItem(STORAGE_KEYS.BANNER);
+                }
+
+                localStorage.setItem(STORAGE_KEYS.BRAND_COLOR, activeBrandColor);
+                localStorage.setItem(STORAGE_KEYS.SCALE, currentScale);
+                localStorage.setItem(STORAGE_KEYS.SOUND, isSoundMuted);
+                localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS_MUTED, areNotificationsMuted);
+                localStorage.setItem(STORAGE_KEYS.BG_THEME_STATE, bgThemeState);
+                localStorage.setItem(STORAGE_KEYS.STREAMER_MODE, isStreamerMode);
+
+                if (appBgUrl) {
+                    localStorage.setItem(STORAGE_KEYS.APP_BG, appBgUrl);
+                    localStorage.setItem(STORAGE_KEYS.APP_BG_BLUR, appBgBlur);
+                    localStorage.setItem(STORAGE_KEYS.APP_BG_OVERLAY_COLOR, appBgOverlayColor);
+                    localStorage.setItem(STORAGE_KEYS.APP_BG_OVERLAY_OPACITY, appBgOverlayOpacity);
+                } else {
+                    localStorage.removeItem(STORAGE_KEYS.APP_BG);
+                    localStorage.removeItem(STORAGE_KEYS.APP_BG_BLUR);
+                    localStorage.removeItem(STORAGE_KEYS.APP_BG_OVERLAY_COLOR);
+                    localStorage.removeItem(STORAGE_KEYS.APP_BG_OVERLAY_OPACITY);
+                }
+
+                if (accountCreatedDate) {
+                    localStorage.setItem(STORAGE_KEYS.CREATED_DATE, accountCreatedDate);
+                }
+            }
+
+            function openSettingsModal() {
+                document.getElementById('modal-settings').classList.remove('hidden');
+                playSound('click');
+            }
+
+            function openChangeMasterModal() {
+                document.getElementById('change-old-pass').value = '';
+                document.getElementById('change-new-pass').value = '';
+                document.getElementById('change-confirm-pass').value = '';
+                document.getElementById('modal-change-master').classList.remove('hidden');
+                playSound('click');
+            }
+
+            async function handleChangeMasterSubmit(e) {
+                e.preventDefault();
+                const oldPass = document.getElementById('change-old-pass').value;
+                const newPass = document.getElementById('change-new-pass').value;
+                const confirmPass = document.getElementById('change-confirm-pass').value;
+
+                if (oldPass !== masterPassword) {
+                    showToast("Obecne Hasło Master jest nieprawidłowe!", "error");
+                    return;
+                }
+                if (newPass.length < 4) {
+                    showToast("Nowe hasło musi mieć co najmniej 4 znaki!", "error");
+                    return;
+                }
+                if (newPass !== confirmPass) {
+                    showToast("Nowe hasła nie są identyczne!", "error");
+                    return;
+                }
+
+                const salt = getOrGenerateSalt();
+                masterPassword = newPass;
+                masterCryptoKey = await deriveCryptoKey(masterPassword, salt);
+                
+                const testEncrypted = await encryptData("SCYTHED_VERIFIED_KEY", masterCryptoKey);
+                localStorage.setItem(STORAGE_KEYS.VERIFIER, testEncrypted);
+                await saveEncryptedState();
+
+                closeModal('modal-change-master');
+                showToast("Pomyślnie zmieniono Hasło Master!", "success");
+                playSound('save');
+            }
+
+            function applyThemeMode(mode, notify = false) {
+                // Tryb jasny został usunięty — aplikacja działa wyłącznie w trybie ciemnym.
+                document.documentElement.classList.add('dark');
+                themeMode = 'dark';
+            }
+
+
+            function toggleHeaderAnimation() {
+                bgThemeState = bgThemeState === 0 ? 1 : 0;
+                if (bgThemeState === 1) {
+                    if (canvasAnimFrameId !== null) {
+                        cancelAnimationFrame(canvasAnimFrameId);
+                        canvasAnimFrameId = null;
+                    }
+                } else if (startHeaderAnimation) {
+                    startHeaderAnimation();
+                }
+                saveEncryptedState();
+                applyBackgroundThemeStateUI(true);
+                playSound('click');
+            }
+
+            function applyBackgroundThemeStateUI(notify = false) {
+                const btnIcon = document.getElementById('theme-toggle-icon');
+                const btnText = document.getElementById('theme-toggle-text');
+                const canvas = document.getElementById('header-bg-canvas');
+
+                if (!btnIcon || !btnText || !canvas) return;
+
+                if (bgThemeState === 0) {
+                    btnIcon.className = 'fas fa-pause text-brand-red';
+                    btnText.innerText = 'WYŁĄCZ';
+                    canvas.style.display = 'block';
+                    if (notify) showToast("Włączono animację nagłówka.", "info");
+                } else {
+                    btnIcon.className = 'fas fa-play text-brand-red';
+                    btnText.innerText = 'WŁĄCZ';
+                    canvas.style.display = 'none';
+                    if (notify) showToast("Wyłączono animację nagłówka.", "info");
+                }
+            }
+
+            function initHeaderCanvasAnimation() {
+                const card = document.getElementById('header-card');
+                const canvas = document.getElementById('header-bg-canvas');
+                if (!card || !canvas) return;
+
+                const ctx = canvas.getContext('2d');
+                let width, height;
+                let particles = [];
+                let shootingStars = [];
+                let mouse = { x: -1000, y: -1000, active: false };
+
+                function resizeCanvas() {
+                    width = canvas.width = card.offsetWidth;
+                    height = canvas.height = card.offsetHeight;
+                    createParticles();
+                }
+
+                class Particle {
+                    constructor() {
+                        this.reset();
+                    }
+
+                    reset() {
+                        this.x = Math.random() * width;
+                        this.y = Math.random() * height;
+                        this.vx = (Math.random() - 0.5) * 0.4;
+                        this.vy = (Math.random() - 0.5) * 0.4;
+                        this.size = Math.random() * 2 + 0.6;
+                        this.baseAlpha = Math.random() * 0.6 + 0.2;
+                        this.alpha = this.baseAlpha;
+                        this.type = Math.random() > 0.5 ? 'star' : 'dot';
+                        this.angle = Math.random() * Math.PI * 2;
+                        this.spin = (Math.random() - 0.5) * 0.02;
+                    }
+
+                    update() {
+                        this.x += this.vx;
+                        this.y += this.vy;
+                        this.angle += this.spin;
+
+                        if (this.x < 0 || this.x > width) this.vx *= -1;
+                        if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                        if (mouse.active) {
+                            const dx = mouse.x - this.x;
+                            const dy = mouse.y - this.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < 100) {
+                                const force = (100 - dist) / 100;
+                                this.x -= (dx / dist) * force * 1.5;
+                                this.y -= (dy / dist) * force * 1.5;
+                            }
+                        }
+                    }
+
+                    draw(rgb, isLightMode) {
+                        ctx.save();
+                        ctx.globalAlpha = this.alpha;
+                        const drawColor = isLightMode ? `rgb(${Math.max(0, rgb.r - 80)}, ${Math.max(0, rgb.g - 80)},${Math.max(0, rgb.b - 80)})` : `rgb(${rgb.r}, ${rgb.g},${rgb.b})`;
+                        ctx.fillStyle = drawColor;
+                        ctx.strokeStyle = drawColor;
+                        ctx.shadowColor = drawColor;
+                        ctx.shadowBlur = 6;
+
+                        if (this.type === 'star') {
+                            ctx.translate(this.x, this.y);
+                            ctx.rotate(this.angle);
+                            ctx.beginPath();
+                            for (let i = 0; i < 4; i++) {
+                                ctx.lineTo(0, this.size * 2);
+                                ctx.rotate(Math.PI / 4);
+                                ctx.lineTo(0, this.size * 0.7);
+                                ctx.rotate(Math.PI / 4);
+                            }
+                            ctx.closePath();
+                            ctx.fill();
+                        } else {
+                            ctx.beginPath();
+                            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        ctx.restore();
+                    }
+                }
+
+                class ShootingStar {
+                    constructor() {
+                        this.reset();
+                    }
+
+                    reset() {
+                        this.x = Math.random() * width + width * 0.2;
+                        this.y = Math.random() * -height * 0.5;
+                        this.len = Math.random() * 80 + 40;
+                        this.speed = Math.random() * 6 + 4;
+                        this.angle = Math.PI / 4 + (Math.random() * 0.2 - 0.1);
+                        this.size = Math.random() * 1.5 + 0.8;
+                        this.opacity = Math.random() * 0.7 + 0.3;
+                        this.active = false;
+                        this.timer = Math.random() * 180 + 30;
+                    }
+
+                    update() {
+                        if (!this.active) {
+                            this.timer--;
+                            if (this.timer <= 0) {
+                                this.active = true;
+                                this.x = Math.random() * width * 1.2;
+                                this.y = -20;
+                            }
+                            return;
+                        }
+
+                        this.x -= Math.cos(this.angle) * this.speed;
+                        this.y += Math.sin(this.angle) * this.speed;
+
+                        if (this.y > height + 50 || this.x < -50) {
+                            this.active = false;
+                            this.timer = Math.random() * 250 + 60;
+                        }
+                    }
+
+                    draw(rgb) {
+                        if (!this.active) return;
+                        ctx.save();
+                        ctx.lineWidth = this.size;
+                        const grad = ctx.createLinearGradient(
+                            this.x, this.y,
+                            this.x + Math.cos(this.angle) * this.len,
+                            this.y - Math.sin(this.angle) * this.len
+                        );
+                        grad.addColorStop(0, `rgba(${rgb.r},${rgb.g}, ${rgb.b},${this.opacity})`);
+                        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                        ctx.strokeStyle = grad;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(this.x + Math.cos(this.angle) * this.len, this.y - Math.sin(this.angle) * this.len);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.shadowColor = `rgb(${rgb.r}, ${rgb.g},${rgb.b})`;
+                        ctx.shadowBlur = 10;
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size * 0.9, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.restore();
+                    }
+                }
+
+                function createParticles() {
+                    particles = [];
+                    shootingStars = [];
+                    const count = Math.max(25, Math.floor((width * height) / 5000));
+                    for (let i = 0; i < count; i++) {
+                        particles.push(new Particle());
+                    }
+                    for (let i = 0; i < 3; i++) {
+                        shootingStars.push(new ShootingStar());
+                    }
+                }
+
+                function getRGBFromHex(hex) {
+                    let cleanHex = hex.replace('#', '');
+                    if (cleanHex.length === 3) {
+                        cleanHex = cleanHex.split('').map(c => c + c).join('');
+                    }
+                    const num = parseInt(cleanHex, 16) || 0;
+                    return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+                }
+
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    mouse.x = e.clientX - rect.left;
+                    mouse.y = e.clientY - rect.top;
+                    mouse.active = true;
+                }, { passive: true });
+
+                card.addEventListener('mouseleave', () => {
+                    mouse.active = false;
+                    mouse.x = -1000;
+                    mouse.y = -1000;
+                });
+
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas();
+
+                function animate() {
+                    if (bgThemeState === 0) {
+                        ctx.clearRect(0, 0, width, height);
+                        const currentHex = getComputedStyle(document.documentElement).getPropertyValue('--brand-red').trim() || activeBrandColor;
+                        const rgb = getRGBFromHex(currentHex);
+                        const isLightMode = !document.documentElement.classList.contains('dark');
+
+                        for (let i = 0; i < shootingStars.length; i++) {
+                            shootingStars[i].update();
+                            shootingStars[i].draw(rgb);
+                        }
+
+                        for (let i = 0; i < particles.length; i++) {
+                            particles[i].update();
+                            particles[i].draw(rgb, isLightMode);
+                        }
+
+                        for (let i = 0; i < particles.length; i++) {
+                            if (mouse.active) {
+                                const dxM = mouse.x - particles[i].x;
+                                const dyM = mouse.y - particles[i].y;
+                                const distM = Math.sqrt(dxM * dxM + dyM * dyM);
+                                if (distM < 120) {
+                                    ctx.save();
+                                    ctx.beginPath();
+                                    ctx.moveTo(particles[i].x, particles[i].y);
+                                    ctx.lineTo(mouse.x, mouse.y);
+                                    ctx.strokeStyle = `rgba(${rgb.r},${rgb.g}, ${rgb.b},${(1 - distM / 120) * 0.4})`;
+                                    ctx.lineWidth = 0.8;
+                                    ctx.stroke();
+                                    ctx.restore();
+                                }
+                            }
+
+                            for (let j = i + 1; j < particles.length; j++) {
+                                const dx = particles[i].x - particles[j].x;
+                                const dy = particles[i].y - particles[j].y;
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                if (dist < 90) {
+                                    ctx.save();
+                                    ctx.beginPath();
+                                    ctx.moveTo(particles[i].x, particles[i].y);
+                                    ctx.lineTo(particles[j].x, particles[j].y);
+                                    ctx.strokeStyle = `rgba(${rgb.r},${rgb.g}, ${rgb.b},${(1 - dist / 90) * 0.18})`;
+                                    ctx.lineWidth = 0.5;
+                                    ctx.stroke();
+                                    ctx.restore();
+                                }
+                            }
+                        }
+                    } else if (bgThemeState === 1) {
+                        ctx.clearRect(0, 0, width, height);
+                        const currentHex = getComputedStyle(document.documentElement).getPropertyValue('--brand-red').trim() || activeBrandColor;
+                        const rgb = getRGBFromHex(currentHex);
+                        const isLightMode = !document.documentElement.classList.contains('dark');
+                        for (let i = 0; i < particles.length; i++) {
+                            particles[i].draw(rgb, isLightMode);
+                        }
+                    }
+
+                    if (bgThemeState === 0) {
+                        canvasAnimFrameId = requestAnimationFrame(animate);
+                    } else {
+                        canvasAnimFrameId = null;
+                    }
+                }
+
+                startHeaderAnimation = () => {
+                    if (bgThemeState === 0 && canvasAnimFrameId === null) {
+                        animate();
+                    }
+                };
+
+                if (bgThemeState === 0) {
+                    startHeaderAnimation();
+                } else {
+                    ctx.clearRect(0, 0, width, height);
+                }
+            }
+
+            function initStorageUI() {
+                if (DEMO_LOCKED) {
+                    username = 'Demo User';
+                    accountCreatedDate = null;
+                    avatarUrl = 'assets/logos/avatar.png';
+                    bannerUrl = null;
+                    const usernameInput = document.getElementById('username-input');
+                    if (usernameInput) usernameInput.textContent = 'Demo User';
+                    const preview = document.getElementById('avatar-img-preview');
+                    if (preview) preview.src = avatarUrl;
+                    return;
+                }
+                const storedUsername = localStorage.getItem(STORAGE_KEYS.USERNAME);
+                if (storedUsername) username = storedUsername;
+                const usernameInput = document.getElementById('username-input');
+                if (usernameInput) usernameInput.value = username;
+
+                const storedAvatar = localStorage.getItem(STORAGE_KEYS.AVATAR);
+                if (storedAvatar) {
+                    avatarUrl = storedAvatar;
+                    const preview = document.getElementById('avatar-img-preview');
+                    if (preview) preview.src = avatarUrl;
+                }
+
+                const storedBanner = localStorage.getItem(STORAGE_KEYS.BANNER);
+                if (storedBanner) {
+                    bannerUrl = storedBanner;
+                    applyBannerUI();
+                } else {
+                    resetBannerToDefault(false);
+                }
+
+                const storedAppBg = localStorage.getItem(STORAGE_KEYS.APP_BG);
+                if (storedAppBg) {
+                    appBgUrl = storedAppBg;
+                    appBgBlur = parseInt(localStorage.getItem(STORAGE_KEYS.APP_BG_BLUR) || '0', 10);
+                    appBgOverlayColor = localStorage.getItem(STORAGE_KEYS.APP_BG_OVERLAY_COLOR) || '#000000';
+                    appBgOverlayOpacity = parseInt(localStorage.getItem(STORAGE_KEYS.APP_BG_OVERLAY_OPACITY) || '40', 10);
+
+                    document.getElementById('bg-blur-slider').value = appBgBlur;
+                    document.getElementById('bg-blur-val').innerText = `${appBgBlur}px`;
+                    document.getElementById('bg-overlay-color').value = appBgOverlayColor;
+                    document.getElementById('bg-overlay-hex').innerText = appBgOverlayColor.toUpperCase();
+                    document.getElementById('bg-opacity-slider').value = appBgOverlayOpacity;
+                    document.getElementById('bg-opacity-val').innerText = `${appBgOverlayOpacity}%`;
+                }
+
+                const storedScale = localStorage.getItem(STORAGE_KEYS.SCALE);
+                if (storedScale) {
+                    currentScale = parseInt(storedScale, 10);
+                    document.getElementById('ui-scale-slider').value = currentScale;
+                }
+
+                const storedSound = localStorage.getItem(STORAGE_KEYS.SOUND);
+                if (storedSound !== null) isSoundMuted = storedSound === 'true';
+
+                const storedNotificationsMuted = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS_MUTED);
+                if (storedNotificationsMuted !== null) areNotificationsMuted = storedNotificationsMuted === 'true';
+
+                const storedColor = localStorage.getItem(STORAGE_KEYS.BRAND_COLOR);
+                if (storedColor) activeBrandColor = storedColor;
+                document.getElementById('brand-color-picker').value = activeBrandColor;
+                document.getElementById('brand-hex-input').value = activeBrandColor;
+
+                const storedThemeState = localStorage.getItem(STORAGE_KEYS.BG_THEME_STATE);
+                if (storedThemeState !== null) bgThemeState = parseInt(storedThemeState, 10) === 1 ? 1 : 0;
+
+                // Tryb jasny został usunięty — ignorujemy stare ustawienie i wymuszamy ciemny.
+                themeMode = 'dark';
+
+                const storedStreamerMode = localStorage.getItem(STORAGE_KEYS.STREAMER_MODE);
+                if (storedStreamerMode !== null) isStreamerMode = storedStreamerMode === 'true';
+
+                accountCreatedDate = localStorage.getItem(STORAGE_KEYS.CREATED_DATE);
+                applyStreamerModeUI();
+            }
+
+            function applyBannerUI() {
+                const profileCardBanner = document.getElementById('profile-card-banner');
+                const cornerResetBtn = document.getElementById('corner-reset-banner-btn');
+                
+                if (bannerUrl) {
+                    if (profileCardBanner) {
+                        profileCardBanner.style.backgroundImage = `url('${bannerUrl}')`;
+                        profileCardBanner.classList.remove('default-banner');
+                    }
+                    if (cornerResetBtn) cornerResetBtn.classList.remove('hidden');
+                } else {
+                    if (profileCardBanner) {
+                        profileCardBanner.style.backgroundImage = 'none';
+                        profileCardBanner.classList.add('default-banner');
+                    }
+                    if (cornerResetBtn) cornerResetBtn.classList.add('hidden');
+                }
+            }
+
+            function resetBannerToDefault(notify = true) {
+                bannerUrl = null;
+                applyBannerUI();
+                saveEncryptedState();
+                if (notify) {
+                    showToast('Przywrócono domyślny czarny banner.', 'info');
+                    playSound('click');
+                }
+            }
+
+            function changeBrandColor(hex) {
+                hex = String(hex || '').trim();
+                if (!hex.startsWith('#')) hex = '#' + hex;
+                if (/^#[0-9A-F]{6}$/i.test(hex)) {
+                    activeBrandColor = hex;
+                    document.getElementById('brand-color-picker').value = hex;
+                    document.getElementById('brand-hex-input').value = hex;
+                    applyBrandColor(hex, true);
+                    showToast('Zmieniono kolor motywu!', 'success');
+                }
+            }
+
+            function changeBrandColorFromText(hex) {
+                hex = String(hex || '').trim();
+                if (!hex.startsWith('#')) hex = '#' + hex;
+                if (/^#[0-9A-F]{6}$/i.test(hex)) {
+                    activeBrandColor = hex;
+                    document.getElementById('brand-color-picker').value = hex;
+                    document.getElementById('brand-hex-input').value = hex;
+                    applyBrandColor(hex, true);
+                    showToast(`Zmieniono kolor na ${hex}.`, 'success');
+                } else {
+                    document.getElementById('brand-hex-input').value = activeBrandColor;
+                    showToast('Nieprawidłowy format HEX (np. #ff0033)', 'error');
+                }
+            }
+
+            function applyBrandColor(hex, save = true) {
+                document.documentElement.style.setProperty('--brand-red', hex);
+                let r = parseInt(hex.slice(1,3), 16) || 255;
+                let g = parseInt(hex.slice(3,5), 16) || 0;
+                let b = parseInt(hex.slice(5,7), 16) || 51;
+                document.documentElement.style.setProperty('--brand-red-glow', `rgba(${r}, ${g},${b}, 0.35)`);
+
+                let trackColor = `rgba(${Math.floor(r * 0.1)}, ${Math.floor(g * 0.1)},${Math.floor(b * 0.1)}, 0.95)`;
+                document.documentElement.style.setProperty('--brand-scroll-track', trackColor);
+
+                let styleTag = document.getElementById('dynamic-brand-style');
+                if (!styleTag) {
+                    styleTag = document.createElement('style');
+                    styleTag.id = 'dynamic-brand-style';
+                    document.head.appendChild(styleTag);
+                }
+
+                let hoverHex = adjustBrightness(hex, -20);
+                document.documentElement.style.setProperty('--brand-hover-red', hoverHex);
+                styleTag.innerHTML = `
+                    .bg-brand-red { background-color: ${hex} !important; }
+                    .fixed-owner-badge {
+                        background-color: rgba(239, 68, 68, 0.10) !important;
+                        border-color: rgba(239, 68, 68, 0.50) !important;
+                        color: #ef4444 !important;
+                    }
+                    .fixed-owner-badge i { color: #ef4444 !important; }
+                    .hover\:bg-brand-hoverRed:hover { background-color: ${hoverHex} !important; }
+                    .text-brand-red, .text-red-500, .text-red-600 { color: ${hex} !important; }
+                    .border-brand-red, .border-red-500, .border-red-600 { border-color: ${hex} !important; }
+                    .bg-red-500, .bg-red-600 { background-color: ${hex} !important; }
+                    .hover\:bg-red-500:hover, .hover\:bg-red-600:hover { background-color: ${hoverHex} !important; }
+                    .hover\:text-red-500:hover, .hover\:text-red-600:hover { color: ${hoverHex} !important; }
+                    .hover\:border-brand-red:hover, .hover\:border-red-500:hover, .hover\:border-red-600:hover { border-color: ${hoverHex} !important; }
+                    .focus\:border-brand-red:focus, .focus\:border-red-500:focus, .focus\:border-red-600:focus { border-color: ${hoverHex} !important; }
+                    input[type="range"] { accent-color: ${hex} !important; }
+                    ::-webkit-scrollbar-thumb { background: ${hex} !important; }
+                    ::-webkit-scrollbar-track { background: ${trackColor} !important; }
+                    ::selection { background-color: ${hex} !important; color: #ffffff !important; }
+                `;
+
+                if (save) {
+                    saveEncryptedState();
+                    playSound('click');
+                }
+            }
+
+            function updateCreatedDateDisplay() {
+                const dateEl = document.getElementById('profile-created-date');
+                if (dateEl) dateEl.innerText = 'Konto od: -';
+            }
+
+            function updateBadgesDisplay() {
+                const betaBadge = document.getElementById('badge-beta-tester');
+                const ownerBadge = document.getElementById('badge-owner');
+                const adminBadge = document.getElementById('badge-admin');
+                const knownBadge = document.getElementById('badge-known');
+                const larpBadge = document.getElementById('badge-larp');
+                const testBadges = Array.from(document.querySelectorAll('#profile-badges-container .test-badge'));
+
+                const u = String(username || '').toLowerCase().trim().replace(/^@/, '');
+                const isSzymon = u === 'szymon';
+                const isTestAccount = u === 'testodznak';
+
+                // Szymon ma wyłącznie odznakę WŁAŚCICIEL.
+                if (ownerBadge) ownerBadge.classList.toggle('hidden', !isSzymon);
+
+                // BETA TESTER. Konto testodznak nie otrzymuje tej odznaki.
+                if (betaBadge) {
+                    let showBeta = false;
+
+                    if (!isTestAccount && !isSzymon && accountCreatedDate) {
+                        const parts = accountCreatedDate.split('.');
+                        if (parts.length === 3) {
+                            const day = parseInt(parts[0], 10);
+                            const month = parseInt(parts[1], 10);
+                            showBeta = month < 9 || (month === 9 && day < 30);
+                        } else {
+                            showBeta = true;
+                        }
+                    } else if (!isTestAccount && !isSzymon && !accountCreatedDate) {
+                        showBeta = true;
+                    }
+
+                    betaBadge.classList.toggle('hidden', !showBeta);
+                }
+
+                // ADMIN (Yufu).
+                if (adminBadge) {
+                    adminBadge.classList.toggle('hidden', isSzymon || u !== 'yufu');
+                }
+
+                // ZNANY (meetmeinhell, yufu, finfinfin, anonek oraz xe3n).
+                if (knownBadge) {
+                    const showKnown = !isSzymon && (u === 'meetmeinhell' || u === 'yufu' || u === 'finfinfin' || u === 'anonek' || u === 'xe3n');
+                    knownBadge.classList.toggle('hidden', !showKnown);
+                    knownBadge.classList.toggle('flex', showKnown);
+                }
+
+                // LARP (xe3n).
+                if (larpBadge) {
+                    larpBadge.classList.toggle('hidden', isSzymon || u !== 'xe3n');
+                }
+
+                // Konto testowe "testodznak": pokazuje kilka dodatkowych odznak,
+                // aby przetestować zawijanie do wierszy i przewijanie pionowe.
+                testBadges.forEach((badge, index) => {
+                    const show = isTestAccount;
+                    badge.classList.toggle('hidden', !show);
+                    if (show) {
+                        badge.classList.remove('flex');
+                        badge.classList.add('flex');
+                    }
+                });
+
+                // Dodatkowa ochrona: na Szymonie wszystkie pozostałe odznaki są ukryte.
+                if (isSzymon) {
+                    [betaBadge, adminBadge, knownBadge, larpBadge, ...testBadges].forEach(badge => {
+                        if (badge) badge.classList.add('hidden');
+                    });
+                }
+            }
+
+            function playSound(type) {
+                if (isSoundMuted) return;
+                try {
+                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    const now = audioCtx.currentTime;
+
+                    if (type === 'click') {
+                        osc.frequency.setValueAtTime(400, now);
+                        osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+                        gain.gain.setValueAtTime(0.15, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                        osc.start(now); osc.stop(now + 0.05);
+                    } else if (type === 'save') {
+                        osc.frequency.setValueAtTime(300, now);
+                        osc.frequency.exponentialRampToValueAtTime(600, now + 0.12);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                        osc.start(now); osc.stop(now + 0.12);
+                    } else if (type === 'delete') {
+                        osc.frequency.setValueAtTime(500, now);
+                        osc.frequency.exponentialRampToValueAtTime(150, now + 0.15);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                        osc.start(now); osc.stop(now + 0.15);
+                    } else if (type === 'toast') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(587.33, now);
+                        osc.frequency.setValueAtTime(880, now + 0.07);
+                        gain.gain.setValueAtTime(0.12, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                        osc.start(now); osc.stop(now + 0.22);
+                    }
+                } catch (e) {}
+            }
+
+            function toggleSound() {
+                isSoundMuted = !isSoundMuted;
+                saveEncryptedState();
+                applySoundUI();
+                if (!isSoundMuted) playSound('click');
+            }
+
+            function applySoundUI() {
+                const icon = document.getElementById('sound-icon');
+                const text = document.getElementById('sound-text');
+                if (isSoundMuted) {
+                    if (icon) icon.className = 'fas fa-volume-xmark text-zinc-400 dark:text-gray-500';
+                    if (text) text.innerText = 'WYCISZONY';
+                } else {
+                    if (icon) icon.className = 'fas fa-volume-high text-brand-red';
+                    if (text) text.innerText = 'DŹWIĘK';
+                }
+            }
+
+            function toggleNotifications() {
+                areNotificationsMuted = !areNotificationsMuted;
+                saveEncryptedState();
+                applyNotificationsUI();
+                if (!areNotificationsMuted) {
+                    showToast('Włączono powiadomienia wyskakujące.', 'info');
+                }
+                playSound('click');
+            }
+
+            function applyNotificationsUI() {
+                const icon = document.getElementById('notifications-icon');
+                const text = document.getElementById('notifications-text');
+                if (areNotificationsMuted) {
+                    if (icon) icon.className = 'fas fa-bell-slash text-zinc-400 dark:text-gray-500';
+                    if (text) text.innerText = 'WYCISZONE';
+                } else {
+                    if (icon) icon.className = 'fas fa-bell text-brand-red';
+                    if (text) text.innerText = 'WŁĄCZONE';
+                }
+            }
+
+            function updateUIScale(val) {
+                currentScale = parseInt(val, 10);
+                saveEncryptedState();
+                applyScaleUI(currentScale);
+                playSound('click');
+            }
+
+            function applyScaleUI(scale) {
+                const html = document.documentElement;
+                const label = document.getElementById('scale-label-text');
+                html.classList.remove('size-small', 'size-medium', 'size-large');
+                if (scale == 1) { html.classList.add('size-small'); if (label) label.innerText = 'MAŁY'; }
+                else if (scale == 3) { html.classList.add('size-large'); if (label) label.innerText = 'DUŻY'; }
+                else { html.classList.add('size-medium'); if (label) label.innerText = 'NORMALNY'; }
+            }
+
+            function saveUsername() {
+                if (DEMO_LOCKED) {
+                    const input = document.getElementById('username-input');
+                    if (input) input.textContent = 'Demo User';
+                    username = 'Demo User';
+                    accountCreatedDate = null;
+                avatarUrl = 'assets/logos/avatar.png';
+                bannerUrl = null;
+                    return;
+                }
+                if (isStreamerMode) {
+                    applyStreamerModeUI();
+                    return;
+                }
+                const input = document.getElementById('username-input');
+                const val = input.value.trim();
+                
+                const validRegex = /^[a-zA-Z0-9_ ]+$/;
+
+                if (!val) {
+                    showToast('Nazwa użytkownika nie może być pusta!', 'error');
+                    input.value = username;
+                    return;
+                }
+
+                if (!validRegex.test(val)) {
+                    showToast('Nazwa użytkownika może zawierać tylko litery, cyfry, spacię oraz znaki _', 'error');
+                    input.value = username;
+                    return;
+                }
+
+                username = val;
+                saveEncryptedState();
+                startTabTitleAnimation();
+                updateBadgesDisplay();
+                showToast('Zaktualizowano nazwę profilu!', 'success');
+                playSound('click');
+            }
+
+            function handleAvatarUpload(event) {
+                if (DEMO_LOCKED) return;
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarUrl = e.target.result;
+                    const preview = document.getElementById('avatar-img-preview');
+                    if (preview) preview.src = avatarUrl;
+                    saveEncryptedState();
+                    showToast('Zaktualizowano avatar profilu!', 'success');
+                    playSound('save');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function handleBannerUpload(event) {
+                if (DEMO_LOCKED) return;
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    bannerUrl = e.target.result;
+                    applyBannerUI();
+                    saveEncryptedState();
+                    showToast('Zaktualizowano banner profilu!', 'success');
+                    playSound('save');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function populatePlatformDropdowns() {
+                const entrySelect = document.getElementById('entry-platform');
+                const filterSelect = document.getElementById('vault-filter-platform');
+
+                // Lista serwisów jest zawsze sortowana alfabetycznie po nazwie.
+                // Tworzymy kopię, aby nie zmieniać źródłowej tablicy PLATFORMS.
+                const sortedPlatforms = [...PLATFORMS].sort((a, b) => {
+                    if (a.id === 'other') return 1;
+                    if (b.id === 'other') return -1;
+                    return a.name.localeCompare(b.name, 'pl', { sensitivity: 'base', numeric: true });
+                });
+
+                entrySelect.innerHTML = '';
+                sortedPlatforms.forEach(p => {
+                    entrySelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+                });
+
+                filterSelect.innerHTML = '<option value="ALL">Wszystkie</option>';
+                sortedPlatforms.forEach(p => {
+                    filterSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+                });
+            }
+
+            function toggleGlobalEmails() {
+                const btn = document.getElementById('global-toggle-emails');
+                const icon = document.getElementById('global-emails-icon');
+
+                if (!globalEmailsConfirmTimer) {
+                    playSound('click');
+                    if (btn && icon) {
+                        btn.classList.add('bg-red-500/20', 'text-red-500');
+                        btn.title = "Kliknij ponownie, aby potwierdzić zmianę widoczności maili";
+                        icon.className = 'fas fa-circle-question text-xs text-red-500 animate-pulse';
+                        const text = document.getElementById('global-emails-text');
+                        if (text) text.innerText = 'KLIKNIJ PONOWNIE';
+                        showToast('Kliknij ponownie, aby pokazać/ukryć wszystkie maile.', 'info');
+                    }
+
+                    globalEmailsConfirmTimer = setTimeout(() => {
+                        resetGlobalEmailsBtn();
+                    }, 3000);
+                    return;
+                }
+
+                resetGlobalEmailsBtn();
+
+                globalEmailsVisible = !globalEmailsVisible;
+                const text = document.getElementById('global-emails-text');
+                if (icon) icon.className = globalEmailsVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+                if (text) text.innerText = globalEmailsVisible ? 'UKRYJ WSZYSTKIE' : 'POKAŻ WSZYSTKIE';
+
+                renderVaultEntries();
+                playSound('click');
+            }
+
+            function resetGlobalEmailsBtn() {
+                if (globalEmailsConfirmTimer) {
+                    clearTimeout(globalEmailsConfirmTimer);
+                    globalEmailsConfirmTimer = null;
+                }
+                const btn = document.getElementById('global-toggle-emails');
+                const icon = document.getElementById('global-emails-icon');
+                if (btn && icon) {
+                    btn.classList.remove('bg-red-500/20', 'text-red-500');
+                    btn.title = "";
+                    icon.className = globalEmailsVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+                    const text = document.getElementById('global-emails-text');
+                    if (text) text.innerText = globalEmailsVisible ? 'UKRYJ WSZYSTKIE' : 'POKAŻ WSZYSTKIE';
+                }
+            }
+
+            function toggleGlobalPasswords() {
+                const btn = document.getElementById('global-toggle-passwords');
+                const icon = document.getElementById('global-pass-icon');
+
+                if (!globalPasswordsConfirmTimer) {
+                    playSound('click');
+                    if (btn && icon) {
+                        btn.classList.add('bg-red-500/20', 'text-red-500');
+                        btn.title = "Kliknij ponownie, aby potwierdzić zmianę widoczności haseł";
+                        icon.className = 'fas fa-circle-question text-xs text-red-500 animate-pulse';
+                        const text = document.getElementById('global-pass-text');
+                        if (text) text.innerText = 'KLIKNIJ PONOWNIE';
+                        showToast('Kliknij ponownie, aby pokazać/ukryć wszystkie hasła.', 'info');
+                    }
+
+                    globalPasswordsConfirmTimer = setTimeout(() => {
+                        resetGlobalPasswordsBtn();
+                    }, 3000);
+                    return;
+                }
+
+                resetGlobalPasswordsBtn();
+
+                globalPasswordsVisible = !globalPasswordsVisible;
+                const text = document.getElementById('global-pass-text');
+                if (icon) icon.className = globalPasswordsVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+                if (text) text.innerText = globalPasswordsVisible ? 'UKRYJ WSZYSTKIE' : 'POKAŻ WSZYSTKIE';
+
+                renderVaultEntries();
+                playSound('click');
+            }
+
+            function resetGlobalPasswordsBtn() {
+                if (globalPasswordsConfirmTimer) {
+                    clearTimeout(globalPasswordsConfirmTimer);
+                    globalPasswordsConfirmTimer = null;
+                }
+                const btn = document.getElementById('global-toggle-passwords');
+                const icon = document.getElementById('global-pass-icon');
+                if (btn && icon) {
+                    btn.classList.remove('bg-red-500/20', 'text-red-500');
+                    btn.title = "";
+                    icon.className = globalPasswordsVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+                }
+            }
+
+            function updateCustomPlatformFieldVisibility() {
+                const platform = document.getElementById('entry-platform')?.value || '';
+                const container = document.getElementById('entry-custom-platform-container');
+                const field = document.getElementById('entry-custom-platform');
+                if (!container || !field) return;
+                const visible = platform === 'other';
+                container.classList.toggle('hidden', !visible);
+                field.required = visible;
+                if (!visible) field.value = '';
+            }
+
+            function openAddEntryModal() {
+                if (DEMO_LOCKED) {
+                    showToast('Dodawanie kont jest zablokowane w wersji demonstracyjnej.', 'info');
+                    return;
+                }
+                document.getElementById('modal-entry-title').innerText = 'DODAJ NOWE KONTO';
+                document.getElementById('entry-id').value = '';
+                document.getElementById('entry-platform').value = 'battlenet';
+                document.getElementById('entry-custom-platform').value = '';
+                updateCustomPlatformFieldVisibility();
+                document.getElementById('entry-account').value = '';
+                document.getElementById('entry-password').value = '';
+                document.getElementById('entry-description').value = '';
+                document.getElementById('modal-entry').classList.remove('hidden');
+                playSound('click');
+            }
+
+            function generateAndSetPassword() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+                let res = '';
+                const array = new Uint32Array(16);
+                window.crypto.getRandomValues(array);
+                for (let i = 0; i < 16; i++) {
+                    res += chars[array[i] % chars.length];
+                }
+                document.getElementById('entry-password').value = res;
+                showToast('Wygenerowano nowe bezpieczne hasło!', 'success');
+                playSound('click');
+            }
+
+            function togglePasswordVisibility(fieldId) {
+                const field = document.getElementById(fieldId);
+                if (!field) return;
+                field.type = field.type === 'password' ? 'text' : 'password';
+                playSound('click');
+            }
+
+            async function handleSaveEntry(e) {
+                e.preventDefault();
+                if (DEMO_LOCKED) {
+                    showToast('Edycja i dodawanie kont są zablokowane w wersji demonstracyjnej.', 'info');
+                    closeModal('modal-entry');
+                    return;
+                }
+                const id = document.getElementById('entry-id').value;
+                const platform = document.getElementById('entry-platform').value;
+                const customPlatform = platform === 'other' ? document.getElementById('entry-custom-platform').value.trim() : '';
+                const account = document.getElementById('entry-account').value.trim();
+                const password = document.getElementById('entry-password').value;
+                const description = document.getElementById('entry-description').value.trim();
+
+                if (id) {
+                    const idx = vaultEntries.findIndex(item => item.id === id);
+                    if (idx !== -1) {
+                        vaultEntries[idx].platform = platform;
+                        vaultEntries[idx].customPlatform = customPlatform;
+                        vaultEntries[idx].customIcon = platform === 'other' ? 'assets/logos/blank.png' : null;
+                        vaultEntries[idx].account = account;
+                        vaultEntries[idx].password = password;
+                        vaultEntries[idx].description = description;
+                        vaultEntries[idx].updatedAt = new Date().toISOString();
+                    }
+                    showToast('Zaktualizowano wpis w menadżerze!', 'success');
+                } else {
+                    const newEntry = {
+                        id: 'entry_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                        platform: platform,
+                        customPlatform: customPlatform,
+                        customIcon: platform === 'other' ? 'assets/logos/blank.png' : null,
+                        account: account,
+                        password: password,
+                        description: description,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                    vaultEntries.unshift(newEntry);
+                    showToast('Dodano nowe konto do bazy!', 'success');
+                }
+
+                await saveEncryptedState();
+                closeModal('modal-entry');
+                renderVaultEntries();
+                playSound('save');
+            }
+
+            function renderVaultEntries() {
+                const grid = document.getElementById('vault-grid');
+                const emptyState = document.getElementById('vault-empty-state');
+                const countBadge = document.getElementById('vault-count-badge');
+                
+                if (!grid || !emptyState || !countBadge) return;
+
+                const searchVal = (document.getElementById('vault-search-input')?.value || '').toLowerCase().trim();
+                const filterPlatform = document.getElementById('vault-filter-platform')?.value || 'ALL';
+                const sortOrder = document.getElementById('vault-sort-order')?.value || 'NEWEST';
+
+                let filtered = vaultEntries.filter(entry => {
+                    const pObj = PLATFORMS.find(p => p.id === entry.platform) || getFallbackPlatform(entry);
+                    const platformName = (entry.platform === 'other' && entry.customPlatform ? entry.customPlatform : pObj.name).toLowerCase();
+
+                    const matchSearch = entry.account.toLowerCase().includes(searchVal) ||
+                                        platformName.includes(searchVal) ||
+                                        (entry.description && entry.description.toLowerCase().includes(searchVal));
+                    const matchPlatform = filterPlatform === 'ALL' || entry.platform === filterPlatform;
+                    return matchSearch && matchPlatform;
+                });
+
+                filtered.sort((a, b) => {
+                    if (sortOrder === 'NEWEST') return new Date(b.createdAt) - new Date(a.createdAt);
+                    if (sortOrder === 'OLDEST') return new Date(a.createdAt) - new Date(b.createdAt);
+                    if (sortOrder === 'NAME_ASC') return a.account.localeCompare(b.account);
+                    if (sortOrder === 'PLATFORM') return a.platform.localeCompare(b.platform);
+                    return 0;
+                });
+
+                countBadge.innerText = vaultEntries.length;
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                emptyState.classList.add('hidden');
+                let html = '';
+
+                filtered.forEach(entry => {
+                    const pObj = PLATFORMS.find(p => p.id === entry.platform) || getFallbackPlatform(entry);
+                    const platformName = entry.platform === 'other' && entry.customPlatform ? entry.customPlatform : pObj.name;
+                    const displayPlatform = entry.platform === 'other' ? { ...pObj, name: platformName, logo: 'assets/logos/blank.png' } : pObj;
+
+                    const logoClass = 'platform-logo';
+                    const iconHtml = displayPlatform.logo
+                        ? `<img src="${displayPlatform.logo}" alt="${escapeHtml(platformName)} logo" class="${logoClass} w-8 h-8 object-contain" loading="lazy" onerror="this.onerror=null; this.style.display='none'; const fallback=this.nextElementSibling; if (fallback) fallback.classList.remove('hidden');"><i class="${displayPlatform.icon} theme-platform-icon text-lg hidden"></i>`
+                        : `<i class="${displayPlatform.icon} theme-platform-icon text-lg"></i>`;
+
+                    const showAcc = globalEmailsVisible;
+                    const showPass = globalPasswordsVisible;
+                    const createdDate = new Date(entry.createdAt).toLocaleString('pl-PL', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+
+                    html += `
+                        <div class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-brand-border rounded-2xl p-5 card-scale shadow-xl flex flex-col space-y-4 hover:border-brand-red/50 transition-all duration-300">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center space-x-3 overflow-hidden">
+                                    <div class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-black/60 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
+                                        ${iconHtml}
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <h3 class="font-orbitron font-bold text-base text-zinc-900 dark:text-white truncate" title="${escapeHtml(platformName)}">${escapeHtml(platformName)}</h3>
+                                        <div class="text-[11px] text-zinc-500 font-mono flex items-center gap-1.5 mt-0.5">
+                                            <i class="far fa-clock text-[10px]"></i>
+                                            <span>${createdDate}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 pt-1">
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Login / Email</span>
+                                    <div class="bg-zinc-100 dark:bg-black/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
+                                        <span id="acc-text-${entry.id}" data-masked="${!showAcc}" data-raw="${escapeHtml(entry.account)}" class="font-mono font-semibold text-zinc-800 dark:text-gray-200 truncate mr-2">${showAcc ? escapeHtml(entry.account) : '••••••••••••'}</span>
+                                        <div class="flex items-center gap-3 flex-shrink-0">
+                                            <button onclick="window.scythedApp.toggleEmailVisibility('${entry.id}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white" title="Pokaż/Ukryj">
+                                                <i id="acc-icon-${entry.id}" class="fas ${showAcc ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i>
+                                            </button>
+                                            <button onclick="window.scythedApp.copyText('${escapeHtml(entry.account)}', 'Login')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj login">
+                                                <i class="fas fa-copy text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Hasło</span>
+                                    <div class="bg-zinc-100 dark:bg-black/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
+                                        <span id="pass-text-${entry.id}" data-masked="${!showPass}" data-raw="${escapeHtml(entry.password)}" class="font-mono font-semibold text-brand-red truncate mr-2">${showPass ? escapeHtml(entry.password) : '••••••••••••••••'}</span>
+                                        <div class="flex items-center gap-3 flex-shrink-0">
+                                            <button onclick="window.scythedApp.togglePasswordEntryVisibility('${entry.id}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white" title="Pokaż/Ukryj">
+                                                <i id="pass-icon-${entry.id}" class="fas ${showPass ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i>
+                                            </button>
+                                            <button onclick="window.scythedApp.copyText('${escapeHtml(entry.password)}', 'Hasło')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj hasło">
+                                                <i class="fas fa-copy text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            ${entry.description ? `
+                            <div class="bg-zinc-100 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800/80 rounded-xl p-3 text-xs text-zinc-600 dark:text-gray-400 font-mono italic break-words">
+                                ${escapeHtml(entry.description)}
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+
+                grid.innerHTML = html;
+            }
+
+            function toggleEmailVisibility(entryId) {
+                playSound('click');
+                const el = document.getElementById(`acc-text-${entryId}`);
+                const icon = document.getElementById(`acc-icon-${entryId}`);
+                if (!el || !icon) return;
+                if (el.dataset.masked === 'true') {
+                    el.textContent = el.dataset.raw;
+                    el.dataset.masked = 'false';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    el.textContent = '••••••••••••';
+                    el.dataset.masked = 'true';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            }
+
+            function togglePasswordEntryVisibility(entryId) {
+                playSound('click');
+                const el = document.getElementById(`pass-text-${entryId}`);
+                const icon = document.getElementById(`pass-icon-${entryId}`);
+                if (!el || !icon) return;
+                if (el.dataset.masked === 'true') {
+                    el.textContent = el.dataset.raw;
+                    el.dataset.masked = 'false';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    el.textContent = '••••••••••••••••';
+                    el.dataset.masked = 'true';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            }
+
+            function editEntry(id) {
+                if (DEMO_LOCKED) {
+                    showToast('Edycja kont jest zablokowana w wersji demonstracyjnej.', 'info');
+                    return;
+                }
+                const entry = vaultEntries.find(item => item.id === id);
+                if (!entry) return;
+
+                document.getElementById('modal-entry-title').innerText = 'EDYTUJ KONTO';
+                document.getElementById('entry-id').value = entry.id;
+                document.getElementById('entry-platform').value = entry.platform;
+                document.getElementById('entry-custom-platform').value = entry.customPlatform || '';
+                updateCustomPlatformFieldVisibility();
+                document.getElementById('entry-account').value = entry.account;
+                document.getElementById('entry-password').value = entry.password;
+                document.getElementById('entry-description').value = entry.description || '';
+
+                document.getElementById('modal-entry').classList.remove('hidden');
+                playSound('click');
+            }
+
+            let pendingDeleteId = null;
+            let pendingDeleteTimer = null;
+
+            async function deleteEntry(id) {
+                if (DEMO_LOCKED) {
+                    showToast('Usuwanie kont jest zablokowane w wersji demonstracyjnej.', 'info');
+                    return;
+                }
+                const idx = vaultEntries.findIndex(item => item.id === id);
+                if (idx === -1) return;
+
+                // Pierwsze kliknięcie uzbraja usuwanie; drugie w ciągu 3 sekund usuwa konto.
+                if (pendingDeleteId !== id) {
+                    if (pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
+                    pendingDeleteId = id;
+
+                    const btn = document.getElementById(`delete-btn-${id}`);
+                    if (btn) {
+                        btn.classList.add('text-red-500', 'animate-pulse');
+                        btn.title = 'Kliknij ponownie, aby usunąć konto';
+                    }
+                    showToast('Kliknij śmietnik ponownie, aby usunąć to konto.', 'info');
+                    playSound('click');
+
+                    pendingDeleteTimer = setTimeout(() => {
+                        pendingDeleteId = null;
+                        pendingDeleteTimer = null;
+                        const currentBtn = document.getElementById(`delete-btn-${id}`);
+                        if (currentBtn) {
+                            currentBtn.classList.remove('text-red-500', 'animate-pulse');
+                            currentBtn.title = 'Kliknij ponownie, aby usunąć konto';
+                        }
+                    }, 3000);
+                    return;
+                }
+
+                if (pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
+                pendingDeleteId = null;
+                pendingDeleteTimer = null;
+
+                lastDeletedEntry = { entry: vaultEntries[idx], index: idx };
+                vaultEntries.splice(idx, 1);
+
+                await saveEncryptedState();
+                renderVaultEntries();
+                showToast('Usunięto konto z menadżera haseł.', 'delete_undo');
+                playSound('delete');
+            }
+
+            async function undoLastDelete() {
+                if (!lastDeletedEntry) return;
+                vaultEntries.splice(lastDeletedEntry.index, 0, lastDeletedEntry.entry);
+                lastDeletedEntry = null;
+                
+                await saveEncryptedState();
+                renderVaultEntries();
+                hideToast();
+                showToast('Przywrócono usunięty wpis!', 'success');
+                playSound('save');
+            }
+
+            function confirmResetApp() {
+                if (confirm("CZY NA PEWNO CHCESZ ZRESETOWAĆ APLIKACJĘ?\nWszystkie zapisane dane i ustawienia zostaną bezpowrotnie usunięte!")) {
+                    localStorage.clear();
+                    location.reload();
+                }
+            }
+
+            async function exportBackup() {
+                if (!masterCryptoKey || masterPassword === null) {
+                    showToast("Musisz najpierw odblokować aplikację, aby pobrać backup!", "error");
+                    return;
+                }
+
+                // Backup jest szyfrowany hasłem Master aktualnym w momencie eksportu.
+                // Zmiana późniejszego hasła Master nie zmienia hasła tego backupu.
+                const backupData = {
+                    version: "v9",
+                    timestamp: new Date().toISOString(),
+                    username: username,
+                    avatarUrl: avatarUrl,
+                    bannerUrl: bannerUrl,
+                    appBgUrl: appBgUrl,
+                    accountCreatedDate: accountCreatedDate,
+                    brandColor: activeBrandColor,
+                    entries: vaultEntries,
+                    settings: {
+                        currentScale: currentScale,
+                        isSoundMuted: isSoundMuted,
+                        areNotificationsMuted: areNotificationsMuted,
+                        bgThemeState: bgThemeState,
+                        themeMode: themeMode,
+                        appBgBlur: appBgBlur,
+                        appBgOverlayColor: appBgOverlayColor,
+                        appBgOverlayOpacity: appBgOverlayOpacity,
+                        globalEmailsVisible: globalEmailsVisible,
+                        globalPasswordsVisible: globalPasswordsVisible,
+                        isStreamerMode: isStreamerMode
+                    }
+                };
+
+                try {
+                    const backupPassword = masterPassword;
+                    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+                    const backupKey = await deriveBackupKey(backupPassword, salt);
+                    const encryptedPayload = await encryptData(JSON.stringify(backupData), backupKey);
+
+                    const backupFile = {
+                        format: "SCYTHED_ENCRYPTED_BACKUP",
+                        version: "v9",
+                        timestamp: backupData.timestamp,
+                        kdf: {
+                            name: "PBKDF2",
+                            hash: "SHA-256",
+                            iterations: 150000,
+                            salt: bytesToBase64(salt)
+                        },
+                        cipher: {
+                            name: "AES-GCM",
+                            keyLength: 256
+                        },
+                        payload: encryptedPayload
+                    };
+
+                    const jsonStr = JSON.stringify(backupFile, null, 2);
+                    const blob = new Blob([jsonStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `SCYTHED_BACKUP_${new Date().toISOString().slice(0, 10)}.scythed`;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    // Nie usuwamy Blob URL natychmiast po kliknięciu.
+                    // Niektóre przeglądarki potrafią anulować pobieranie, jeśli URL
+                    // zostanie zwolniony zanim mechanizm pobierania go odczyta.
+                    setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+                    showToast("Pobrano zaszyfrowany backup Hasłem Master!", "success");
+                    playSound('save');
+                } catch (err) {
+                    console.error("Backup export error:", err);
+                    showToast("Nie udało się utworzyć zaszyfrowanego backupu!", "error");
+                    playSound('delete');
+                }
+            }
+
+            function importBackup(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // Pozwól ponownie wybrać ten sam plik po błędzie.
+                event.target.value = '';
+
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const backupFile = JSON.parse(e.target.result);
+
+                        if (
+                            !backupFile ||
+                            backupFile.format !== "SCYTHED_ENCRYPTED_BACKUP" ||
+                            backupFile.version !== "v9" ||
+                            !backupFile.kdf ||
+                            !backupFile.kdf.salt ||
+                            !backupFile.payload
+                        ) {
+                            throw new Error("Nieprawidłowy lub niezabezpieczony format backupu.");
+                        }
+
+                        if (!masterCryptoKey || masterPassword === null) {
+                            showToast("Najpierw odblokuj aplikację swoim obecnym Hasłem Master!", "error");
+                            return;
+                        }
+
+                        const backupPassword = prompt(
+                            "Podaj Hasło Master użyte w momencie tworzenia tego backupu:"
+                        );
+
+                        if (backupPassword === null) {
+                            showToast("Wczytywanie backupu anulowane.", "info");
+                            return;
+                        }
+
+                        if (!backupPassword) {
+                            showToast("Hasło backupu nie może być puste!", "error");
+                            return;
+                        }
+
+                        const salt = base64ToBytes(backupFile.kdf.salt);
+                        const backupKey = await deriveBackupKey(backupPassword, salt);
+
+                        let decryptedJson;
+                        try {
+                            decryptedJson = await decryptData(backupFile.payload, backupKey);
+                        } catch (decryptError) {
+                            // AES-GCM odrzuca błędne hasło przed udostępnieniem zawartości backupu.
+                            showToast("Nieprawidłowe Hasło Master tego backupu. Backup nie został wczytany!", "error");
+                            playSound('delete');
+                            return;
+                        }
+
+                        const importedData = JSON.parse(decryptedJson);
+
+                        if (!importedData.entries || !Array.isArray(importedData.entries)) {
+                            throw new Error("Nieprawidłowa zawartość backupu.");
+                        }
+
+                        if (confirm(`Wczytać odszyfrowany backup z dnia ${importedData.timestamp ? importedData.timestamp.slice(0,10) : 'nieznanego'}? Istniejące wpisy zostaną zastąpione danymi z backupu.`)) {
+                            vaultEntries = importedData.entries;
+                            if (importedData.username) username = importedData.username;
+                            if (importedData.avatarUrl) avatarUrl = importedData.avatarUrl;
+                            if (importedData.bannerUrl !== undefined) bannerUrl = importedData.bannerUrl;
+                            if (importedData.appBgUrl !== undefined) appBgUrl = importedData.appBgUrl;
+                            if (importedData.accountCreatedDate) accountCreatedDate = importedData.accountCreatedDate;
+                            if (importedData.brandColor) activeBrandColor = importedData.brandColor;
+
+                            if (importedData.settings && typeof importedData.settings === 'object') {
+                                const settings = importedData.settings;
+
+                                if (settings.currentScale !== undefined) {
+                                    currentScale = Math.min(3, Math.max(1, parseInt(settings.currentScale, 10) || 2));
+                                }
+                                if (settings.isSoundMuted !== undefined) {
+                                    isSoundMuted = Boolean(settings.isSoundMuted);
+                                }
+                                if (settings.areNotificationsMuted !== undefined) {
+                                    areNotificationsMuted = Boolean(settings.areNotificationsMuted);
+                                }
+                                if (settings.bgThemeState !== undefined) {
+                                    bgThemeState = parseInt(settings.bgThemeState, 10) === 1 ? 1 : 0;
+                                }
+                                // Backup nie może przywrócić usuniętego trybu jasnego.
+                                themeMode = 'dark';
+                                if (settings.appBgBlur !== undefined) {
+                                    appBgBlur = Math.min(20, Math.max(0, parseInt(settings.appBgBlur, 10) || 0));
+                                }
+                                if (settings.appBgOverlayColor && /^#[0-9A-F]{6}$/i.test(settings.appBgOverlayColor)) {
+                                    appBgOverlayColor = settings.appBgOverlayColor;
+                                }
+                                if (settings.appBgOverlayOpacity !== undefined) {
+                                    appBgOverlayOpacity = Math.min(100, Math.max(0, parseInt(settings.appBgOverlayOpacity, 10) || 0));
+                                }
+                                if (settings.globalEmailsVisible !== undefined) {
+                                    globalEmailsVisible = Boolean(settings.globalEmailsVisible);
+                                }
+                                if (settings.globalPasswordsVisible !== undefined) {
+                                    globalPasswordsVisible = Boolean(settings.globalPasswordsVisible);
+                                }
+                                if (settings.isStreamerMode !== undefined) {
+                                    isStreamerMode = Boolean(settings.isStreamerMode);
+                                }
+                            }
+
+                            document.getElementById('username-input').value = username;
+                            applyStreamerModeUI();
+                            document.getElementById('avatar-img-preview').src = avatarUrl;
+                            document.getElementById('ui-scale-slider').value = currentScale;
+                            document.getElementById('bg-blur-slider').value = appBgBlur;
+                            document.getElementById('bg-blur-val').innerText = `${appBgBlur}px`;
+                            document.getElementById('bg-overlay-color').value = appBgOverlayColor;
+                            document.getElementById('bg-overlay-hex').innerText = appBgOverlayColor.toUpperCase();
+                            document.getElementById('bg-opacity-slider').value = appBgOverlayOpacity;
+                            document.getElementById('bg-opacity-val').innerText = `${appBgOverlayOpacity}%`;
+
+                            applyBannerUI();
+                            applyAppBackgroundUI();
+                            applyBrandColor(activeBrandColor, false);
+                            applyScaleUI(currentScale);
+                            applySoundUI();
+                            applyNotificationsUI();
+                            applyThemeMode(themeMode, false);
+                            applyBackgroundThemeStateUI(false);
+                            updateBadgesDisplay();
+                            updateCreatedDateDisplay();
+
+                            await saveEncryptedState();
+                            renderVaultEntries();
+                            showToast("Pomyślnie odszyfrowano i wczytano backup!", "success");
+                            playSound('save');
+                        }
+                    } catch (err) {
+                        console.error("Backup import error:", err);
+                        showToast("Błąd podczas wczytywania backupu. Plik może być uszkodzony lub nieprawidłowy.", "error");
+                        playSound('delete');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            window.scythedApp = {
+                handleAuthSubmit,
+                lockVault,
+                confirmResetApp,
+                exportBackup,
+                importBackup,
+                openAddEntryModal,
+                handleSaveEntry,
+                renderVaultEntries,
+                editEntry,
+                deleteEntry,
+                undoLastDelete,
+                copyText: copyToClipboard,
+                showToast,
+                hideToast,
+                closeModal,
+                openSettingsModal,
+                openChangeMasterModal,
+                handleChangeMasterSubmit,
+                changeBrandColor,
+                changeBrandColorFromText,
+                updateUIScale,
+                toggleSound,
+                toggleNotifications,
+                toggleHeaderAnimation,
+                saveUsername,
+                handleAvatarUpload,
+                handleBannerUpload,
+                resetBannerToDefault,
+                handleAppBackgroundUpload,
+                removeAppCustomBackground,
+                updateBgBlur,
+                updateBgOverlayColor,
+                updateBgOverlayOpacity,
+                toggleStreamerMode,
+                generateAndSetPassword,
+                togglePasswordVisibility,
+                toggleGlobalEmails,
+                toggleGlobalPasswords,
+                toggleEmailVisibility,
+                togglePasswordEntryVisibility,
+                updateCustomPlatformFieldVisibility
+            };
+
+        })();
+    </script>
+</body>
+</html>
