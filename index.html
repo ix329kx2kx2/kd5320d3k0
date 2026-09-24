@@ -4,6 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
+  
+  <meta property="og:title" content="SCYTHED -  MENADŻER HASEŁ">
+  <meta property="og:description" content="Scythed Open Beta 7.">
+  <meta property="og:image" content="https://scythed.xyz/link.png">
+  <meta property="og:url" content="https://scythed.xyz">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
   <title>SCYTHED</title>
   <link rel="icon" href="assets/logos/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -139,6 +147,30 @@
 <footer style="background:#000"><div class="wrap footer-inner"><span>© 2026 <strong>SCYTH<span style="color:var(--red)">ED</span></strong> &nbsp; Projekt stworzony przez @yzke (discord).</span></div></footer>
 
 <script>
+  let currentBrandColor = '#ff0033';
+
+  function updateTailwindConfig(colorHex) {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                card: '#0d0d0feb',
+                border: '#1f1f23cc',
+                red: colorHex,
+                hoverRed: adjustBrightness(colorHex, -20)
+              }
+            },
+            fontFamily: {
+              orbitron: ['Orbitron', 'sans-serif'],
+              rajdhani: ['Rajdhani', 'sans-serif']
+            }
+          }
+        }
+      }
+  }
+
   // Statystyki działają od razu na hostingu statycznym jako liczniki lokalne.
   // Po podpięciu backendu można zamienić je na globalne statystyki dla wszystkich odwiedzających.
   const visitKey='scythed_landing_visits_v1', clickKey='scythed_demo_clicks_v1', downloadKey='scythed_downloads_v1';
