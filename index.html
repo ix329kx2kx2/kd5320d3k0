@@ -83,16 +83,11 @@
     .ghost{border:1px solid #303035;background:#0c0c0e}.ghost:hover{border-color:#555}
     .scroll{margin-top:65px;color:#666;font-size:11px;letter-spacing:.22em}
     section{padding:115px 0}.section-kicker{color:var(--red);font:800 11px Rajdhani;letter-spacing:.2em}.section-title{font:800 clamp(30px,5vw,54px) Rajdhani;margin:12px 0 45px}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .stat{padding:28px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,0,51,.025));position:relative;overflow:hidden}
-    .stat:before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(255,0,51,.08),transparent);transform:translateX(-100%);animation:shine 5s infinite}
-    @keyframes shine{50%,100%{transform:translateX(100%)}}
-    .num{font:900 clamp(34px,5vw,58px) Rajdhani;color:#fff}.label{color:#85858c;font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:12px;margin-top:7px}
     .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{border:1px solid var(--line);background:#0a0a0c;border-radius:18px;padding:28px}.icon{font-size:25px;color:var(--red);margin-bottom:18px}.card h3{font:800 18px Rajdhani;margin:0 0 8px}.card p{color:#8d8d94;line-height:1.55;margin:0}
     .cta{border:1px solid rgba(255,0,51,.35);border-radius:24px;padding:55px 30px;text-align:center;background:radial-gradient(circle at 50% 0,rgba(255,0,51,.14),transparent 50%),#09090b}
     footer{padding:28px 0 42px;border-top:1px solid #18181b;background:#000;color:#8a8a92;font-size:13px}.footer-inner{display:flex;justify-content:center;align-items:center;text-align:center;gap:8px 24px;flex-wrap:wrap}.footer-inner strong{color:#fff;letter-spacing:.04em}.footer-inner small{display:block;margin-top:6px;color:#666}
     [data-reveal]{opacity:0;transform:translateY(28px);transition:.8s ease}.visible{opacity:1;transform:none}
-    @media(prefers-reduced-motion:reduce){.square{animation:none;opacity:.22;transform:none!important}#cursorGlow{display:none}[data-reveal]{transition:none}}    @media(max-width:760px){.links{display:none}.stats,.cards{grid-template-columns:1fr}.wrap{padding:0 18px}section{padding:80px 0}.hero{min-height:92vh}.download-btn{min-width:0;width:100%;max-width:320px}.demo-btn{width:100%;max-width:320px}.update-box{padding:38px 20px}.update-item{grid-template-columns:34px 1fr;padding:15px}.update-date{margin:-18px 0 18px}#logoMist{width:110vw;height:110vw;opacity:.055}}
+    @media(prefers-reduced-motion:reduce){.square{animation:none;opacity:.22;transform:none!important}#cursorGlow{display:none}[data-reveal]{transition:none}}    @media(max-width:760px){.links{display:none}.cards{grid-template-columns:1fr}.wrap{padding:0 18px}section{padding:80px 0}.hero{min-height:92vh}.download-btn{min-width:0;width:100%;max-width:320px}.demo-btn{width:100%;max-width:320px}.update-box{padding:38px 20px}.update-item{grid-template-columns:34px 1fr;padding:15px}.update-date{margin:-18px 0 18px}#logoMist{width:110vw;height:110vw;opacity:.055}}
   </style>
 </head>
 <body>
@@ -100,7 +95,7 @@
 
 <nav><div class="wrap inner">
   <a class="brand" href="#"><img src="assets/logos/logo.gif" alt="SCYTHED"><span>SCYTH<span>ED</span></span></a>
-  <div class="links"><a href="#statystyki">STATYSTYKI</a><a href="#funkcje">FUNKCJE</a><a href="#aktualizacja">AKTUALIZACJA</a></div>
+  <div class="links"><a href="#funkcje">FUNKCJE</a><a href="#aktualizacja">AKTUALIZACJA</a></div>
   <a class="navbtn" href="demo.html" id="navDemo">OTWÓRZ DEMO</a>
 </div></nav>
 
@@ -113,20 +108,10 @@
     <div class="actions">
       <a class="btn primary download-btn" href="scythed.zip" download="scythed.zip" id="downloadBtn">POBIERZ SCYTHED <span class="download-badge">BETA 7</span></a>
       <a class="btn ghost demo-btn" href="demo.html" id="demoBtn">ODPAL DEMO</a>
-      <a class="btn ghost" href="#stats">ZOBACZ STATYSTYKI</a>
     </div>
     <div class="scroll">PRZEWIŃ, ABY ODKRYĆ ↓</div>
   </div>
 </section>
-
-<section id="statystyki"><div class="wrap">
-  <div data-reveal><div class="section-kicker">Realna statystyka Scythed</div><div class="section-title">STATYSTYKA STRONY</div></div>
-  <div class="stats" data-reveal>
-    <div class="stat"><div class="num" id="visits">0</div><div class="label">odwiedzin strony</div></div>
-    <div class="stat"><div class="num" id="clicks">0</div><div class="label">uruchomień demo</div></div>
-    <div class="stat"><div class="num" id="downloads">0</div><div class="label">pobrań SCYTHED (strona główna)</div></div>
-  </div>
-</div></section>
 
 <section id="funkcje"><div class="wrap">
   <div data-reveal><div class="section-kicker">ZAPROJEKTOWANE Z MYŚLĄ O TOBIE</div><div class="section-title">FUNKCJE</div></div>
@@ -170,17 +155,6 @@
         }
       }
   }
-
-  // Statystyki działają od razu na hostingu statycznym jako liczniki lokalne.
-  // Po podpięciu backendu można zamienić je na globalne statystyki dla wszystkich odwiedzających.
-  const visitKey='scythed_landing_visits_v1', clickKey='scythed_demo_clicks_v1', downloadKey='scythed_downloads_v1';
-  const n=(k)=>Number(localStorage.getItem(k)||0);
-  localStorage.setItem(visitKey,n(visitKey)+1);
-  const render=()=>{document.getElementById('visits').textContent=n(visitKey).toLocaleString('pl-PL');document.getElementById('clicks').textContent=n(clickKey).toLocaleString('pl-PL');document.getElementById('downloads').textContent=n(downloadKey).toLocaleString('pl-PL')};
-  document.querySelectorAll('#demoBtn,#ctaDemo,#navDemo').forEach(a=>a.addEventListener('click',()=>{localStorage.setItem(clickKey,n(clickKey)+1);render()}));
-  document.querySelectorAll('#downloadBtn,#ctaDownload').forEach(a=>a.addEventListener('click',()=>{localStorage.setItem(downloadKey,n(downloadKey)+1);render();}));
-  render();
-
 
   const squareField=document.getElementById('squareField');
   const cursorGlow=document.getElementById('cursorGlow');
