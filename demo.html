@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scythed Demo</title>
-    <!-- Favicon -->
+    
     <link rel="icon" type="image/png" href="assets/logos/logo.png">
-    <!-- Tailwind CSS CDN -->
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
     <script>
@@ -51,6 +51,9 @@
     </script>
 
     <style>
+        #bulk-actions-btn[aria-disabled="true"] { pointer-events: auto; }
+        #vault-search-icon { color: #ff0033 !important; }
+        #bulk-actions-btn[aria-disabled="true"]:hover { border-color: rgba(63,63,70,.7) !important; }
         :root {
             --brand-red: #ff0033;
             --brand-hover-red: #cc0029;
@@ -98,19 +101,14 @@
         }
         .brand-logo:hover, .platform-logo:hover { transform: scale(1.04); }
 
-        /* Wszystkie logotypy aplikacji dopasowują się do motywu:
-           ciemny motyw = białe logo, jasny motyw = czarne logo. */
         html.dark .brand-logo, html.dark .platform-logo { filter: brightness(0) invert(1); }
         html:not(.dark) .brand-logo, html:not(.dark) .platform-logo { filter: brightness(0); }
 
-        /* Ikony aplikacji używane jako fallback również mają kolor motywu. */
         .theme-platform-icon { color: #111827 !important; transition: color .25s ease; }
         html.dark .theme-platform-icon { color: #ffffff !important; }
 
-        /* Avatar nie jest logotypem — zachowuje naturalne kolory zdjęcia/obrazu. */
         #avatar-img-preview { filter: none !important; }
 
-        /* Avatar wypełnia dokładnie wnętrze jednej obramówki — bez dodatkowej obwódki/paddingu. */
         #profile-avatar-display {
             padding: 0 !important;
             box-sizing: border-box;
@@ -126,9 +124,6 @@
             box-shadow: none !important;
         }
 
-        /* Odznaki profilu: układają się obok siebie i zawijają do kolejnych wierszy.
-           Przy większej liczbie odznak lista ma ograniczoną wysokość i można ją przewijać w dół,
-           dzięki czemu panel profilu nie rozciąga się bez końca. */
         #profile-badges-container {
             display: flex;
             flex-direction: row;
@@ -165,7 +160,6 @@
             max-width: 100%;
         }
 
-        /* Odznaki WŁAŚCICIEL / ADMIN mają stały kolor i nie reagują na zmianę motywu. */
         .fixed-owner-badge {
             background-color: rgba(239, 68, 68, 0.10) !important;
             border-color: rgba(239, 68, 68, 0.50) !important;
@@ -175,7 +169,6 @@
             color: #ef4444 !important;
         }
 
-        /* Odznaka ZNANY: niebieska odznaka w stylu zweryfikowanego konta. */
         .known-badge {
             background-color: rgba(59, 130, 246, 0.10) !important;
             border-color: rgba(59, 130, 246, 0.55) !important;
@@ -186,7 +179,6 @@
             color: #3b82f6 !important;
         }
 
-        /* Kolorowe, neutralne odznaki testowe dla konta "testodznak". */
         .test-badge {
             background-color: rgba(168, 85, 247, 0.10) !important;
             border-color: rgba(168, 85, 247, 0.50) !important;
@@ -234,19 +226,39 @@
             background: linear-gradient(135deg, #09090b 0%, #18181b 50%, #000000 100%);
         }
 
-        /* Tryb streamera: ukrywa widoczną nazwę SCYTHED bez zmiany układu. */
         html.streamer-mode .streamer-scythed-name {
             opacity: 0 !important;
             visibility: hidden !important;
         }
     </style>
+
+<style id="demo-tag-style">
+
+.entry-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 18px;
+    padding: 2px 7px;
+    border: 1px solid rgba(255, 0, 51, 0.55);
+    border-radius: 9999px;
+    background: rgba(255, 0, 51, 0.08);
+    color: #ff0033;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 13px;
+    letter-spacing: 0;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+</style>
 </head>
 <body class="min-h-screen flex flex-col justify-between bg-zinc-100 dark:bg-black text-zinc-900 dark:text-white selection:bg-brand-red selection:text-white pb-24 md:pb-28 transition-colors duration-300 relative overflow-x-hidden">
 
     <div id="app-custom-bg"></div>
     <div id="app-bg-overlay"></div>
 
-    <!-- Pasek Informacyjny DEMO -->
     <div class="w-full bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-700/60 py-2.5 px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-white shadow-lg relative z-50">
         <div class="flex items-center gap-2 text-xs md:text-sm font-orbitron font-bold tracking-wider text-center sm:text-left">
             <i class="fas fa-triangle-exclamation text-amber-400"></i>
@@ -256,7 +268,6 @@
             <i class="fas fa-download text-brand-red"></i> POBIERZ
         </a>
     </div>
-
 
     <div id="auth-overlay" class="hidden fixed inset-0 bg-zinc-900/95 dark:bg-black/95 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
         <div class="bg-white/95 dark:bg-brand-card border border-zinc-200 dark:border-brand-border rounded-2xl max-w-md w-full p-6 space-y-6 glow-effect text-center backdrop-blur-md shadow-2xl">
@@ -313,10 +324,10 @@
         </div>
 
         <div class="flex items-center gap-2 md:gap-3">
-            <button onclick="window.scythedApp.confirmResetApp()" class="px-3 py-1.5 bg-zinc-200/80 dark:bg-zinc-900/90 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-200 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5 shadow-sm" title="Resetuj aplikację do stanu fabrycznego">
-                <i class="fas fa-rotate-left text-brand-red"></i>
-                <span class="hidden sm:inline">RESET</span>
-            </button>
+            <a href="https://scythed.xyz" class="px-3 py-1.5 bg-zinc-200/80 dark:bg-zinc-900/90 hover:bg-zinc-300 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-200 text-xs font-bold rounded-lg border border-zinc-300 dark:border-zinc-700 transition flex items-center gap-1.5 shadow-sm" title="Przejdź na stronę główną SCYTHED">
+                <i class="fas fa-house text-brand-red"></i>
+                <span class="hidden sm:inline">STRONA GŁÓWNA</span>
+            </a>
         </div>
     </header>
 
@@ -332,7 +343,7 @@
                 <p class="text-xs text-zinc-600 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-1.5">
                     <span>Liczba wpisów:</span> <span id="vault-count-badge" class="text-brand-red font-bold">0</span>
                     <span class="text-zinc-400 dark:text-zinc-600">|</span>
-                    <span class="text-[11px] text-zinc-500 dark:text-gray-400 streamer-scythed-name">Wersja demonstracyjna</span>
+                    <span class="text-[11px] text-zinc-500 dark:text-gray-400 streamer-scythed-name">Demo - Scythed.xyz </span>
                 </p>
             </div>
             
@@ -357,23 +368,44 @@
             </div>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-3">
-            <div class="relative flex-grow">
-                <i class="fas fa-search absolute left-4 top-3.5 text-zinc-400 dark:text-gray-500 text-xs"></i>
-                <input type="text" id="vault-search-input" oninput="window.scythedApp.renderVaultEntries()" placeholder="Szukaj konta, loginu lub platformy..." class="w-full bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
-            </div>
-            
-            <div class="flex gap-2">
-                <select id="vault-filter-platform" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none flex-grow shadow-xl transition-colors duration-300">
-                    <option value="ALL">Wszystkie</option>
+        <div class="flex flex-col gap-2 w-full">
+            <div class="flex flex-col md:flex-row gap-2 w-full">
+                <div class="relative flex-1 min-w-0">
+                    <i id="vault-search-icon" class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-brand-red text-xs z-10 pointer-events-none" aria-hidden="true"></i>
+                    <input type="text" id="vault-search-input" oninput="window.scythedApp.renderVaultEntries()" placeholder="Szukaj..." class="w-full bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
+                </div>
+
+                <div class="flex flex-wrap gap-2 shrink-0">
+                <select id="vault-filter-platform" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none min-w-[150px] shadow-xl transition-colors duration-300">
+                    <option value="ALL">Platforma: Wszystkie</option>
                 </select>
 
-                <select id="vault-sort-order" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
+                <select id="vault-filter-tag" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none min-w-[150px] shadow-xl transition-colors duration-300">
+                    <option value="ALL">Tag: Wszystkie</option>
+                </select>
+
+                <select id="vault-sort-order" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none min-w-[145px] shadow-xl transition-colors duration-300">
                     <option value="NEWEST">Najnowsze</option>
                     <option value="OLDEST">Najstarsze</option>
                     <option value="NAME_ASC">Nazwa (A-Z)</option>
+                    <option value="NAME_DESC">Nazwa (Z-A)</option>
                     <option value="PLATFORM">Platforma</option>
+                    <option value="LAST_COPIED">Ostatnie kopiowanie</option>
+                    <option value="PINNED">Przypięte</option>
+                    <option value="FAVORITES">Ulubione</option>
                 </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end items-center gap-2 w-full">
+                <button id="open-trash-btn" type="button" onclick="return false;" class="px-3 py-2.5 bg-white/90 dark:bg-brand-card border border-zinc-200 dark:border-zinc-800 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-gray-300 hover:border-brand-red transition flex items-center justify-center gap-1.5" title="USUNIĘTE — niedostępne w wersji demo" aria-disabled="true">
+                    <i class="fas fa-trash text-brand-red text-[11px]" aria-hidden="true"></i>
+                    <span>USUNIĘTE</span>
+                </button>
+                <button id="bulk-actions-btn" type="button" onclick="return false;" class="px-3 py-2.5 bg-white/90 dark:bg-brand-card border border-zinc-200 dark:border-zinc-800 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-gray-300 hover:border-brand-red transition flex items-center justify-center gap-1.5" title="ZAZNACZANIE — niedostępne w wersji demo" aria-disabled="true">
+                    <i class="fas fa-list-check text-brand-red text-[11px]" aria-hidden="true"></i>
+                    <span>ZAZNACZANIE</span>
+                </button>
             </div>
         </div>
 
@@ -388,10 +420,9 @@
 
     </main>
 
-    <!-- PROFIL W LEWYM DOLNYM ROGU -->
     <div class="fixed bottom-4 left-4 z-40 w-[300px] max-w-[calc(100vw-2rem)] h-[135px]">
         <div class="w-full h-full bg-black/95 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md relative">
-            <div class="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-zinc-900/80 to-transparent"></div>
+            <div class="absolute inset-x-0 top-0 h-16 bg-black"></div>
             <div class="absolute left-3.5 top-[46px] flex items-center gap-3 right-3.5">
                 <div id="profile-avatar-display" class="w-[64px] h-[64px] rounded-xl bg-red-600 border-2 border-brand-red flex items-center justify-center overflow-hidden shadow-lg flex-shrink-0">
                     <img id="avatar-img-preview" src="assets/logos/avatar.png" alt="Avatar Demo User" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='assets/logos/avatar.png';">
@@ -406,9 +437,8 @@
         </div>
     </div>
 
-    <!-- PRZYCISK KOŁA ZĘBATEGO W PRAWYM DOLNYM ROGU -->
     <div class="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-1">
-        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">wer.demo open beta 7</span>
+        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">wer. demo open beta 10</span>
         <button onclick="window.scythedApp.openSettingsModal()" class="w-12 h-12 rounded-2xl bg-white/95 dark:bg-black/95 border border-zinc-200 dark:border-brand-border text-brand-red hover:scale-105 active:scale-95 shadow-2xl backdrop-blur-md flex items-center justify-center text-xl transition-all glow-effect" title="Ustawienia & System">
             <i class="fas fa-gear"></i>
         </button>
@@ -424,7 +454,6 @@
         </p>
     </footer>
 
-    <!-- MODAL USTAWIEŃ I SYSTEMU -->
     <div id="modal-settings" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#0b0b0d] border border-zinc-800 rounded-xl max-w-[640px] w-full p-2.5 sm:p-3 space-y-3 shadow-2xl">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
@@ -564,7 +593,6 @@
         (function() {
             'use strict';
 
-            // Każda platforma ma osobny PNG z przezroczystym tłem. Wybrane monochromatyczne logo zmieniają kolor wraz z motywem.
             const PLATFORMS = [
                 { id: 'battlenet', name: 'Battle.net', icon: 'fa-solid fa-bolt', color: '#00aeef', logo: 'assets/logos/battlenet.png' },
                 { id: 'discord', name: 'Discord', icon: 'fa-brands fa-discord', color: '#5865F2', logo: 'assets/logos/discord.png' },
@@ -604,7 +632,6 @@
                 { id: 'coinbase_wallet', name: 'Coinbase Wallet', icon: 'fa-solid fa-wallet', color: '#0052FF', logo: 'assets/logos/coinbase_wallet.png' },
                 { id: 'binance', name: 'Binance', icon: 'fa-solid fa-coins', color: '#F3BA2F', logo: 'assets/logos/binance.png' },
 
-                // Marketplace / gaming accounts
                 { id: 'g2a', name: 'G2A', icon: 'fa-solid fa-gamepad', color: '#ff5a00', logo: 'assets/logos/g2a.png' },
                 { id: 'eldorado', name: 'Eldorado', icon: 'fa-solid fa-coins', color: '#f5b942', logo: 'assets/logos/eldorado.png' },
                 { id: 'eneba', name: 'Eneba', icon: 'fa-solid fa-gamepad', color: '#6f3cff', logo: 'assets/logos/eneba.png' },
@@ -612,7 +639,6 @@
                 { id: 'kinguin', name: 'Kinguin', icon: 'fa-solid fa-crown', color: '#00a651', logo: 'assets/logos/kinguin.png' },
                 { id: 'other', name: 'Inne', icon: 'fa-solid fa-folder', color: '#9ca3af' },
 
-                // Streaming / entertainment
                 { id: 'primevideo', name: 'Prime Video', icon: 'fa-solid fa-play', color: '#00A8E1', logo: 'assets/logos/primevideo.png' },
                 { id: 'disney', name: 'Disney', icon: 'fa-solid fa-wand-magic-sparkles', color: '#113CCF', logo: 'assets/logos/disney.png' },
                 { id: 'hbo', name: 'HBO', icon: 'fa-solid fa-tv', color: '#ffffff', logo: 'assets/logos/hbo.png', themeAdaptive: true },
@@ -621,7 +647,6 @@
                 { id: 'tvpvod', name: 'TVP VOD', icon: 'fa-solid fa-tv', color: '#0077c8', logo: 'assets/logos/tvpvod.png' },
                 { id: 'cda', name: 'CDA', icon: 'fa-solid fa-film', color: '#111111', logo: 'assets/logos/cda.png', themeAdaptive: true },
 
-                // Social / tech
                 { id: 'youtube', name: 'YouTube', icon: 'fa-brands fa-youtube', color: '#FF0000', logo: 'assets/logos/youtube.png' },
                 { id: 'google', name: 'Google', icon: 'fa-brands fa-google', color: '#4285F4', logo: 'assets/logos/google.png' },
                 { id: 'github', name: 'GitHub', icon: 'fa-brands fa-github', color: '#181717', logo: 'assets/logos/github.png', themeAdaptive: true },
@@ -642,14 +667,10 @@
                 { id: 'paypal', name: 'PayPal', icon: 'fa-brands fa-paypal', color: '#003087', logo: 'assets/logos/paypal.png' },
                 { id: 'kick', name: 'Kick', icon: 'fa-solid fa-play', color: '#53FC18', logo: 'assets/logos/kick.png' },
 
-                // Konsole / gaming
                 { id: 'playstation', name: 'PlayStation', icon: 'fa-brands fa-playstation', color: '#003791', logo: 'assets/logos/playstation.png' },
                 { id: 'xbox', name: 'Xbox', icon: 'fa-brands fa-xbox', color: '#107C10', logo: 'assets/logos/xbox.png' },
                 { id: 'nintendo', name: 'Nintendo', icon: 'fa-solid fa-gamepad', color: '#E60012', logo: 'assets/logos/nintendo.png' }
             ];
-
-            // Tylko te platformy są traktowane jako portfele krypto.
-            // Pole seed phrase jest dostępne wyłącznie dla nich.
 
             const STORAGE_KEYS = {
                 ENCRYPTED_VAULT: 'scythed_demo_vault_enc_v1',
@@ -708,8 +729,6 @@
 
             let audioCtx = null;
 
-            // Wersja demonstracyjna jest tylko do podglądu: istniejące wpisy zostają,
-            // ale profil i operacje na kontach są zablokowane. RESET pozostaje aktywny.
             const DEMO_LOCKED = true;
 
             function escapeHtml(str) {
@@ -842,9 +861,6 @@
                 const combined = new Uint8Array(iv.length + encrypted.byteLength);
                 combined.set(iv, 0);
                 combined.set(new Uint8Array(encrypted), iv.length);
-                // Nie używamy String.fromCharCode.apply() na całej tablicy —
-                // przy większym backupie (np. z obrazami) może to przekroczyć
-                // limit argumentów JavaScript i przerwać szyfrowanie.
                 return bytesToBase64(combined);
             }
 
@@ -917,11 +933,7 @@
                 return new Uint8Array(match.map(byte => parseInt(byte, 16)));
             }
 
-
             async function initDemoMode() {
-                // Demo korzysta z własnego magazynu localStorage i automatycznie
-                // odblokowuje bazę kluczem demonstracyjnym. Nie dotyka danych
-                // normalnej wersji start.html.
                 username = 'Demo User';
                 avatarUrl = 'assets/logos/avatar.png';
                 bannerUrl = null;
@@ -938,6 +950,17 @@
 
                 await loadEncryptedVault();
 
+                if (Array.isArray(vaultEntries) && vaultEntries.length) {
+                    vaultEntries.forEach(entry => {
+                        const platform = String(entry.platform || '').toLowerCase();
+                        entry.favorite = platform === 'gmail';
+                        entry.pinned = platform === 'discord';
+                        entry.tags = platform === 'battlenet' ? ['#gry'] : [];
+                        if (platform === 'battlenet') entry.description = '';
+                    });
+                    await saveEncryptedState();
+                }
+
                 if (!Array.isArray(vaultEntries) || vaultEntries.length === 0) {
                     vaultEntries = [
                         {
@@ -945,7 +968,10 @@
                             platform: 'battlenet',
                             account: 'BattlenetDemo',
                             password: 'BattlenetDemoHasło',
-                            description: 'Chyba jakieś gry czy coś? Konto ma 2FA.',
+                            tags: ['#gry'],
+                            favorite: false,
+                            pinned: false,
+                            description: '',
                             createdAt: Date.now() - 86400000 * 3
                         },
                         {
@@ -953,6 +979,9 @@
                             platform: 'discord',
                             account: 'ognazwaużytkownika',
                             password: 'jakieśtamhasło?',
+                            tags: [],
+                            favorite: false,
+                            pinned: true,
                             description: 'Bardzo og nazwa konta.',
                             createdAt: Date.now() - 86400000 * 2
                         },
@@ -961,12 +990,24 @@
                             platform: 'gmail',
                             account: 'jakiśgmail@gmail.com',
                             password: 'jakieśhasło',
+                            tags: [],
+                            favorite: true,
+                            pinned: false,
                             description: 'Demonstracyjne konto.',
                             createdAt: Date.now() - 86400000
                         }
                     ];
                     await saveEncryptedState();
                 }
+
+                vaultEntries.forEach(entry => {
+                    const platform = String(entry.platform || '').toLowerCase();
+                    entry.favorite = platform === 'gmail';
+                    entry.pinned = platform === 'discord';
+                    entry.tags = platform === 'battlenet' ? ['#gry'] : [];
+                    if (platform === 'battlenet') entry.description = '';
+                });
+                await saveEncryptedState();
 
                 const usernameInput = document.getElementById('username-input');
                 if (usernameInput) usernameInput.value = username;
@@ -1199,9 +1240,6 @@
             }
 
             function lockVault() {
-                // Blokada = pełne odświeżenie strony. Po reloadzie zmienne sesyjne
-                // masterPassword/masterCryptoKey są ponownie ustawiane na null,
-                // a checkMasterPasswordStatus() pokaże ekran Hasła Master.
                 masterPassword = null;
                 masterCryptoKey = null;
                 vaultEntries = [];
@@ -1219,7 +1257,6 @@
                     const jsonStr = await decryptData(encVault, masterCryptoKey);
                     vaultEntries = JSON.parse(jsonStr);
 
-                    // Migracja starej nazwy platformy po zmianie Kickstarter → Kick.
                     let migrated = false;
                     vaultEntries = vaultEntries.map(entry => {
                         if (entry.platform === 'kickstarter') {
@@ -1354,11 +1391,9 @@
             }
 
             function applyThemeMode(mode, notify = false) {
-                // Tryb jasny został usunięty — aplikacja działa wyłącznie w trybie ciemnym.
                 document.documentElement.classList.add('dark');
                 themeMode = 'dark';
             }
-
 
             function toggleHeaderAnimation() {
                 bgThemeState = bgThemeState === 0 ? 1 : 0;
@@ -1730,7 +1765,6 @@
                 const storedThemeState = localStorage.getItem(STORAGE_KEYS.BG_THEME_STATE);
                 if (storedThemeState !== null) bgThemeState = parseInt(storedThemeState, 10) === 1 ? 1 : 0;
 
-                // Tryb jasny został usunięty — ignorujemy stare ustawienie i wymuszamy ciemny.
                 themeMode = 'dark';
 
                 const storedStreamerMode = localStorage.getItem(STORAGE_KEYS.STREAMER_MODE);
@@ -1860,10 +1894,8 @@
                 const isSzymon = u === 'szymon';
                 const isTestAccount = u === 'testodznak';
 
-                // Szymon ma wyłącznie odznakę WŁAŚCICIEL.
                 if (ownerBadge) ownerBadge.classList.toggle('hidden', !isSzymon);
 
-                // BETA TESTER. Konto testodznak nie otrzymuje tej odznaki.
                 if (betaBadge) {
                     let showBeta = false;
 
@@ -1883,25 +1915,20 @@
                     betaBadge.classList.toggle('hidden', !showBeta);
                 }
 
-                // ADMIN (Yufu).
                 if (adminBadge) {
                     adminBadge.classList.toggle('hidden', isSzymon || u !== 'yufu');
                 }
 
-                // ZNANY (meetmeinhell, yufu, finfinfin, anonek oraz xe3n).
                 if (knownBadge) {
                     const showKnown = !isSzymon && (u === 'meetmeinhell' || u === 'yufu' || u === 'finfinfin' || u === 'anonek' || u === 'xe3n');
                     knownBadge.classList.toggle('hidden', !showKnown);
                     knownBadge.classList.toggle('flex', showKnown);
                 }
 
-                // LARP (xe3n).
                 if (larpBadge) {
                     larpBadge.classList.toggle('hidden', isSzymon || u !== 'xe3n');
                 }
 
-                // Konto testowe "testodznak": pokazuje kilka dodatkowych odznak,
-                // aby przetestować zawijanie do wierszy i przewijanie pionowe.
                 testBadges.forEach((badge, index) => {
                     const show = isTestAccount;
                     badge.classList.toggle('hidden', !show);
@@ -1911,7 +1938,6 @@
                     }
                 });
 
-                // Dodatkowa ochrona: na Szymonie wszystkie pozostałe odznaki są ukryte.
                 if (isSzymon) {
                     [betaBadge, adminBadge, knownBadge, larpBadge, ...testBadges].forEach(badge => {
                         if (badge) badge.classList.add('hidden');
@@ -2093,8 +2119,6 @@
                 const entrySelect = document.getElementById('entry-platform');
                 const filterSelect = document.getElementById('vault-filter-platform');
 
-                // Lista serwisów jest zawsze sortowana alfabetycznie po nazwie.
-                // Tworzymy kopię, aby nie zmieniać źródłowej tablicy PLATFORMS.
                 const sortedPlatforms = [...PLATFORMS].sort((a, b) => {
                     if (a.id === 'other') return 1;
                     if (b.id === 'other') return -1;
@@ -2302,33 +2326,69 @@
                 playSound('save');
             }
 
+            function getEntryTags(entry) {
+                return Array.isArray(entry?.tags) ? entry.tags.filter(Boolean).map(String) : [];
+            }
+
+            function refreshTagFilter() {
+                const select = document.getElementById('vault-filter-tag');
+                if (!select) return;
+                const current = select.value || 'ALL';
+                const tags = [...new Set(vaultEntries.flatMap(getEntryTags))].sort((a, b) => a.localeCompare(b, 'pl'));
+                select.innerHTML = '<option value="ALL">Tag: Wszystkie</option>' +
+                    tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+                if (tags.includes(current)) select.value = current;
+            }
+
+            function openTrashModal() {
+                showToast('Historia usuniętych wpisów jest zablokowana w wersji demonstracyjnej.', 'info');
+            }
+
+            function toggleBulkActions() {
+                showToast('Zaznaczanie wpisów jest zablokowane w wersji demonstracyjnej.', 'info');
+            }
+
             function renderVaultEntries() {
                 const grid = document.getElementById('vault-grid');
                 const emptyState = document.getElementById('vault-empty-state');
                 const countBadge = document.getElementById('vault-count-badge');
-                
                 if (!grid || !emptyState || !countBadge) return;
+
+                refreshTagFilter();
 
                 const searchVal = (document.getElementById('vault-search-input')?.value || '').toLowerCase().trim();
                 const filterPlatform = document.getElementById('vault-filter-platform')?.value || 'ALL';
+                const filterTag = document.getElementById('vault-filter-tag')?.value || 'ALL';
                 const sortOrder = document.getElementById('vault-sort-order')?.value || 'NEWEST';
 
                 let filtered = vaultEntries.filter(entry => {
                     const pObj = PLATFORMS.find(p => p.id === entry.platform) || getFallbackPlatform(entry);
                     const platformName = (entry.platform === 'other' && entry.customPlatform ? entry.customPlatform : pObj.name).toLowerCase();
+                    const tags = getEntryTags(entry);
 
-                    const matchSearch = entry.account.toLowerCase().includes(searchVal) ||
-                                        platformName.includes(searchVal) ||
-                                        (entry.description && entry.description.toLowerCase().includes(searchVal));
+                    const matchSearch =
+                        String(entry.account || '').toLowerCase().includes(searchVal) ||
+                        platformName.includes(searchVal) ||
+                        String(entry.description || '').toLowerCase().includes(searchVal) ||
+                        tags.some(tag => tag.toLowerCase().includes(searchVal));
+
                     const matchPlatform = filterPlatform === 'ALL' || entry.platform === filterPlatform;
-                    return matchSearch && matchPlatform;
+                    const matchTag = filterTag === 'ALL' || tags.includes(filterTag);
+                    return matchSearch && matchPlatform && matchTag;
                 });
 
                 filtered.sort((a, b) => {
-                    if (sortOrder === 'NEWEST') return new Date(b.createdAt) - new Date(a.createdAt);
-                    if (sortOrder === 'OLDEST') return new Date(a.createdAt) - new Date(b.createdAt);
-                    if (sortOrder === 'NAME_ASC') return a.account.localeCompare(b.account);
-                    if (sortOrder === 'PLATFORM') return a.platform.localeCompare(b.platform);
+                    const pinnedPriority = Number(!!b.pinned) - Number(!!a.pinned);
+                    if (pinnedPriority !== 0) return pinnedPriority;
+
+                    if (sortOrder === 'NEWEST') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                    if (sortOrder === 'OLDEST') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+                    if (sortOrder === 'NAME_ASC') return String(a.account || '').localeCompare(String(b.account || ''), 'pl');
+                    if (sortOrder === 'NAME_DESC') return String(b.account || '').localeCompare(String(a.account || ''), 'pl');
+                    if (sortOrder === 'PLATFORM') return String(a.platform || '').localeCompare(String(b.platform || ''), 'pl');
+                    if (sortOrder === 'LAST_COPIED') return new Date(b.lastCopiedAt || 0) - new Date(a.lastCopiedAt || 0);
+                    if (sortOrder === 'PINNED') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                    if (sortOrder === 'FAVORITES') return Number(!!b.favorite) - Number(!!a.favorite) || new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
                     return 0;
                 });
 
@@ -2346,7 +2406,9 @@
                 filtered.forEach(entry => {
                     const pObj = PLATFORMS.find(p => p.id === entry.platform) || getFallbackPlatform(entry);
                     const platformName = entry.platform === 'other' && entry.customPlatform ? entry.customPlatform : pObj.name;
-                    const displayPlatform = entry.platform === 'other' ? { ...pObj, name: platformName, logo: 'assets/logos/blank.png' } : pObj;
+                    const displayPlatform = entry.platform === 'other'
+                        ? { ...pObj, name: platformName, logo: 'assets/logos/blank.png' }
+                        : pObj;
 
                     const logoClass = 'platform-logo';
                     const iconHtml = displayPlatform.logo
@@ -2355,20 +2417,26 @@
 
                     const showAcc = globalEmailsVisible;
                     const showPass = globalPasswordsVisible;
-                    const createdDate = new Date(entry.createdAt).toLocaleString('pl-PL', {
+                    const createdDate = entry.createdAt ? new Date(entry.createdAt).toLocaleString('pl-PL', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
                         hour: '2-digit', minute: '2-digit'
-                    });
+                    }) : '-';
+                    const tags = getEntryTags(entry);
+                    const safeId = escapeHtml(entry.id);
 
                     html += `
-                        <div class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-brand-border rounded-2xl p-5 card-scale shadow-xl flex flex-col space-y-4 hover:border-brand-red/50 transition-all duration-300">
+                        <div id="entry-card-${safeId}" data-entry-id="${safeId}" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-brand-border rounded-2xl p-5 card-scale shadow-xl flex flex-col space-y-4 hover:border-brand-red/50 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center space-x-3 overflow-hidden">
                                     <div class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-black/60 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
                                         ${iconHtml}
                                     </div>
                                     <div class="overflow-hidden">
-                                        <h3 class="font-orbitron font-bold text-base text-zinc-900 dark:text-white truncate" title="${escapeHtml(platformName)}">${escapeHtml(platformName)}</h3>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="font-orbitron font-bold text-base text-zinc-900 dark:text-white truncate" title="${escapeHtml(platformName)}">${escapeHtml(platformName)}</h3>
+                                            ${entry.favorite ? '<i class="fas fa-star text-amber-400 text-[11px]" title="Ulubione"></i>' : ''}
+                                            ${entry.pinned ? '<i class="fas fa-thumbtack text-brand-red text-[11px]" title="Przypięte"></i>' : ''}
+                                        </div>
                                         <div class="text-[11px] text-zinc-500 font-mono flex items-center gap-1.5 mt-0.5">
                                             <i class="far fa-clock text-[10px]"></i>
                                             <span>${createdDate}</span>
@@ -2383,12 +2451,12 @@
                                 <div>
                                     <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Login / Email</span>
                                     <div class="bg-zinc-100 dark:bg-black/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
-                                        <span id="acc-text-${entry.id}" data-masked="${!showAcc}" data-raw="${escapeHtml(entry.account)}" class="font-mono font-semibold text-zinc-800 dark:text-gray-200 truncate mr-2">${showAcc ? escapeHtml(entry.account) : '••••••••••••'}</span>
+                                        <span id="acc-text-${safeId}" data-masked="${!showAcc}" data-raw="${escapeHtml(entry.account || '')}" class="font-mono font-semibold text-zinc-800 dark:text-gray-200 truncate mr-2">${showAcc ? escapeHtml(entry.account || '') : '••••••••••••'}</span>
                                         <div class="flex items-center gap-3 flex-shrink-0">
-                                            <button onclick="window.scythedApp.toggleEmailVisibility('${entry.id}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white" title="Pokaż/Ukryj">
-                                                <i id="acc-icon-${entry.id}" class="fas ${showAcc ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i>
+                                            <button onclick="window.scythedApp.toggleEmailVisibility('${safeId}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white" title="Pokaż/Ukryj">
+                                                <i id="acc-icon-${safeId}" class="fas ${showAcc ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i>
                                             </button>
-                                            <button onclick="window.scythedApp.copyText('${escapeHtml(entry.account)}', 'Login')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj login">
+                                            <button onclick="window.scythedApp.copyText('${escapeHtml(entry.account || '')}', 'Login')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj login">
                                                 <i class="fas fa-copy text-xs"></i>
                                             </button>
                                         </div>
@@ -2398,12 +2466,12 @@
                                 <div>
                                     <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Hasło</span>
                                     <div class="bg-zinc-100 dark:bg-black/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
-                                        <span id="pass-text-${entry.id}" data-masked="${!showPass}" data-raw="${escapeHtml(entry.password)}" class="font-mono font-semibold text-brand-red truncate mr-2">${showPass ? escapeHtml(entry.password) : '••••••••••••••••'}</span>
+                                        <span id="pass-text-${safeId}" data-masked="${!showPass}" data-raw="${escapeHtml(entry.password || '')}" class="font-mono font-semibold text-brand-red truncate mr-2">${showPass ? escapeHtml(entry.password || '') : '••••••••••••••••'}</span>
                                         <div class="flex items-center gap-3 flex-shrink-0">
-                                            <button onclick="window.scythedApp.togglePasswordEntryVisibility('${entry.id}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white" title="Pokaż/Ukryj">
-                                                <i id="pass-icon-${entry.id}" class="fas ${showPass ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i>
+                                            <button onclick="window.scythedApp.togglePasswordEntryVisibility('${safeId}')" class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white" title="Pokaż/Ukryj">
+                                                <i id="pass-icon-${safeId}" class="fas ${showPass ? 'fa-eye-slash' : 'fa-eye'} text-xs"></i>
                                             </button>
-                                            <button onclick="window.scythedApp.copyText('${escapeHtml(entry.password)}', 'Hasło')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj hasło">
+                                            <button onclick="window.scythedApp.copyText('${escapeHtml(entry.password || '')}', 'Hasło')" class="text-zinc-400 hover:text-brand-red" title="Kopiuj hasło">
                                                 <i class="fas fa-copy text-xs"></i>
                                             </button>
                                         </div>
@@ -2416,6 +2484,8 @@
                                 ${escapeHtml(entry.description)}
                             </div>
                             ` : ''}
+
+                            ${tags.length ? `<div class="flex flex-wrap gap-1">${tags.map(t => `<span class="entry-tag-chip">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
                         </div>
                     `;
                 });
@@ -2491,7 +2561,6 @@
                 const idx = vaultEntries.findIndex(item => item.id === id);
                 if (idx === -1) return;
 
-                // Pierwsze kliknięcie uzbraja usuwanie; drugie w ciągu 3 sekund usuwa konto.
                 if (pendingDeleteId !== id) {
                     if (pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
                     pendingDeleteId = id;
@@ -2554,8 +2623,6 @@
                     return;
                 }
 
-                // Backup jest szyfrowany hasłem Master aktualnym w momencie eksportu.
-                // Zmiana późniejszego hasła Master nie zmienia hasła tego backupu.
                 const backupData = {
                     version: "v9",
                     timestamp: new Date().toISOString(),
@@ -2615,9 +2682,6 @@
                     a.click();
                     document.body.removeChild(a);
 
-                    // Nie usuwamy Blob URL natychmiast po kliknięciu.
-                    // Niektóre przeglądarki potrafią anulować pobieranie, jeśli URL
-                    // zostanie zwolniony zanim mechanizm pobierania go odczyta.
                     setTimeout(() => URL.revokeObjectURL(url), 1500);
 
                     showToast("Pobrano zaszyfrowany backup Hasłem Master!", "success");
@@ -2633,7 +2697,6 @@
                 const file = event.target.files[0];
                 if (!file) return;
 
-                // Pozwól ponownie wybrać ten sam plik po błędzie.
                 event.target.value = '';
 
                 const reader = new FileReader();
@@ -2678,7 +2741,6 @@
                         try {
                             decryptedJson = await decryptData(backupFile.payload, backupKey);
                         } catch (decryptError) {
-                            // AES-GCM odrzuca błędne hasło przed udostępnieniem zawartości backupu.
                             showToast("Nieprawidłowe Hasło Master tego backupu. Backup nie został wczytany!", "error");
                             playSound('delete');
                             return;
@@ -2691,7 +2753,20 @@
                         }
 
                         if (confirm(`Wczytać odszyfrowany backup z dnia ${importedData.timestamp ? importedData.timestamp.slice(0,10) : 'nieznanego'}? Istniejące wpisy zostaną zastąpione danymi z backupu.`)) {
-                            vaultEntries = importedData.entries;
+                            vaultEntries = importedData.entries.map(entry => ({
+                                ...entry,
+                                id: entry.id || ('entry_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9)),
+                                account: entry.account || entry.login || entry.email || '',
+                                password: entry.password || '',
+                                description: entry.description || '',
+                                platform: entry.platform || 'other',
+                                tags: Array.isArray(entry.tags) ? entry.tags.filter(Boolean).map(String) : [],
+                                favorite: !!entry.favorite,
+                                pinned: !!entry.pinned,
+                                createdAt: entry.createdAt || new Date().toISOString(),
+                                updatedAt: entry.updatedAt || entry.createdAt || new Date().toISOString(),
+                                lastCopiedAt: entry.lastCopiedAt || null
+                            }));
                             if (importedData.username) username = importedData.username;
                             if (importedData.avatarUrl) avatarUrl = importedData.avatarUrl;
                             if (importedData.bannerUrl !== undefined) bannerUrl = importedData.bannerUrl;
@@ -2714,7 +2789,6 @@
                                 if (settings.bgThemeState !== undefined) {
                                     bgThemeState = parseInt(settings.bgThemeState, 10) === 1 ? 1 : 0;
                                 }
-                                // Backup nie może przywrócić usuniętego trybu jasnego.
                                 themeMode = 'dark';
                                 if (settings.appBgBlur !== undefined) {
                                     appBgBlur = Math.min(20, Math.max(0, parseInt(settings.appBgBlur, 10) || 0));
