@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta property="og:title" content="SCYTHED -  MENADŻER HASEŁ">
-    <meta property="og:description" content="Scythed Open Beta 11.">
-    <meta property="og:image" content="https://scythed.xyz/link2.png">
+    <meta property="og:description" content="Scythed Open Beta 12.">
+    <meta property="og:image" content="https://scythed.xyz/obrazek.png">
     <meta property="og:url" content="https://scythed.xyz">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
@@ -375,45 +375,33 @@
             </div>
         </div>
 
-        <div class="flex flex-col gap-2 w-full">
-            <div class="flex flex-col md:flex-row gap-2 w-full">
-                <div class="relative flex-1 min-w-0">
-                    <i id="vault-search-icon" class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-brand-red text-xs z-10 pointer-events-none" aria-hidden="true"></i>
-                    <input type="text" id="vault-search-input" oninput="window.scythedApp.renderVaultEntries()" placeholder="Szukaj..." class="w-full bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
-                </div>
-
-                <div class="flex flex-wrap gap-2 shrink-0">
-                <select id="vault-filter-platform" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none min-w-[150px] shadow-xl transition-colors duration-300">
-                    <option value="ALL">Platforma: Wszystkie</option>
-                </select>
-
-                <select id="vault-filter-tag" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none min-w-[150px] shadow-xl transition-colors duration-300">
-                    <option value="ALL">Tag: Wszystkie</option>
-                </select>
-
-                <select id="vault-sort-order" onchange="window.scythedApp.renderVaultEntries()" class="bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none min-w-[145px] shadow-xl transition-colors duration-300">
-                    <option value="NEWEST">Najnowsze</option>
-                    <option value="OLDEST">Najstarsze</option>
-                    <option value="NAME_ASC">Nazwa (A-Z)</option>
-                    <option value="NAME_DESC">Nazwa (Z-A)</option>
-                    <option value="PLATFORM">Platforma</option>
-                    <option value="LAST_COPIED">Ostatnie kopiowanie</option>
-                    <option value="PINNED">Przypięte</option>
-                    <option value="FAVORITES">Ulubione</option>
-                </select>
-                </div>
+        <div id="vault-toolbar" class="flex items-center gap-2 w-full overflow-x-auto pb-0.5">
+            <div id="vault-search-wrap" class="relative flex-1 min-w-[260px]">
+                <i id="vault-search-icon" class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-brand-red text-xs z-10 pointer-events-none" aria-hidden="true"></i>
+                <input type="text" id="vault-search-input" oninput="window.scythedApp.renderVaultEntries()" placeholder="Szukaj..." class="w-full bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none shadow-xl transition-colors duration-300">
             </div>
-
-            <div class="flex justify-end items-center gap-2 w-full">
-                <button id="open-trash-btn" type="button" onclick="return false;" class="px-3 py-2.5 bg-white/90 dark:bg-brand-card border border-zinc-200 dark:border-zinc-800 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-gray-300 hover:border-brand-red transition flex items-center justify-center gap-1.5" title="USUNIĘTE — niedostępne w wersji demo" aria-disabled="true">
-                    <i class="fas fa-trash text-brand-red text-[11px]" aria-hidden="true"></i>
-                    <span>USUNIĘTE</span>
-                </button>
-                <button id="bulk-actions-btn" type="button" onclick="return false;" class="px-3 py-2.5 bg-white/90 dark:bg-brand-card border border-zinc-200 dark:border-zinc-800 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-gray-300 hover:border-brand-red transition flex items-center justify-center gap-1.5" title="ZAZNACZANIE — niedostępne w wersji demo" aria-disabled="true">
-                    <i class="fas fa-list-check text-brand-red text-[11px]" aria-hidden="true"></i>
-                    <span>ZAZNACZANIE</span>
-                </button>
-            </div>
+            <select id="vault-filter-platform" onchange="window.scythedApp.renderVaultEntries()" class="vault-toolbar-filter bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none min-w-[150px] shadow-xl transition-colors duration-300">
+                <option value="ALL">Platforma: Wszystkie</option>
+            </select>
+            <select id="vault-filter-tag" onchange="window.scythedApp.renderVaultEntries()" class="vault-toolbar-filter bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none min-w-[140px] shadow-xl transition-colors duration-300">
+                <option value="ALL">Tag: Wszystkie</option>
+            </select>
+            <select id="vault-sort-order" onchange="window.scythedApp.renderVaultEntries()" class="vault-toolbar-filter bg-white/90 dark:bg-brand-card backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs md:text-sm text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none min-w-[145px] shadow-xl transition-colors duration-300">
+                <option value="NEWEST">Najnowsze</option>
+                <option value="OLDEST">Najstarsze</option>
+                <option value="NAME_ASC">Nazwa (A-Z)</option>
+                <option value="NAME_DESC">Nazwa (Z-A)</option>
+                <option value="PLATFORM">Platforma</option>
+                <option value="LAST_COPIED">Ostatnie kopiowanie</option>
+                <option value="PINNED">Przypięte</option>
+                <option value="FAVORITES">Ulubione</option>
+            </select>
+            <button id="open-trash-btn" type="button" onclick="return false;" class="px-3 py-2.5 bg-white/90 dark:bg-brand-card border border-zinc-200 dark:border-zinc-800 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-gray-300 hover:border-brand-red transition flex items-center justify-center gap-1.5 shrink-0" title="USUNIĘTE — niedostępne w wersji demo" aria-disabled="true">
+                <i class="fas fa-trash text-brand-red text-[11px]" aria-hidden="true"></i><span>USUNIĘTE</span>
+            </button>
+            <button id="bulk-actions-btn" type="button" onclick="return false;" class="px-3 py-2.5 bg-white/90 dark:bg-brand-card border border-zinc-200 dark:border-zinc-800 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-gray-300 hover:border-brand-red transition flex items-center justify-center gap-1.5 shrink-0" title="ZAZNACZANIE — niedostępne w wersji demo" aria-disabled="true">
+                <i class="fas fa-list-check text-brand-red text-[11px]" aria-hidden="true"></i><span>ZAZNACZANIE</span>
+            </button>
         </div>
 
         <div id="vault-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -445,7 +433,7 @@
     </div>
 
     <div class="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-1">
-        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">wer. demo open beta 11</span>
+        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">wer. demo open beta 12</span>
         <button onclick="window.scythedApp.openSettingsModal()" class="w-12 h-12 rounded-2xl bg-white/95 dark:bg-black/95 border border-zinc-200 dark:border-brand-border text-brand-red hover:scale-105 active:scale-95 shadow-2xl backdrop-blur-md flex items-center justify-center text-xl transition-all glow-effect" title="Ustawienia & System">
             <i class="fas fa-gear"></i>
         </button>
@@ -974,7 +962,7 @@
                             id: 'demo_1',
                             platform: 'battlenet',
                             account: 'BattlenetDemo',
-                            password: 'BattlenetDemoHasło',
+                            password: '123',
                             tags: ['#gry'],
                             favorite: false,
                             pinned: false,
@@ -1036,6 +1024,7 @@
                 applyBackgroundThemeStateUI(false);
                 setDocumentTitleForMode();
                 updateBadgesDisplay();
+                setupDemoSearchFocusBehavior();
                 await initDemoMode();
             });
 
@@ -2355,6 +2344,30 @@
                 showToast('Zaznaczanie wpisów jest zablokowane w wersji demonstracyjnej.', 'info');
             }
 
+            function isWeakEntryPassword(password) {
+                const p = String(password || '').trim().toLowerCase();
+                if (!p) return false;
+                if (p.length < 8) return true;
+                if (/^(\d+|[a-z]+)$/i.test(p) && p.length < 12) return true;
+                if (/(.)\1{2,}/u.test(p)) return true;
+                const common = ['123456', '12345678', 'password', 'haslo', 'qwerty', 'abc123', '123abc', 'admin'];
+                return common.some(x => p.includes(x));
+            }
+
+            function setupDemoSearchFocusBehavior() {
+                const input = document.getElementById('vault-search-input');
+                const filters = Array.from(document.querySelectorAll('.vault-toolbar-filter'));
+                if (!input || !filters.length) return;
+                const setSearching = (active) => {
+                    filters.forEach(el => el.classList.toggle('hidden', active));
+                    document.getElementById('vault-toolbar')?.classList.toggle('searching', active);
+                };
+                input.addEventListener('focus', () => setSearching(true));
+                input.addEventListener('blur', () => {
+                    if (!input.value.trim()) setSearching(false);
+                });
+            }
+
             function renderVaultEntries() {
                 const grid = document.getElementById('vault-grid');
                 const emptyState = document.getElementById('vault-empty-state');
@@ -2441,6 +2454,7 @@
                                     <div class="overflow-hidden">
                                         <div class="flex items-center gap-2">
                                             <h3 class="font-orbitron font-bold text-base text-zinc-900 dark:text-white truncate" title="${escapeHtml(platformName)}">${escapeHtml(platformName)}</h3>
+                                            ${isWeakEntryPassword(entry.password) ? '<span class="text-[8px] font-mono font-bold text-red-500 uppercase tracking-wider">SŁABE</span>' : ''}
                                             ${entry.favorite ? '<i class="fas fa-star text-amber-400 text-[11px]" title="Ulubione"></i>' : ''}
                                             ${entry.pinned ? '<i class="fas fa-thumbtack text-brand-red text-[11px]" title="Przypięte"></i>' : ''}
                                         </div>
