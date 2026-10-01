@@ -6,25 +6,10 @@
     "text": "DOSTĘPNA JEST AKTUALIZACJA SCYTHED.",
     "actionLabel": "STRONA GŁÓWNA",
     "link": "https://scythed.xyz",
-    "color": "#5b1111",
-    "accent": "#ff0033",
     "dismissible": true,
     "showOnRefresh": true,
-    "useThemeAccent": true,
     "gradient": true,
-    "glow": true,
-    "themeColors": {
-      "dark": {
-        "background": "#5b1111",
-        "accent": "#ff0033",
-        "text": "#ffffff"
-      },
-      "light": {
-        "background": "#991b1b",
-        "accent": "#dc2626",
-        "text": "#ffffff"
-      }
-    }
+    "glow": true
   },
   "profiles": {
     "szymon": {
