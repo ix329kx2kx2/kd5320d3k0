@@ -3,8 +3,8 @@
   "announcement": {
     "enabled": true,
     "id": "update-2026-10-01",
-    "text": "DOSTĘPNA JEST AKTUALIZACJA SCYTHED.",
-    "actionLabel": "STRONA GŁÓWNA",
+    "text": "DOSTĘPNA JEST AKTUALIZACJA SCYTHED. TEST Z ANONKIEM SZEFEM J2JS492S241",
+    "actionLabel": " ",
     "link": "https://scythed.xyz",
     "color": "#5b1111",
     "accent": "#ff0033",
