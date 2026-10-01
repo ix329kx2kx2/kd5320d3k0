@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "announcement": {
     "enabled": true,
     "id": "update-2026-10-01",
@@ -8,7 +8,23 @@
     "link": "https://scythed.xyz",
     "color": "#5b1111",
     "accent": "#ff0033",
-    "dismissible": true
+    "dismissible": true,
+    "showOnRefresh": true,
+    "useThemeAccent": true,
+    "gradient": true,
+    "glow": true,
+    "themeColors": {
+      "dark": {
+        "background": "#5b1111",
+        "accent": "#ff0033",
+        "text": "#ffffff"
+      },
+      "light": {
+        "background": "#991b1b",
+        "accent": "#dc2626",
+        "text": "#ffffff"
+      }
+    }
   },
   "profiles": {
     "szymon": {
@@ -20,9 +36,19 @@
           "label": "Właściciel",
           "icon": "fas fa-crown",
           "tooltip": "Właściciel Projektu SCYTHED",
-          "color": "#facc15"
+          "color": "#facc15",
+          "variant": "owner",
+          "gradient": "linear-gradient(120deg, #facc1522, #facc1566, #facc1522, #facc1577)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #facc1570 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         }
-      ]
+      ],
+      "verification": {
+        "salt": "QJyYTC6oSA14/tsIK1xiBA==",
+        "hash": "p0yBIQ0HAT6eDqVOp2fcqANOjZt81po0uBTq8IXe4QQ=",
+        "iterations": 150000
+      }
     },
     "yufu": {
       "createdDate": "",
@@ -33,23 +59,43 @@
           "label": "Administrator",
           "icon": "fas fa-shield-halved",
           "tooltip": "Administrator SCYTHED",
-          "color": "#ef4444"
+          "color": "#ef4444",
+          "variant": "admin",
+          "gradient": "linear-gradient(120deg, #ef444422, #ef444466, #ef444422, #ef444477)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #ef444470 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         },
         {
           "id": "bug-hunter",
           "label": "Łowca błędów",
           "icon": "fas fa-network-wired",
           "tooltip": "Łowca błędów poziom 1",
-          "color": "#facc15"
+          "color": "#facc15",
+          "variant": "bug-hunter",
+          "gradient": "linear-gradient(120deg, #facc1522, #facc1566, #facc1522, #facc1577)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #facc1570 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         },
         {
           "id": "beta",
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
           "tooltip": "Beta Tester",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "beta",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         }
-      ]
+      ],
+      "verification": {
+        "salt": "aOeTsvhl3bwcS6D7F0JMuA==",
+        "hash": "nKoqzeBNbV1YdMPIQov2L0Ev+oxs4hRPrknxodt9WIs=",
+        "iterations": 150000
+      }
     },
     "xe3n": {
       "createdDate": "",
@@ -60,23 +106,43 @@
           "label": "Moderator",
           "icon": "fas fa-hammer",
           "tooltip": "Moderator SCYTHED",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "moderator",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         },
         {
           "id": "bug-hunter-2",
           "label": "Łowca błędów",
           "icon": "fas fa-network-wired",
           "tooltip": "Łowca błędów poziom 2",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "bug-hunter-2",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         },
         {
           "id": "beta",
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
           "tooltip": "Beta Tester",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "beta",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         }
-      ]
+      ],
+      "verification": {
+        "salt": "ZJS/XuHZSg0aDHQnnW4eJA==",
+        "hash": "NA7g8mEpb2ViPerD5bB3x30xCqPAM92WvLkY/rMo6x0=",
+        "iterations": 150000
+      }
     },
     "meetmeinhell": {
       "createdDate": "",
@@ -87,21 +153,41 @@
           "label": "Łowca błędów",
           "icon": "fas fa-network-wired",
           "tooltip": "Łowca błędów poziom 1",
-          "color": "#facc15"
+          "color": "#facc15",
+          "variant": "bug-hunter",
+          "gradient": "linear-gradient(120deg, #facc1522, #facc1566, #facc1522, #facc1577)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #facc1570 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         },
         {
           "id": "beta",
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
           "tooltip": "Beta Tester",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "beta",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         }
-      ]
+      ],
+      "verification": {
+        "salt": "J05hs9wUtaDQ9wcvZ80r9A==",
+        "hash": "uPSGklbveXrm9ampB6GhifB/JhI0/glqRMHaq679IOg=",
+        "iterations": 150000
+      }
     },
     "finfinfin": {
       "createdDate": "",
       "verified": true,
-      "badges": []
+      "badges": [],
+      "verification": {
+        "salt": "yQm52lygoe6pnF+vpodNcA==",
+        "hash": "ycYlbQbVEBclYpmNqq9O4Nz/N8fLQrxKg/YpwaHzlZY=",
+        "iterations": 150000
+      }
     },
     "anonek": {
       "createdDate": "",
@@ -112,9 +198,19 @@
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
           "tooltip": "Beta Tester",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "beta",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         }
-      ]
+      ],
+      "verification": {
+        "salt": "MjJaGgJmZ9x7lGAPk+6zxw==",
+        "hash": "UZ35MVcGRBrlvqIy/OagJa96Yu3knj3GEGfN58CV9OA=",
+        "iterations": 150000
+      }
     },
     "tiltedhunter": {
       "createdDate": "",
@@ -125,9 +221,19 @@
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
           "tooltip": "Beta Tester",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "beta",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         }
-      ]
+      ],
+      "verification": {
+        "salt": "yG+Gix7u1ZgrTDL7zjHd5w==",
+        "hash": "PpHRWW59MkxiizTEL2FPxGB+0wRZP1ON3R2tqsGe5Ks=",
+        "iterations": 150000
+      }
     },
     "ploghes": {
       "createdDate": "",
@@ -138,9 +244,19 @@
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
           "tooltip": "Beta Tester",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "beta",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         }
-      ]
+      ],
+      "verification": {
+        "salt": "NNTodIsErgPtcdtfzdPQ5Q==",
+        "hash": "XGs3G24dlSak7Tqlz6sCBPq1pncEjoSswcGuxlScCFc=",
+        "iterations": 150000
+      }
     },
     "adaseu": {
       "createdDate": "",
@@ -151,9 +267,19 @@
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
           "tooltip": "Beta Tester",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "beta",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         }
-      ]
+      ],
+      "verification": {
+        "salt": "7ZaUb8LEGnW9jetrzQgHFg==",
+        "hash": "YR20noCpySUFm6Wo6Hq03r7n7ce7K/Q/TNKJ5OtBr+s=",
+        "iterations": 150000
+      }
     },
     "adam sernecki": {
       "createdDate": "",
@@ -164,9 +290,20 @@
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
           "tooltip": "Beta Tester",
-          "color": "#60a5fa"
+          "color": "#60a5fa",
+          "variant": "beta",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
         }
-      ]
+      ],
+      "verification": {
+        "salt": "Vd45ht3Gkz1W5qyXcAQXrQ==",
+        "hash": "EMCwk8xG8LTKd8o1RVNCZECS0JlxXZerPM9fXo2A2YI=",
+        "iterations": 150000
+      }
     }
-  }
+  },
+  "encryptedData": null
 }
