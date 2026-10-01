@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "announcement": {
+    "enabled": true,
+    "id": "update-2026-10-01",
+    "text": "DOSTĘPNA JEST AKTUALIZACJA SCYTHED.",
+    "actionLabel": "STRONA GŁÓWNA",
+    "link": "https://scythed.xyz",
+    "color": "#5b1111",
+    "accent": "#ff0033",
+    "dismissible": true
+  },
+  "profiles": {
+    "szymon": {
+      "createdDate": "",
+      "verified": true,
+      "badges": [
+        {
+          "id": "owner",
+          "label": "Właściciel",
+          "icon": "fas fa-crown",
+          "tooltip": "Właściciel Projektu SCYTHED",
+          "color": "#facc15"
+        }
+      ]
+    },
+    "yufu": {
+      "createdDate": "",
+      "verified": true,
+      "badges": [
+        {
+          "id": "admin",
+          "label": "Administrator",
+          "icon": "fas fa-shield-halved",
+          "tooltip": "Administrator SCYTHED",
+          "color": "#ef4444"
+        },
+        {
+          "id": "bug-hunter",
+          "label": "Łowca błędów",
+          "icon": "fas fa-network-wired",
+          "tooltip": "Łowca błędów poziom 1",
+          "color": "#facc15"
+        },
+        {
+          "id": "beta",
+          "label": "Beta Tester",
+          "icon": "fas fa-certificate",
+          "tooltip": "Beta Tester",
+          "color": "#60a5fa"
+        }
+      ]
+    },
+    "xe3n": {
+      "createdDate": "",
+      "verified": true,
+      "badges": [
+        {
+          "id": "moderator",
+          "label": "Moderator",
+          "icon": "fas fa-hammer",
+          "tooltip": "Moderator SCYTHED",
+          "color": "#60a5fa"
+        },
+        {
+          "id": "bug-hunter-2",
+          "label": "Łowca błędów",
+          "icon": "fas fa-network-wired",
+          "tooltip": "Łowca błędów poziom 2",
+          "color": "#60a5fa"
+        },
+        {
+          "id": "beta",
+          "label": "Beta Tester",
+          "icon": "fas fa-certificate",
+          "tooltip": "Beta Tester",
+          "color": "#60a5fa"
+        }
+      ]
+    },
+    "meetmeinhell": {
+      "createdDate": "",
+      "verified": true,
+      "badges": [
+        {
+          "id": "bug-hunter",
+          "label": "Łowca błędów",
+          "icon": "fas fa-network-wired",
+          "tooltip": "Łowca błędów poziom 1",
+          "color": "#facc15"
+        },
+        {
+          "id": "beta",
+          "label": "Beta Tester",
+          "icon": "fas fa-certificate",
+          "tooltip": "Beta Tester",
+          "color": "#60a5fa"
+        }
+      ]
+    },
+    "finfinfin": {
+      "createdDate": "",
+      "verified": true,
+      "badges": []
+    },
+    "anonek": {
+      "createdDate": "",
+      "verified": true,
+      "badges": [
+        {
+          "id": "beta",
+          "label": "Beta Tester",
+          "icon": "fas fa-certificate",
+          "tooltip": "Beta Tester",
+          "color": "#60a5fa"
+        }
+      ]
+    },
+    "tiltedhunter": {
+      "createdDate": "",
+      "verified": true,
+      "badges": [
+        {
+          "id": "beta",
+          "label": "Beta Tester",
+          "icon": "fas fa-certificate",
+          "tooltip": "Beta Tester",
+          "color": "#60a5fa"
+        }
+      ]
+    },
+    "ploghes": {
+      "createdDate": "",
+      "verified": true,
+      "badges": [
+        {
+          "id": "beta",
+          "label": "Beta Tester",
+          "icon": "fas fa-certificate",
+          "tooltip": "Beta Tester",
+          "color": "#60a5fa"
+        }
+      ]
+    },
+    "adaseu": {
+      "createdDate": "",
+      "verified": true,
+      "badges": [
+        {
+          "id": "beta",
+          "label": "Beta Tester",
+          "icon": "fas fa-certificate",
+          "tooltip": "Beta Tester",
+          "color": "#60a5fa"
+        }
+      ]
+    },
+    "adam sernecki": {
+      "createdDate": "",
+      "verified": true,
+      "badges": [
+        {
+          "id": "beta",
+          "label": "Beta Tester",
+          "icon": "fas fa-certificate",
+          "tooltip": "Beta Tester",
+          "color": "#60a5fa"
+        }
+      ]
+    }
+  }
+}
