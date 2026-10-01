@@ -3,7 +3,7 @@
   "announcement": {
     "enabled": true,
     "id": "update-2026-10-01",
-    "text": "DOSTĘPNA JEST AKTUALIZACJA SCYTHED. TEST Z ANONKIEM SZEFEM J2JS492S241",
+    "text": "DOSTĘPNA JEST AKTUALIZACJA SCYx224x2THED. TEST Z ANONKIEM SZEFEM J2JS492S241",
     "actionLabel": " ",
     "link": "https://scythed.xyz",
     "color": "#5b1111",
@@ -199,7 +199,7 @@
           "id": "beta",
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
-          "tooltip": "Beta Tester",
+          "tooltip": "Beta Txsxsxester",
           "color": "#60a5fa",
           "variant": "beta",
           "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
