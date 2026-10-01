@@ -179,16 +179,6 @@
         "iterations": 150000
       }
     },
-    "finfinfin": {
-      "createdDate": "",
-      "verified": true,
-      "badges": [],
-      "verification": {
-        "salt": "yQm52lygoe6pnF+vpodNcA==",
-        "hash": "ycYlbQbVEBclYpmNqq9O4Nz/N8fLQrxKg/YpwaHzlZY=",
-        "iterations": 150000
-      }
-    },
     "anonek": {
       "createdDate": "",
       "verified": true,
@@ -221,37 +211,6 @@
       "verification": {
         "salt": "MjJaGgJmZ9x7lGAPk+6zxw==",
         "hash": "UZ35MVcGRBrlvqIy/OagJa96Yu3knj3GEGfN58CV9OA=",
-        "iterations": 150000
-      }
-    },
-    "tiltedhunter": {
-      "createdDate": "",
-      "verified": true,
-      "badges": [],
-      "verification": {
-        "salt": "yG+Gix7u1ZgrTDL7zjHd5w==",
-        "hash": "PpHRWW59MkxiizTEL2FPxGB+0wRZP1ON3R2tqsGe5Ks=",
-        "iterations": 150000
-      }
-    },
-    "ploghes": {
-      "createdDate": "",
-      "verified": true,
-      "badges": [],
-      "verification": {
-      "verification": {
-        "salt": "NNTodIsErgPtcdtfzdPQ5Q==",
-        "hash": "XGs3G24dlSak7Tqlz6sCBPq1pncEjoSswcGuxlScCFc=",
-        "iterations": 150000
-      }
-    },
-    "adaseu": {
-      "createdDate": "",
-      "verified": true,
-      "badges": [],
-      "verification": {
-        "salt": "7ZaUb8LEGnW9jetrzQgHFg==",
-        "hash": "YR20noCpySUFm6Wo6Hq03r7n7ce7K/Q/TNKJ5OtBr+s=",
         "iterations": 150000
       }
     },
