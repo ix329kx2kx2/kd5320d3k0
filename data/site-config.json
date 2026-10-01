@@ -148,6 +148,17 @@
       "verified": true,
       "badges": [
         {
+          "label": "Moderator",
+          "icon": "fas fa-hammer",
+          "tooltip": "Moderator SCYTHED",
+          "color": "#60a5fa",
+          "variant": "moderator",
+          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
+          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
+          "glow": true,
+          "animationDuration": "3.2s"
+        },
+        {
           "id": "beta",
           "label": "Beta Tester",
           "icon": "fas fa-certificate",
@@ -164,21 +175,6 @@
     "tiltedhunter": {
       "createdDate": "",
       "verified": true,
-      "badges": [
-        {
-          "id": "beta",
-          "label": "Beta Tester",
-          "icon": "fas fa-certificate",
-          "tooltip": "Beta Tester",
-          "color": "#60a5fa",
-          "variant": "beta",
-          "gradient": "linear-gradient(120deg, #60a5fa22, #60a5fa66, #60a5fa22, #60a5fa77)",
-          "shine": "linear-gradient(110deg, transparent 42%, transparent 47%, #60a5fa70 50%, transparent 53%, transparent 58%)",
-          "glow": true,
-          "animationDuration": "3.2s"
-        }
-      ]
-    },
     "ploghes": {
       "createdDate": "",
       "verified": true,
