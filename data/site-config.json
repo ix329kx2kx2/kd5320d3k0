@@ -3,8 +3,8 @@
   "announcement": {
     "enabled": true,
     "id": "update-2026-10-01",
-    "text": "DOSTĘPNA JEST AKTUALIZACJA SCYTHED.",
-    "actionLabel": "STRONA GŁÓWNA",
+    "text": "DOSTĘPNA JEST AKTUALIZACJA SCYTHED! Anonek Heh",
+    "actionLabel": "",
     "link": "https://scythed.xyz",
     "dismissible": true,
     "showOnRefresh": true,
