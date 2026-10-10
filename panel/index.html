@@ -2242,10 +2242,19 @@ html:not(.dark) #app-dialog {
                 localStorage.setItem(STORAGE_KEYS.AUTO_LOCK, String(autoLockEnabled));
                 localStorage.setItem(STORAGE_KEYS.AUTO_LOCK_MINUTES, '10');
                 localStorage.setItem(STORAGE_KEYS.LOCK_ON_HIDDEN, String(lockOnHidden));
-                if (masterCryptoKey) await saveEncryptedState();
-                if (autoLockEnabled) resetActivityTimer();
-                else if (activityTimer) { clearTimeout(activityTimer); activityTimer = null; }
+
+                if (masterCryptoKey) {
+                    await saveEncryptedState();
+                }
+
+                if (autoLockEnabled) {
+                    resetActivityTimer();
+                } else if (inactivityTimer) {
+                    clearTimeout(inactivityTimer);
+                    inactivityTimer = null;
+                }
             }
+
 
             function setAutoLockMode(mode) {
                 if (mode === 'off') { autoLockEnabled = false; lockOnHidden = false; }
