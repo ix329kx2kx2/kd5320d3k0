@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <meta name="robots" content="noindex">
+  <title>404 SCYTHED</title>
+  <link rel="icon" type="image/png" href="assets/logos/logo.png">
+  <link rel="shortcut icon" type="image/png" href="assets/logos/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--red:#ff0033;--red2:#cc0029;--bg:#050505;--white:#fff;--muted:#92929d;--font:"Rajdhani",Arial,sans-serif}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#000;color:var(--white);font-family:var(--font)}
+    body{min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+    a{color:inherit;text-decoration:none}
+    #bg{
+      position:fixed;inset:0;z-index:-8;background:#000;overflow:hidden;
+    }
+    #bg:before{
+      content:"";position:absolute;inset:-20%;
+      background:
+        radial-gradient(circle at 50% 42%,rgba(255,0,51,.10),transparent 34%),
+        radial-gradient(circle at 15% 85%,rgba(255,0,51,.055),transparent 28%),
+        radial-gradient(circle at 88% 18%,rgba(255,0,51,.045),transparent 25%);
+      filter:blur(20px);animation:bgBreath 8s ease-in-out infinite alternate;
+    }
+    #bg:after{
+      content:"";position:absolute;inset:0;
+      background:linear-gradient(115deg,transparent 0%,rgba(255,0,51,.018) 46%,transparent 58%);
+      background-size:220% 220%;animation:bgSweep 11s linear infinite;
+    }
+    #particleCanvas{
+      position:fixed;inset:0;width:100%;height:100%;z-index:-7;pointer-events:none;
+    }
+    @keyframes bgBreath{0%{transform:scale(.94);opacity:.55}100%{transform:scale(1.08);opacity:1}}
+    @keyframes bgSweep{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+    #grid,#grain,#orbField,#logoMist,#meteorField,#cursorGlow{display:none!important}
+    .meteor{
+      position:absolute;left:var(--x);top:var(--y);width:var(--len);height:1px;
+      transform:rotate(135deg);transform-origin:left center;
+      background:linear-gradient(90deg,rgba(255,0,51,0),rgba(255,0,51,.28) 30%,rgba(255,0,51,.96) 86%,#ff0033 100%);
+      box-shadow:0 0 7px rgba(255,0,51,.8),0 0 16px rgba(255,0,51,.25);
+      opacity:0;animation:meteorFall var(--dur) linear infinite;animation-delay:var(--delay);
+    }
+    .meteor:after{
+      content:"";position:absolute;right:-2px;top:50%;width:4px;height:4px;border-radius:50%;
+      transform:translateY(-50%);background:#ff0033;box-shadow:0 0 8px #ff0033,0 0 15px #ff0033;
+    }
+    @keyframes meteorFall{
+      0%{opacity:0;transform:translate3d(0,0,0) rotate(135deg) scaleX(.45)}
+      8%{opacity:.8}
+      62%{opacity:.72}
+      100%{opacity:0;transform:translate3d(-48vw,48vh,0) rotate(135deg) scaleX(1)}
+    }
+    #cursorGlow{
+      position:fixed;z-index:-3;width:260px;height:260px;border-radius:50%;pointer-events:none;
+      transform:translate(-50%,-50%);
+      background:radial-gradient(circle,rgba(255,0,51,.055),transparent 70%);
+      mix-blend-mode:screen;
+    }
+
+    #logoMist{
+      position:fixed;left:50%;top:52%;z-index:-2;
+      width:min(720px,75vw);height:min(720px,75vw);
+      pointer-events:none;
+      transform:translate(-50%,-50%) translate3d(0,var(--logoPy,0px),0) rotate(-8deg) scale(1.18);
+      opacity:.028;filter:blur(9px) saturate(.55);mix-blend-mode:screen;
+    }
+    #logoMist:after{
+      content:"";position:absolute;inset:-25%;
+      background:radial-gradient(circle,rgba(255,23,68,.10),transparent 62%);
+      filter:blur(35px);
+    }
+    #logoMist img{width:100%;height:100%;object-fit:contain;display:block}
+    #particleCanvas{
+      position:fixed;inset:0;width:100%;height:100%;z-index:-7;pointer-events:none;
+    }
+    nav{height:76px;flex:none;position:relative;z-index:2;background:rgba(6,6,9,.68);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.07)}
+    .wrap{width:min(1180px,100%);margin:auto;padding:0 24px}
+    .nav-inner{height:100%;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:800;letter-spacing:.12em}
+    .brand img{width:42px;height:42px;object-fit:contain}
+    .brand span span{color:var(--red)}
+    .status{display:flex;align-items:center;gap:9px;color:#a4a4af;font-size:12px;font-weight:700;letter-spacing:.15em}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 12px var(--red);animation:blink 1.2s infinite}
+    main{position:relative;z-index:2;flex:1;display:grid;place-items:center;padding:36px 18px}
+    .error-card{width:min(760px,100%);position:relative;text-align:center;padding:clamp(20px,4vw,42px) 18px;animation:rise .7s ease both}
+    .kicker{display:none}
+    .code{font-size:clamp(100px,22vw,176px);line-height:.82;font-weight:800;letter-spacing:-.075em;margin:34px 0 24px;text-shadow:0 0 35px rgba(255,0,51,.18)}
+    .code span{color:var(--red)}
+    h1{margin:0 0 12px;font-size:clamp(22px,4vw,32px);font-weight:800;letter-spacing:.07em}
+    .message{max-width:470px;margin:0 auto;color:#8e8e99;font-size:17px;line-height:1.55}
+    .rule{display:none}
+    .actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:27px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:13px 22px;border-radius:12px;font-size:13px;font-weight:800;letter-spacing:.05em;transition:transform .2s,filter .2s,border-color .2s}
+    .primary{background:linear-gradient(135deg,#ff0033,#d6002f 55%,#ff0033);border:1px solid rgba(255,0,51,.8);box-shadow:0 0 22px rgba(255,0,51,.27)}
+    .secondary{border:1px solid #303038;background:rgba(13,13,17,.76);color:#ddd}
+    .btn:hover{transform:translateY(-3px);filter:brightness(1.18)}
+    .secondary:hover{border-color:rgba(255,0,51,.45)}
+    footer{position:relative;z-index:2;flex:none;padding:18px 12px 22px;text-align:center;color:#676770;font-size:11px}
+    footer strong{color:#fff;letter-spacing:.04em} footer em{font-style:normal;color:var(--red)}
+    @keyframes bgBreath{0%{transform:scale(.94);opacity:.55}100%{transform:scale(1.08);opacity:1}}
+    @keyframes bgSweep{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+    @keyframes blink{50%{opacity:.25;box-shadow:0 0 2px var(--red)}}
+    @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:520px){nav{height:66px}.wrap{padding:0 18px}.brand img{width:36px;height:36px}.status{font-size:10px;letter-spacing:.08em}.error-card{border-radius:18px}.actions{flex-direction:column;align-items:stretch}.btn{width:100%}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div id="bg"></div><canvas id="particleCanvas" aria-hidden="true"></canvas>
+  <nav><div class="wrap nav-inner">
+    <a class="brand" href="https://scythed.xyz" aria-label="SCYTHED — strona główna"><img src="assets/logos/logo.gif" alt=""><span>SCYTH<span>ED</span></span></a>
+    <div class="status"><i class="dot"></i> SCYTHED ONLINE</div>
+  </div></nav>
+  <main>
+    <section class="error-card" aria-labelledby="error-title">
+      <div class="kicker"><i class="dot"></i>BŁĄD NAWIGACJI</div>
+      <div class="code">4<span>0</span>4</div>
+      <h1 id="error-title">TEJ STRONY NIE MA</h1>
+      <p class="message">Wygląda na to, że ten adres jest nieprawidłowy albo strona została przeniesiona. Wróć na stronę główną i spróbuj ponownie.</p>
+      <div class="rule"></div>
+      <div class="actions">
+        <a class="btn primary" href="https://scythed.xyz">WRÓĆ NA STRONĘ GŁÓWNĄ</a>
+      </div>
+    </section>
+  </main>
+  <footer>© 2026 <strong>SCYTH<em>ED</em></strong> <span>· Menadżer Haseł · Projekt stworzony przez @yzke (discord).</span></footer>
+<script>
+  let currentBrandColor = '#ff0033';
+
+  const canvas=document.getElementById('particleCanvas');
+  const ctx=canvas.getContext('2d');
+  let W=innerWidth,H=innerHeight,dpr=Math.min(devicePixelRatio||1,2);
+  let particles=[],shootingStars=[];
+  const mouse={x:-1000,y:-1000,tx:-1000,ty:-1000,active:false};
+
+  function resizeBg(){
+    W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);
+    canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    createParticles();
+  }
+
+  class Star{
+    constructor(){this.reset();}
+    reset(){
+      this.x=Math.random()*W;this.y=Math.random()*H;
+      this.vx=(Math.random()-.5)*.38;this.vy=(Math.random()-.5)*.38;
+      this.size=Math.random()*1.8+.65;
+      this.baseAlpha=Math.random()*.52+.18;this.alpha=this.baseAlpha;
+      this.type=Math.random()>.48?'star':'dot';
+      this.angle=Math.random()*Math.PI*2;this.spin=(Math.random()-.5)*.02;
+      this.depth=.35+Math.random()*.9;
+      this.phase=Math.random()*Math.PI*2;
+    }
+    update(t){
+      this.x+=this.vx;this.y+=this.vy;this.angle+=this.spin;
+      if(this.x<0||this.x>W)this.vx*=-1;
+      if(this.y<0||this.y>H)this.vy*=-1;
+      const parallaxX=(mouse.x-W/2)*0.012*this.depth;
+      const parallaxY=(mouse.y-H/2)*0.012*this.depth;
+      this.renderX=this.x+parallaxX;this.renderY=this.y+parallaxY;
+      if(mouse.active){
+        const dx=mouse.x-this.renderX,dy=mouse.y-this.renderY,dist=Math.hypot(dx,dy);
+        if(dist<120&&dist>0){
+          const force=(120-dist)/120;
+          this.renderX-=(dx/dist)*force*10*this.depth;
+          this.renderY-=(dy/dist)*force*10*this.depth;
+        }
+      }
+      this.alpha=this.baseAlpha*(.72+.28*Math.sin(t*1.8+this.phase));
+    }
+    draw(){
+      ctx.save();ctx.globalAlpha=this.alpha;
+      ctx.fillStyle='#ff0033';ctx.strokeStyle='#ff0033';ctx.shadowColor='#ff0033';ctx.shadowBlur=7;
+      if(this.type==='star'){
+        ctx.translate(this.renderX,this.renderY);ctx.rotate(this.angle);
+        ctx.beginPath();
+        for(let i=0;i<4;i++){ctx.lineTo(0,this.size*2);ctx.rotate(Math.PI/4);ctx.lineTo(0,this.size*.7);ctx.rotate(Math.PI/4);}
+        ctx.closePath();ctx.fill();
+      }else{ctx.beginPath();ctx.arc(this.renderX,this.renderY,this.size,0,Math.PI*2);ctx.fill();}
+      ctx.restore();
+    }
+  }
+
+  class ShootingStar{
+    constructor(){this.reset();}
+    reset(){
+      this.x=Math.random()*W*1.2;this.y=Math.random()*-H*.5;
+      this.len=Math.random()*80+45;this.speed=Math.random()*5+4;
+      this.angle=Math.PI/4+(Math.random()*.2-.1);this.size=Math.random()*1.5+.8;
+      this.opacity=Math.random()*.55+.25;this.active=false;this.timer=Math.random()*180+40;
+    }
+    update(){
+      if(!this.active){if(--this.timer<=0){this.active=true;this.x=Math.random()*W*1.2;this.y=-20;}return;}
+      this.x-=Math.cos(this.angle)*this.speed;this.y+=Math.sin(this.angle)*this.speed;
+      if(this.y>H+50||this.x<-50){this.active=false;this.timer=Math.random()*250+70;}
+    }
+    draw(){
+      if(!this.active)return;
+      ctx.save();ctx.lineWidth=this.size;
+      const grad=ctx.createLinearGradient(this.x,this.y,this.x+Math.cos(this.angle)*this.len,this.y-Math.sin(this.angle)*this.len);
+      grad.addColorStop(0,`rgba(255,0,51,${this.opacity})`);grad.addColorStop(1,'rgba(255,0,51,0)');
+      ctx.strokeStyle=grad;ctx.beginPath();ctx.moveTo(this.x,this.y);ctx.lineTo(this.x+Math.cos(this.angle)*this.len,this.y-Math.sin(this.angle)*this.len);ctx.stroke();
+      ctx.fillStyle='#fff';ctx.shadowColor='#ff0033';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(this.x,this.y,this.size*.9,0,Math.PI*2);ctx.fill();ctx.restore();
+    }
+  }
+
+  function createParticles(){
+    particles=[];shootingStars=[];
+    const count=Math.max(45,Math.floor((W*H)/9500));
+    for(let i=0;i<count;i++)particles.push(new Star());
+    for(let i=0;i<4;i++)shootingStars.push(new ShootingStar());
+  }
+
+  addEventListener('pointermove',e=>{mouse.tx=e.clientX;mouse.ty=e.clientY;mouse.active=true},{passive:true});
+  addEventListener('pointerleave',()=>{mouse.active=false;mouse.tx=-1000;mouse.ty=-1000});
+  addEventListener('resize',resizeBg);
+
+  function drawBg(){
+    if(mouse.active){
+      mouse.x+=(mouse.tx-mouse.x)*.07;mouse.y+=(mouse.ty-mouse.y)*.07;
+    }else{
+      mouse.x+=(W/2-mouse.x)*.025;mouse.y+=(H/2-mouse.y)*.025;
+    }
+    ctx.clearRect(0,0,W,H);
+    const t=performance.now()*.001;
+    const atmosphere=ctx.createRadialGradient(W*.5,H*.46,0,W*.5,H*.46,Math.max(W,H)*.78);
+    atmosphere.addColorStop(0,'rgba(45,0,10,.16)');atmosphere.addColorStop(.5,'rgba(10,0,3,.07)');atmosphere.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=atmosphere;ctx.fillRect(0,0,W,H);
+    const mx=mouse.x, my=mouse.y;
+    if(mouse.active){
+      const glow=ctx.createRadialGradient(mx,my,0,mx,my,420);
+      glow.addColorStop(0,'rgba(255,0,51,.13)');glow.addColorStop(.3,'rgba(255,0,51,.045)');glow.addColorStop(1,'rgba(255,0,51,0)');
+      ctx.fillStyle=glow;ctx.fillRect(mx-420,my-420,840,840);
+    }
+    for(const s of particles){s.update(t);s.draw();}
+    for(const star of shootingStars){star.update();star.draw();}
+    if(mouse.active){
+      const near=particles.filter(p=>Math.hypot(p.renderX-mouse.x,p.renderY-mouse.y)<190);
+      for(let i=0;i<near.length;i++)for(let j=i+1;j<near.length;j++){
+        const a=near[i],b=near[j],dist=Math.hypot(a.renderX-b.renderX,a.renderY-b.renderY);
+        if(dist<115){
+          const alpha=(1-dist/115)*.18;
+          ctx.strokeStyle=`rgba(255,0,51,${alpha})`;ctx.lineWidth=.55;
+          ctx.beginPath();ctx.moveTo(a.renderX,a.renderY);ctx.lineTo(b.renderX,b.renderY);ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(drawBg);
+  }
+  resizeBg();drawBg();
+
+  </script>
+</body>
+</html>
