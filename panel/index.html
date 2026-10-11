@@ -16,6 +16,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
     <script>
       let currentBrandColor = localStorage.getItem('scythed_brand_color_v6') || '#ff0033';
       if (!/^#[0-9A-F]{6}$/i.test(currentBrandColor)) currentBrandColor = '#ff0033';
@@ -221,8 +223,27 @@
         }
 
         #profile-badges-container > div {
-            flex: 0 0 auto;
-            max-width: 100%;
+            flex: 0 0 28px;
+            width: 28px;
+            min-width: 28px;
+            height: 28px;
+            min-height: 28px;
+            max-width: 28px;
+            box-sizing: border-box;
+            padding: 0 !important;
+            aspect-ratio: 1 / 1;
+        }
+
+        /* Wszystkie odznaki mają identyczny wymiar niezależnie od ikony. */
+        #profile-badges-container > div > i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 12px;
+            height: 12px;
+            flex: 0 0 12px;
+            font-size: 10px !important;
+            line-height: 1;
         }
 
         .fixed-owner-badge {
