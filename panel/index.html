@@ -949,7 +949,7 @@ html:not(.dark) #app-dialog {
 
                     <div class="overflow-hidden flex-grow">
                         <div class="flex items-center gap-1 min-w-0 relative" id="username-row">
-                            <input type="text" id="username-input" value="USER" readonly oninput="window.scythedApp.syncUsernameInputWidth()" onkeydown="if(event.key==='Enter') { event.preventDefault(); window.scythedApp.toggleUsernameEdit(); } if(event.key==='Escape') { event.preventDefault(); window.scythedApp.cancelUsernameEdit(); }" maxlength="16" title="Kliknij ołówek, aby zmienić nazwę" class="profile-username-input font-orbitron font-extrabold text-sm animated-gradient-text bg-transparent focus:outline-none min-w-0 cursor-default" style="width:42px">
+                            <input type="text" id="username-input" value="USER" readonly oninput="window.scythedApp.syncUsernameInputWidth()" onkeydown="if(event.key==='Enter') { event.preventDefault(); window.scythedApp.toggleUsernameEdit(); } if(event.key==='Escape') { event.preventDefault(); window.scythedApp.cancelUsernameEdit(); }" maxlength="16" title="Kliknij ołówek, aby zmienić nazwę" class="profile-username-input font-orbitron font-extrabold text-sm animated-gradient-text bg-transparent focus:outline-none min-w-0 cursor-default" style="width:1px">
                             <i id="profile-verified-icon" class="hidden fas fa-circle-check profile-verified-icon text-[13px]" title="Zweryfikowane konto" aria-label="Zweryfikowane konto"></i>
                             <button type="button" id="username-edit-btn" onclick="window.scythedApp.toggleUsernameEdit()" class="inline-flex items-center justify-center self-center h-4 leading-none text-zinc-400 hover-brand-dynamic transition flex-shrink-0" title="Edytuj nazwę użytkownika" aria-label="Edytuj nazwę użytkownika"><i class="fas fa-pen text-[10px]"></i></button>
                             <span id="username-width-measure" class="font-orbitron font-extrabold text-sm">USER</span>
@@ -972,7 +972,7 @@ html:not(.dark) #app-dialog {
                         <i class="fas fa-hammer text-[10px]"></i>
                     </div>
 
-                    <div id="badge-paragon" class="profile-badge-tooltip hidden fixed-owner-badge p-1.5 rounded-md border text-[9px] font-bold font-orbitron flex items-center justify-center shadow-sm glow-effect" data-tooltip="Paragon" aria-label="Paragon">
+                    <div id="badge-paragon" class="profile-badge-tooltip hidden fixed-owner-badge p-1.5 rounded-md border text-[9px] font-bold font-orbitron flex items-center justify-center shadow-sm glow-effect" data-tooltip="Zasłużony" aria-label="Paragon">
                         <i class="fas fa-award text-[10px]"></i>
                     </div>
 <div id="badge-bug-hunter" class="profile-badge-tooltip hidden bug-hunter-badge p-1.5 rounded-md border text-[9px] font-bold font-orbitron flex items-center justify-center shadow-sm" data-tooltip="Łowca błędów poziom 1" aria-label="Łowca błędów poziom 1">
@@ -3840,7 +3840,7 @@ html:not(.dark) #app-dialog {
                 const value = input.value || username || 'USER';
                 measure.textContent = value;
                 const width = Math.ceil(measure.getBoundingClientRect().width) + 2;
-                input.style.width = `${Math.max(42, Math.min(width, 180))}px`;
+                input.style.width = `${Math.max(1, Math.min(width, 180))}px`;
             }
 
             function updateUsernameEditButton() {
