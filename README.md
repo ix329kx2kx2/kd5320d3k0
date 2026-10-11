@@ -1,4 +1,4 @@
-## **Licencja i ograniczenia wykorzystania**
+# **Licencja i ograniczenia wykorzystania**
 
 ### Repozytorium nie udziela licencji na dowolne wykorzystanie zamieszczonych materiałów. O ile nie wskazano inaczej, kopiowanie, modyfikowanie, rozpowszechnianie i ponowne hostowanie materiałów wymaga uzyskania zgody odpowiedniego właściciela praw.
 
