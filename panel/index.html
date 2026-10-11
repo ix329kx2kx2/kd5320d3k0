@@ -284,6 +284,7 @@
 
         .fixed-owner-badge,
         #badge-admin,
+        #badge-paragon,
         .moderator-badge {
             position: relative;
             overflow: hidden;
@@ -314,6 +315,13 @@
             border-color: rgba(248, 113, 113, 0.88) !important;
         }
 
+        #badge-paragon {
+            background: linear-gradient(120deg, #ffffff, #f4fff7, #ffffff, #eaffef) !important;
+            border-color: rgba(34, 197, 94, 0.78) !important;
+            color: #22a447 !important;
+        }
+        #badge-paragon i { color: #22a447 !important; }
+
         .moderator-badge {
             background: linear-gradient(
                 120deg,
@@ -328,6 +336,7 @@
 
         .fixed-owner-badge::after,
         #badge-admin::after,
+        #badge-paragon::after,
         .moderator-badge::after {
             content: "";
             position: absolute;
@@ -349,12 +358,17 @@
             background: linear-gradient(110deg, transparent 42%, rgba(248, 113, 113, 0.04) 47%, rgba(248, 113, 113, 0.42) 50%, rgba(220, 38, 38, 0.06) 53%, transparent 58%);
         }
 
+        #badge-paragon::after {
+            background: linear-gradient(110deg, transparent 42%, rgba(34, 197, 94, 0.03) 47%, rgba(74, 222, 128, 0.45) 50%, rgba(34, 197, 94, 0.06) 53%, transparent 58%);
+        }
+
         .moderator-badge::after {
             background: linear-gradient(110deg, transparent 42%, rgba(147, 197, 253, 0.04) 47%, rgba(96, 165, 250, 0.52) 50%, rgba(37, 99, 235, 0.08) 53%, transparent 58%);
         }
 
         .fixed-owner-badge > *,
         #badge-admin > *,
+        #badge-paragon > *,
         .moderator-badge > * {
             position: relative;
             z-index: 1;
@@ -388,9 +402,11 @@
         @media (prefers-reduced-motion: reduce) {
             .fixed-owner-badge,
             #badge-admin,
+            #badge-paragon,
             .moderator-badge,
             .fixed-owner-badge::after,
             #badge-admin::after,
+            #badge-paragon::after,
             .moderator-badge::after {
                 animation: none !important;
             }
@@ -920,6 +936,10 @@ html:not(.dark) #app-dialog {
 
                     <div id="badge-admin" class="profile-badge-tooltip hidden fixed-owner-badge p-1.5 rounded-md border text-[9px] font-bold font-orbitron flex items-center justify-center shadow-sm glow-effect" data-tooltip="Administrator SCYTHED" aria-label="Administrator SCYTHED">
                         <i class="fas fa-shield-halved text-[10px]"></i>
+                    </div>
+
+                    <div id="badge-paragon" class="profile-badge-tooltip hidden p-1.5 rounded-md border text-[9px] font-bold font-orbitron flex items-center justify-center shadow-sm glow-effect" data-tooltip="Paragon — zasłużony użytkownik SCYTHED" aria-label="Paragon">
+                        <i class="fas fa-award text-[10px]"></i>
                     </div>
 
                     <div id="badge-moderator" class="profile-badge-tooltip hidden moderator-badge p-1.5 rounded-md border text-[9px] font-bold font-orbitron flex items-center justify-center shadow-sm glow-effect" data-tooltip="Moderator SCYTHED" aria-label="Moderator SCYTHED">
@@ -3573,10 +3593,11 @@ html:not(.dark) #app-dialog {
                 const bugHunterBadge = document.getElementById('badge-bug-hunter');
                 const ownerBadge = document.getElementById('badge-owner');
                 const adminBadge = document.getElementById('badge-admin');
+                const paragonBadge = document.getElementById('badge-paragon');
                 const verifiedIcon = document.getElementById('profile-verified-icon');
                 const u = String(username || '').toLowerCase().trim().replace(/^@/, '');
 
-                [betaBadge, initialBetaBadge, moderatorBadge, bugHunterBadge, ownerBadge, adminBadge, verifiedIcon]
+                [betaBadge, initialBetaBadge, moderatorBadge, bugHunterBadge, ownerBadge, adminBadge, paragonBadge, verifiedIcon]
                     .forEach(el => { if (el) el.classList.add('hidden'); });
                 if (!u) return;
 
@@ -3595,6 +3616,7 @@ html:not(.dark) #app-dialog {
                     .map(item => [String(item.badge_key || ''), Number(item.badge_level) || 1]));
                 const isOwner = badges.has('owner');
                 const isAdmin = badges.has('admin');
+                const isParagon = badges.has('paragon');
                 const bugLevel = badges.get('bug_hunter');
                 const isLarp = badges.has('larp');
                 let showBeta = badges.has('beta_tester');
@@ -3611,6 +3633,7 @@ html:not(.dark) #app-dialog {
 
                 if (ownerBadge) ownerBadge.classList.toggle('hidden', !isOwner);
                 if (adminBadge) adminBadge.classList.toggle('hidden', !isAdmin || isOwner);
+                if (paragonBadge) paragonBadge.classList.toggle('hidden', !isParagon || isOwner);
                 if (bugHunterBadge) {
                     bugHunterBadge.classList.toggle('hidden', !bugLevel || isOwner);
                     bugHunterBadge.classList.toggle('bug-hunter-level-2', bugLevel === 2);
@@ -3629,7 +3652,7 @@ html:not(.dark) #app-dialog {
                     betaBadge.setAttribute('aria-label', 'Beta Tester');
                 }
                 if (verifiedIcon) verifiedIcon.classList.toggle('hidden', profile.verified !== true);
-                if (isOwner) [adminBadge, bugHunterBadge, moderatorBadge, betaBadge].forEach(el => { if (el) el.classList.add('hidden'); });
+                if (isOwner) [adminBadge, paragonBadge, bugHunterBadge, moderatorBadge, betaBadge].forEach(el => { if (el) el.classList.add('hidden'); });
             }
 
             function playSound(type) {
