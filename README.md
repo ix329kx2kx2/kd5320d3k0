@@ -5,3 +5,5 @@ Repozytorium nie udziela licencji na dowolne wykorzystanie zamieszczonych materi
 Publiczna dostępność repozytorium oraz możliwość jego forkowania w ramach GitHuba nie oznaczają zgody na wykorzystywanie materiałów poza zakresem dozwolonym przez obowiązujące prawo, regulamin GitHuba i właściwe licencje.
 
 Materiały osób trzecich pozostają objęte prawami i licencjami ich właścicieli.
+
+Projekt tworzony przez @yzke (discord).
