@@ -433,10 +433,10 @@
     </div>
 
     <div class="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-1">
-        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">publiczne wydanie demo 4</span>
         <button onclick="window.scythedApp.openSettingsModal()" class="w-12 h-12 rounded-2xl bg-white/95 dark:bg-black/95 border border-zinc-200 dark:border-brand-border text-brand-red hover:scale-105 active:scale-95 shadow-2xl backdrop-blur-md flex items-center justify-center text-xl transition-all glow-effect" title="Ustawienia & System">
             <i class="fas fa-gear"></i>
         </button>
+        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 tracking-wider text-right whitespace-nowrap">publiczne wydanie 4</span>
     </div>
 
     <footer class="w-full max-w-xl mx-auto text-center px-4 mt-8 space-y-1 relative z-10">
@@ -1850,27 +1850,34 @@
                 }
             }
 
+            // Najciemniejszy dopuszczalny kolor motywu to RGB(13, 13, 13) / #0d0d0d.
+            function normalizeBrandColor(hex) {
+                const value = String(hex || '').trim();
+                const normalized = value.startsWith('#') ? value : '#' + value;
+                if (!/^#[0-9A-F]{6}$/i.test(normalized)) return null;
+                const channels = [1, 3, 5].map(i => Math.max(13, parseInt(normalized.slice(i, i + 2), 16)));
+                return '#' + channels.map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+            }
+
             function changeBrandColor(hex) {
-                hex = String(hex || '').trim();
-                if (!hex.startsWith('#')) hex = '#' + hex;
-                if (/^#[0-9A-F]{6}$/i.test(hex)) {
-                    activeBrandColor = hex;
-                    document.getElementById('brand-color-picker').value = hex;
-                    document.getElementById('brand-hex-input').value = hex;
-                    applyBrandColor(hex, true);
-                    showToast('Zmieniono kolor motywu!', 'success');
+                const normalized = normalizeBrandColor(hex);
+                if (normalized) {
+                    activeBrandColor = normalized;
+                    document.getElementById('brand-color-picker').value = normalized;
+                    document.getElementById('brand-hex-input').value = normalized;
+                    applyBrandColor(normalized, true);
+                    showToast(normalized !== String(hex).trim().toUpperCase() ? `Kolor skorygowano do ${normalized} (minimum RGB 13, 13, 13).` : 'Zmieniono kolor motywu!', 'success');
                 }
             }
 
             function changeBrandColorFromText(hex) {
-                hex = String(hex || '').trim();
-                if (!hex.startsWith('#')) hex = '#' + hex;
-                if (/^#[0-9A-F]{6}$/i.test(hex)) {
-                    activeBrandColor = hex;
-                    document.getElementById('brand-color-picker').value = hex;
-                    document.getElementById('brand-hex-input').value = hex;
-                    applyBrandColor(hex, true);
-                    showToast(`Zmieniono kolor na ${hex}.`, 'success');
+                const normalized = normalizeBrandColor(hex);
+                if (normalized) {
+                    activeBrandColor = normalized;
+                    document.getElementById('brand-color-picker').value = normalized;
+                    document.getElementById('brand-hex-input').value = normalized;
+                    applyBrandColor(normalized, true);
+                    showToast(`Zmieniono kolor na ${normalized}.`, 'success');
                 } else {
                     document.getElementById('brand-hex-input').value = activeBrandColor;
                     showToast('Nieprawidłowy format HEX (np. #ff0033)', 'error');
@@ -1878,10 +1885,19 @@
             }
 
             function applyBrandColor(hex, save = true) {
+                hex = normalizeBrandColor(hex) || '#0D0D0D';
                 document.documentElement.style.setProperty('--brand-red', hex);
                 let r = parseInt(hex.slice(1,3), 16) || 255;
                 let g = parseInt(hex.slice(3,5), 16) || 0;
                 let b = parseInt(hex.slice(5,7), 16) || 51;
+                // Dobierz kolor tekstu do kontrastu na powierzchniach w kolorze akcentu.
+                const linearize = value => {
+                    value /= 255;
+                    return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+                };
+                const luminance = 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
+                const contrastText = luminance > 0.50 ? '#0d0d0d' : '#ffffff';
+                document.documentElement.style.setProperty('--brand-text-color', contrastText);
                 document.documentElement.style.setProperty('--brand-red-glow', `rgba(${r}, ${g},${b}, 0.35)`);
 
                 let trackColor = `rgba(${Math.floor(r * 0.1)}, ${Math.floor(g * 0.1)},${Math.floor(b * 0.1)}, 0.95)`;
@@ -1898,7 +1914,14 @@
                 document.documentElement.style.setProperty('--brand-hover-red', hoverHex);
                 document.documentElement.style.setProperty('--demo-accent', hex);
                 styleTag.innerHTML = `
+                    /* Przycisk potwierdzenia pozostaje czytelny i nie jest zalewany kolorem tła. */
+                    .confirm-again-state { background-color: transparent !important; color: ${hex} !important; border-color: ${hex} !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, ${hex} 22%, transparent) !important; }
+                    .confirm-again-state:hover { background-color: color-mix(in srgb, ${hex} 9%, transparent) !important; }
+                    .confirm-again-state i, .confirm-again-state span { color: ${hex} !important; }
+                    /* Kontrast napisów automatycznie dopasowany do jasności koloru motywu. */
+                    .bg-brand-red, a[href*="scythed.xyz/panel"] { color: var(--brand-text-color, #ffffff) !important; }
                     .bg-brand-red { background-color: ${hex} !important; }
+                    .text-brand-red, .text-red-500, .text-red-600 { color: ${hex} !important; }
                     [data-entry-id] { border-color: #27272a !important; }
                     .entry-tag-chip { color: ${hex} !important; border-color: color-mix(in srgb, ${hex} 55%, transparent) !important; background-color: color-mix(in srgb, ${hex} 8%, transparent) !important; }
                     [class~="border-brand-red/10"], [class~="border-brand-red/20"], [class~="border-brand-red/30"], [class~="border-brand-red/40"], [class~="border-brand-red/50"] { border-color: color-mix(in srgb, ${hex} 30%, transparent) !important; }
@@ -1907,7 +1930,7 @@
                     [class~="bg-brand-red/20"] { background-color: color-mix(in srgb, ${hex} 20%, transparent) !important; }
                     [class~="bg-red-500/10"], [class~="bg-red-500/20"], [class~="bg-red-600/10"], [class~="bg-red-600/20"] { background-color: color-mix(in srgb, ${hex} 10%, transparent) !important; }
                     [class*="border-red-"], [class*="border-blue-"], [class*="border-sky-"], [class*="border-brand-red/"] { border-color: color-mix(in srgb, ${hex} 55%, transparent) !important; }
-                    [class*="text-red-"], [class*="text-blue-"], [class*="text-sky-"] { color: ${hex} !important; }
+                    [class*="text-red-"] { color: ${hex} !important; }
                     .test-badge, .known-badge, .fixed-owner-badge { color: ${hex} !important; border-color: color-mix(in srgb, ${hex} 55%, transparent) !important; background-color: color-mix(in srgb, ${hex} 10%, transparent) !important; }
                     .test-badge i, .known-badge i, .fixed-owner-badge i { color: ${hex} !important; }
                     .fixed-owner-badge {
@@ -1917,9 +1940,7 @@
                     }
                     .fixed-owner-badge i { color: ${hex} !important; }
                     .hover\:bg-brand-hoverRed:hover { background-color: ${hoverHex} !important; }
-                    .text-brand-red, .text-red-500, .text-red-600 { color: ${hex} !important; }
                     .border-brand-red, .border-red-500, .border-red-600 { border-color: ${hex} !important; }
-                    [class*="bg-red-500"], [class*="bg-red-600"], [class*="bg-blue-500"], [class*="bg-blue-600"], [class*="bg-sky-500"], [class*="bg-sky-600"], [class*="bg-indigo-500"], [class*="bg-indigo-600"] { background-color: ${hex} !important; }
                     a[href*="scythed.xyz/panel"] { background-color: ${hex} !important; border-color: ${hex} !important; }
                     a[href*="scythed.xyz/panel"]:hover { background-color: ${hoverHex} !important; border-color: ${hoverHex} !important; }
                     [class~="text-blue-400"], [class~="text-blue-500"], [class~="text-blue-600"], [class~="text-sky-400"], [class~="text-sky-500"] { color: ${hex} !important; }
@@ -2210,9 +2231,9 @@
                 if (!globalEmailsConfirmTimer) {
                     playSound('click');
                     if (btn && icon) {
-                        btn.classList.add('bg-red-500/20', 'text-red-500');
+                        btn.classList.add('confirm-again-state');
                         btn.title = "Kliknij ponownie, aby potwierdzić zmianę widoczności maili";
-                        icon.className = 'fas fa-circle-question text-xs text-red-500 animate-pulse';
+                        icon.className = 'fas fa-circle-question text-xs animate-pulse';
                         const text = document.getElementById('global-emails-text');
                         if (text) text.innerText = 'KLIKNIJ PONOWNIE';
                         showToast('Kliknij ponownie, aby pokazać/ukryć wszystkie maile.', 'info');
@@ -2243,7 +2264,7 @@
                 const btn = document.getElementById('global-toggle-emails');
                 const icon = document.getElementById('global-emails-icon');
                 if (btn && icon) {
-                    btn.classList.remove('bg-red-500/20', 'text-red-500');
+                    btn.classList.remove('confirm-again-state');
                     btn.title = "";
                     icon.className = globalEmailsVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
                     const text = document.getElementById('global-emails-text');
@@ -2258,9 +2279,9 @@
                 if (!globalPasswordsConfirmTimer) {
                     playSound('click');
                     if (btn && icon) {
-                        btn.classList.add('bg-red-500/20', 'text-red-500');
+                        btn.classList.add('confirm-again-state');
                         btn.title = "Kliknij ponownie, aby potwierdzić zmianę widoczności haseł";
-                        icon.className = 'fas fa-circle-question text-xs text-red-500 animate-pulse';
+                        icon.className = 'fas fa-circle-question text-xs animate-pulse';
                         const text = document.getElementById('global-pass-text');
                         if (text) text.innerText = 'KLIKNIJ PONOWNIE';
                         showToast('Kliknij ponownie, aby pokazać/ukryć wszystkie hasła.', 'info');
@@ -2291,7 +2312,7 @@
                 const btn = document.getElementById('global-toggle-passwords');
                 const icon = document.getElementById('global-pass-icon');
                 if (btn && icon) {
-                    btn.classList.remove('bg-red-500/20', 'text-red-500');
+                    btn.classList.remove('confirm-again-state');
                     btn.title = "";
                     icon.className = globalPasswordsVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
                 }
