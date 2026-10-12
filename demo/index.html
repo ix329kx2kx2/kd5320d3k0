@@ -314,10 +314,10 @@
 
     <header class="border-b border-zinc-200 dark:border-brand-border bg-white/85 dark:bg-black/85 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 py-3 flex items-center justify-between transition-colors duration-300">
         <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg border border-transparent bg-transparent flex items-center justify-center overflow-hidden">
+            <a href="https://scythed.xyz" class="w-10 h-10 md:w-12 md:h-12 rounded-lg border border-transparent bg-transparent flex items-center justify-center overflow-hidden cursor-pointer" title="Przejdź do scythed.xyz" aria-label="SCYTHED — strona główna">
                 <img src="assets/logos/logo.gif" alt="SCYTHED Logo" class="brand-logo w-full h-full object-contain p-0.5">
-            </div>
-            <span class="font-orbitron font-extrabold text-xl md:text-2xl tracking-wider text-zinc-900 dark:text-white streamer-scythed-name">SCYTH<span class="text-brand-red">ED</span></span>
+            </a>
+            <a href="https://scythed.xyz" class="font-orbitron font-extrabold text-xl md:text-2xl tracking-wider text-zinc-900 dark:text-white streamer-scythed-name no-underline cursor-pointer" title="Przejdź do scythed.xyz">SCYTH<span class="text-brand-red">ED</span></a>
         </div>
 
         <div class="flex items-center gap-2 md:gap-3">
@@ -421,9 +421,8 @@
                 </div>
                 <div class="overflow-hidden flex-1 min-w-0 pt-2">
                     <div class="font-orbitron font-extrabold text-[15px] text-brand-red truncate">Demo</div>
-                    <div id="profile-created-date" class="text-[9px] text-zinc-500 font-mono mt-0.5">Konto od: -</div>
+                    <div id="profile-created-date" class="text-[9px] text-zinc-500 font-mono mt-0.5">Konto od: ?</div>
                 </div>
-                <i class="fas fa-lock text-brand-red text-[11px] self-start mt-7 flex-shrink-0" title="Profil zablokowany w wersji demonstracyjnej"></i>
             </div>
             <div class="absolute left-3.5 right-3.5 bottom-3 border-t border-zinc-800"></div>
         </div>
@@ -1501,12 +1500,20 @@
                             const dx = mouse.x - this.x;
                             const dy = mouse.y - this.y;
                             const dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist < 100) {
+                            if (dist < 100 && dist > 0.001) {
                                 const force = (100 - dist) / 100;
                                 this.x -= (dx / dist) * force * 1.5;
                                 this.y -= (dy / dist) * force * 1.5;
                             }
                         }
+
+                        // Keep particles inside the header canvas so mouse interaction
+                        // can never push the effects beyond the card's border.
+                        const pad = this.size + 2;
+                        if (this.x < pad) { this.x = pad; this.vx = Math.abs(this.vx); }
+                        else if (this.x > width - pad) { this.x = width - pad; this.vx = -Math.abs(this.vx); }
+                        if (this.y < pad) { this.y = pad; this.vy = Math.abs(this.vy); }
+                        else if (this.y > height - pad) { this.y = height - pad; this.vy = -Math.abs(this.vy); }
                     }
 
                     draw(rgb, isLightMode) {
@@ -2418,17 +2425,10 @@
             }
 
             function setupDemoSearchFocusBehavior() {
-                const input = document.getElementById('vault-search-input');
-                const filters = Array.from(document.querySelectorAll('.vault-toolbar-filter'));
-                if (!input || !filters.length) return;
-                const setSearching = (active) => {
-                    filters.forEach(el => el.classList.toggle('hidden', active));
-                    document.getElementById('vault-toolbar')?.classList.toggle('searching', active);
-                };
-                input.addEventListener('focus', () => setSearching(true));
-                input.addEventListener('blur', () => {
-                    if (!input.value.trim()) setSearching(false);
-                });
+                // Filtry kategorii/platform/tagów pozostają widoczne również podczas wyszukiwania.
+                const filters = document.querySelectorAll('.vault-toolbar-filter');
+                filters.forEach(el => el.classList.remove('hidden'));
+                document.getElementById('vault-toolbar')?.classList.remove('searching');
             }
 
             function renderVaultEntries() {
