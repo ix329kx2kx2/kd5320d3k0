@@ -1322,14 +1322,17 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                 </div>
                 <div>
                     <label class="block text-xs font-mono uppercase text-zinc-600 dark:text-gray-400 mb-1">Krótka Notatka / Opis</label>
-                    <textarea id="entry-description" rows="2" maxlength="100" class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm" placeholder="np. Konto główne..."></textarea>
+                    <textarea id="entry-description" rows="2" maxlength="100" oninput="window.scythedApp.updateEntryLimitCounters()" class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm" placeholder="np. Konto główne..."></textarea>
+                    <p id="entry-description-counter" class="text-[10px] text-zinc-500 mt-1 text-right" aria-live="polite">0/100 znaków</p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-3">
                     <div>
                         <label class="block text-xs font-mono uppercase text-zinc-600 dark:text-gray-400 mb-1">Tagi</label>
-                        <input type="text" id="entry-tags" maxlength="56" class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm" placeholder="#przykładowy tag, #tag">
-                        <p class="text-[10px] text-zinc-500 mt-1">Maksymalnie 3 tagi na platformę, do 16 znaków każdy (łącznie ze znakiem #). Oddzielaj przecinkami; brakujący # zostanie dodany automatycznie.</p>
+                        <input type="text" id="entry-tags" oninput="window.scythedApp.updateEntryLimitCounters()" class="w-full bg-zinc-100 dark:bg-black/80 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:border-brand-red focus:outline-none text-xs md:text-sm" placeholder="#przykładowy tag, #tag" aria-describedby="entry-tags-help entry-tags-counter">
+                        <p id="entry-tags-help" class="text-[10px] text-zinc-500 mt-1">Maksymalnie 3 tagi na platformę, do 16 znaków każdy (łącznie ze znakiem #). Oddzielaj przecinkami; brakujący # zostanie dodany automatycznie.</p>
+                        <p id="entry-tags-counter" class="text-[10px] text-zinc-500 mt-1 text-right" aria-live="polite">0/3 tagi · długość tagów: —</p>
+                        <p id="entry-tags-error" class="hidden text-[10px] text-red-500 mt-1" role="alert"></p>
                     </div>
                 </div>
 
@@ -4237,6 +4240,7 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                 document.getElementById('entry-password').value = '';
                 document.getElementById('entry-description').value = '';
                 document.getElementById('entry-tags').value = '';
+                updateEntryLimitCounters();
                 document.getElementById('entry-favorite').checked = false;
                 document.getElementById('entry-pinned').checked = false;
                 document.getElementById('entry-history-row').classList.add('hidden');
@@ -4269,10 +4273,50 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                 playSound('click');
             }
 
+            function getEntryTagValidation(raw) {
+                const rawTags = String(raw || '').split(',').map(t => t.trim()).filter(Boolean);
+                const tags = [...new Set(rawTags.map(t => (t.startsWith('#') ? t : `#${t}`)))];
+                const tooLong = tags.filter(t => t.length > 16);
+                return {
+                    tags,
+                    tooMany: tags.length > 3,
+                    tooLong,
+                    valid: tags.length <= 3 && tooLong.length === 0
+                };
+            }
+
             function normalizeEntryTags(raw) {
-                return [...new Set(String(raw || '').split(',').map(t => t.trim()).filter(Boolean)
-                    .map(t => (t.startsWith('#') ? t : `#${t}`).slice(0, 16)))]
-                    .slice(0, 3);
+                return getEntryTagValidation(raw).tags;
+            }
+
+            function updateEntryLimitCounters() {
+                const description = document.getElementById('entry-description');
+                const descriptionCounter = document.getElementById('entry-description-counter');
+                const tagsInput = document.getElementById('entry-tags');
+                const tagsCounter = document.getElementById('entry-tags-counter');
+                const tagsError = document.getElementById('entry-tags-error');
+                if (description && descriptionCounter) {
+                    const length = description.value.length;
+                    descriptionCounter.textContent = `${length}/100 znaków`;
+                    descriptionCounter.classList.toggle('text-red-500', length >= 100);
+                    descriptionCounter.classList.toggle('text-zinc-500', length < 100);
+                }
+                if (tagsInput && tagsCounter) {
+                    const validation = getEntryTagValidation(tagsInput.value);
+                    const lengths = validation.tags.length
+                        ? validation.tags.map(tag => `${tag.length}/16`).join(', ')
+                        : '—';
+                    tagsCounter.textContent = `${validation.tags.length}/3 tagi · długość tagów: ${lengths}`;
+                    tagsCounter.classList.toggle('text-red-500', !validation.valid);
+                    tagsCounter.classList.toggle('text-zinc-500', validation.valid);
+                    if (tagsError) {
+                        const messages = [];
+                        if (validation.tooMany) messages.push('Można dodać maksymalnie 3 tagi do jednego wpisu/platformy.');
+                        if (validation.tooLong.length) messages.push(`Każdy tag może mieć maksymalnie 16 znaków ze znakiem #. Za długie: ${validation.tooLong.join(', ')}.`);
+                        tagsError.textContent = messages.join(' ');
+                        tagsError.classList.toggle('hidden', messages.length === 0);
+                    }
+                }
             }
 
             async function handleSaveEntry(e) {
@@ -4283,8 +4327,24 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                 const customPlatform = platform === 'other' ? document.getElementById('entry-custom-platform').value.trim() : '';
                 const account = document.getElementById('entry-account').value.trim();
                 const password = document.getElementById('entry-password').value;
-                const description = document.getElementById('entry-description').value.trim().slice(0, 100);
-                const tags = normalizeEntryTags(document.getElementById('entry-tags').value);
+                const descriptionRaw = document.getElementById('entry-description').value;
+                if (descriptionRaw.length > 100) {
+                    showToast('Nie udało się zapisać wpisu: notatka może mieć maksymalnie 100 znaków.', 'info');
+                    document.getElementById('entry-description').focus();
+                    return;
+                }
+                const description = descriptionRaw.trim();
+                const tagsValidation = getEntryTagValidation(document.getElementById('entry-tags').value);
+                if (!tagsValidation.valid) {
+                    updateEntryLimitCounters();
+                    const reason = tagsValidation.tooMany
+                        ? 'Można dodać maksymalnie 3 tagi do jednego wpisu/platformy.'
+                        : `Każdy tag może mieć maksymalnie 16 znaków ze znakiem #. Za długie tagi: ${tagsValidation.tooLong.join(', ')}.`;
+                    showToast(`Nie udało się zapisać wpisu. ${reason}`, 'info');
+                    document.getElementById('entry-tags').focus();
+                    return;
+                }
+                const tags = tagsValidation.tags;
                 const favorite = document.getElementById('entry-favorite').checked;
                 const pinned = document.getElementById('entry-pinned').checked;
 
@@ -4675,6 +4735,7 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                 document.getElementById('entry-password').value = entry.password;
                 document.getElementById('entry-description').value = (entry.description || '').slice(0, 100);
                 document.getElementById('entry-tags').value = normalizeEntryTags((entry.tags || []).join(', ')).join(', ');
+                updateEntryLimitCounters();
                 document.getElementById('entry-favorite').checked = !!entry.favorite;
                 document.getElementById('entry-pinned').checked = !!entry.pinned;
                 document.getElementById('entry-history-row').classList.remove('hidden');
@@ -4729,29 +4790,40 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                 if (!selectedEntryIds.size) return showToast('Najpierw zaznacz wpisy.', 'info');
                 const raw = await appPrompt('Wpisz tagi oddzielone przecinkami, np. #gry na codzien, #cos tam:', '', { title: 'DODAJ TAGI', placeholder: '#gry na codzien, #cos tam', icon: 'fa-tags', confirmText: 'DODAJ TAGI' });
                 if (raw === null) return;
-                const normalizedTags = normalizeEntryTags(raw);
-                if (!normalizedTags.length) return showToast('Nie podano żadnego tagu.', 'info');
+                const validation = getEntryTagValidation(raw);
+                if (!validation.tags.length) return showToast('Nie podano żadnego tagu.', 'info');
+                if (!validation.valid) {
+                    const reason = validation.tooMany
+                        ? 'Można podać maksymalnie 3 tagi.'
+                        : `Każdy tag może mieć maksymalnie 16 znaków ze znakiem #. Za długie: ${validation.tooLong.join(', ')}.`;
+                    return showToast(`Nie udało się dodać tagów. ${reason}`, 'info');
+                }
+                const normalizedTags = validation.tags;
                 pushUndo('dodanie tagów do zaznaczonych wpisów', vaultEntries);
                 let changed = 0;
+                let skippedAtLimit = 0;
                 vaultEntries.forEach(entry => {
                     if (!selectedEntryIds.has(entry.id)) return;
                     const tags = Array.isArray(entry.tags) ? entry.tags : [];
                     const currentTags = normalizeEntryTags(tags.join(', '));
-                    const missingTags = normalizedTags.filter(tag => !currentTags.includes(tag)).slice(0, Math.max(0, 3 - currentTags.length));
-                    if (missingTags.length) {
-                        entry.tags = [...currentTags, ...missingTags];
+                    const missingTags = normalizedTags.filter(tag => !currentTags.includes(tag));
+                    const available = Math.max(0, 3 - currentTags.length);
+                    const tagsToAdd = missingTags.slice(0, available);
+                    if (missingTags.length > available) skippedAtLimit++;
+                    if (tagsToAdd.length) {
+                        entry.tags = [...currentTags, ...tagsToAdd];
                         entry.updatedAt = new Date().toISOString();
                         changed++;
                     }
                 });
                 if (!changed) {
                     undoStack.pop();
-                    return showToast('Wybrane wpisy mają już wszystkie podane tagi.', 'info');
+                    return showToast('Nie dodano tagów: wybrane wpisy mają już te tagi albo osiągnęły limit 3 tagów.', 'info');
                 }
                 await saveEncryptedState();
                 refreshTagFilter();
                 renderVaultEntries();
-                showToast(`Dodano tag ${normalizedTag} do ${changed} wpisów.`, 'success');
+                showToast(`Dodano tagi do ${changed} wpisów.${skippedAtLimit ? ` ${skippedAtLimit} wpisów pominięto, bo osiągnęły limit 3 tagów.` : ''}`, skippedAtLimit ? 'info' : 'success');
             }
 
             async function duplicateSelectedEntries() {
@@ -5532,6 +5604,7 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                 selectAllVisible,
                 duplicateSelectedEntries,
                 addTagToSelectedEntries,
+                updateEntryLimitCounters,
                 bulkDeleteEntries,
                 openTrashModal,
                 restoreTrashEntry,
