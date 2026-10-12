@@ -709,7 +709,7 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
 }
 </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between bg-zinc-100 dark:bg-black text-zinc-900 dark:text-white selection:bg-brand-red selection:text-white pb-24 md:pb-28 transition-colors duration-300 relative overflow-x-hidden">
+<body class="min-h-screen flex flex-col justify-between bg-zinc-100 dark:bg-black text-zinc-900 dark:text-white selection:bg-brand-red selection:text-white pb-24 md:pb-28 transition-colors duration-300 relative overflow-x-hidden" style="isolation:isolate">
 
     <div id="app-custom-bg"></div>
     <div id="app-bg-overlay"></div>
@@ -2263,7 +2263,12 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                     let b = parseInt(hex.substring(4, 6), 16) || 0;
                     let alpha = appBgOverlayOpacity / 100;
 
-                    document.documentElement.style.setProperty('--app-bg-overlay-color', `rgba(${r},${g}, ${b},${alpha})`);
+                    const overlayColor = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                    document.documentElement.style.setProperty('--app-bg-overlay-color', overlayColor);
+                    // Ustawiaj kolor bezpośrednio na warstwie nakładki. Samo CSS-owe
+                    // tło nie wystarcza, jeśli wcześniej usunięto obraz (pozostaje wtedy
+                    // inline backgroundColor: transparent).
+                    if (overlayEl) overlayEl.style.backgroundColor = appBgUrl ? overlayColor : 'transparent';
 
                     if (appBgUrl) {
                         bgEl.style.backgroundImage = `url("${appBgUrl}")`;
