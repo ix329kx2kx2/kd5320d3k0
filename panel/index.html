@@ -180,7 +180,7 @@
             padding: 0 !important;
             box-sizing: border-box;
             
-            background-color: color-mix(in srgb, var(--brand-red, #ff0033) 78%, #000 22%) !important;
+            background-color: color-mix(in srgb, var(--brand-red, #ff0033) 70%, #000 30%) !important;
             transition: background-color 180ms ease;
         }
         #avatar-img-preview {
@@ -577,9 +577,9 @@ document.addEventListener('DOMContentLoaded', function(){
     if(!text) return;
     active=el;
     const badgeStyle=getComputedStyle(el);
-    const badgeColor=badgeStyle.color || badgeStyle.borderColor || '#18181b';
+    const badgeColor = el.id === 'badge-paragon' ? '#347a4f' : (badgeStyle.color || badgeStyle.borderColor || '#18181b');
     tip.style.setProperty('--tooltip-badge-color', badgeColor);
-    tip.style.borderColor=badgeColor;
+    tip.style.borderColor = el.id === 'badge-paragon' ? '#5b9b70' : badgeColor;
     tip.textContent=text;
     tip.style.display='block';
     const r=el.getBoundingClientRect();
@@ -3118,8 +3118,9 @@ html:not(.dark) #app-dialog {
                             const dist = Math.sqrt(dx * dx + dy * dy);
                             if (dist > 0.001 && dist < 100) {
                                 const force = (100 - dist) / 100;
-                                this.x -= (dx / dist) * force * 1.2;
-                                this.y -= (dy / dist) * force * 1.2;
+                                const push = Math.min(force * 1.2, 0.65);
+                                this.x -= (dx / dist) * push;
+                                this.y -= (dy / dist) * push;
                             }
                         }
                         if (!Number.isFinite(this.x) || !Number.isFinite(this.y) ||
@@ -3127,6 +3128,8 @@ html:not(.dark) #app-dialog {
                             this.reset();
                             return;
                         }
+                        this.x = Math.max(1, Math.min(width - 1, this.x));
+                        this.y = Math.max(1, Math.min(height - 1, this.y));
                     }
 
                     draw(rgb, isLightMode) {
@@ -3165,8 +3168,8 @@ html:not(.dark) #app-dialog {
                     }
 
                     reset() {
-                        this.x = Math.random() * width + width * 0.2;
-                        this.y = Math.random() * -height * 0.5;
+                        this.x = Math.random() * Math.max(1, width - 2) + 1;
+                        this.y = Math.random() * Math.max(1, height * 0.35);
                         this.len = Math.random() * 80 + 40;
                         this.speed = Math.random() * 6 + 4;
                         this.angle = Math.PI / 4 + (Math.random() * 0.2 - 0.1);
@@ -3181,8 +3184,8 @@ html:not(.dark) #app-dialog {
                             this.timer -= speed;
                             if (this.timer <= 0) {
                                 this.active = true;
-                                this.x = Math.random() * width * 1.2;
-                                this.y = -20;
+                                this.x = Math.random() * Math.max(1, width - 2) + 1;
+                                this.y = Math.random() * Math.max(1, height * 0.25);
                             }
                             return;
                         }
@@ -3190,9 +3193,9 @@ html:not(.dark) #app-dialog {
                         this.x -= Math.cos(this.angle) * this.speed * speed;
                         this.y += Math.sin(this.angle) * this.speed * speed;
 
-                        if (this.y > height + 50 || this.x < -50) {
-                            this.active = false;
-                            this.timer = Math.random() * 250 + 60;
+                        if (this.y < 0 || this.y > height || this.x < 0 || this.x > width) {
+                            this.reset();
+                            this.timer = Math.random() * 24 + 1;
                         }
                     }
 
