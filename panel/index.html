@@ -573,8 +573,8 @@
 <style>
 .profile-badge-tooltip{cursor:help;}
 .profile-badge-tooltip:hover{filter:brightness(1.12);}
-.badge-hover-tooltip{position:fixed;display:none;z-index:2147483647;pointer-events:none;background:#f3f3f3;color:#171717;border:1px solid #d0d0d0;padding:6px 9px;border-radius:7px;font-size:10px;font-weight:700;line-height:1.2;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.22);font-family:inherit;}
-html.dark .badge-hover-tooltip{background:#131313;color:#f5f5f5;border-color:#333;box-shadow:0 8px 20px rgba(0,0,0,.45);}
+.badge-hover-tooltip{position:fixed;display:none;z-index:2147483647;pointer-events:none;background:#f4f4f5;color:#18181b;border:1px solid #d4d4d8;padding:6px 9px;border-radius:7px;font-size:10px;font-weight:700;line-height:1.2;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.22);font-family:inherit;}
+html.dark .badge-hover-tooltip{background:#18181b;color:#f4f4f5;border-color:#3f3f46;box-shadow:0 8px 20px rgba(0,0,0,.45);}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
@@ -589,9 +589,9 @@ document.addEventListener('DOMContentLoaded', function(){
     const badgeStyle=getComputedStyle(el);
     const badgeColor=badgeStyle.color || badgeStyle.borderColor || '#18181b';
     const darkMode = document.documentElement.classList.contains('dark');
-    tip.style.backgroundColor = darkMode ? '#131313' : '#f3f3f3';
-    tip.style.color = darkMode ? '#f5f5f5' : '#171717';
-    tip.style.borderColor = darkMode ? '#333333' : '#d0d0d0';
+    tip.style.backgroundColor = darkMode ? '#18181b' : '#f4f4f5';
+    tip.style.color = darkMode ? '#f4f4f5' : '#18181b';
+    tip.style.borderColor = darkMode ? '#3f3f46' : '#d4d4d8';
     tip.textContent=text;
     tip.style.display='block';
     const r=el.getBoundingClientRect();
