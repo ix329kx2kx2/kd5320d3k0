@@ -179,6 +179,9 @@
         #profile-avatar-display {
             padding: 0 !important;
             box-sizing: border-box;
+            
+            background-color: color-mix(in srgb, var(--brand-red, #ff0033) 78%, #000 22%) !important;
+            transition: background-color 180ms ease;
         }
         #avatar-img-preview {
             display: block;
@@ -234,7 +237,7 @@
             aspect-ratio: 1 / 1;
         }
 
-        /* Wszystkie odznaki mają identyczny wymiar niezależnie od ikony. */
+        
         #profile-badges-container > div > i {
             display: inline-flex;
             align-items: center;
@@ -337,7 +340,7 @@
         }
 
         #badge-paragon {
-            /* Rozmiar dziedziczony jak w pozostałych odznakach profilu. */
+            
             box-sizing: border-box !important;
             padding: 0.375rem !important;
             background: linear-gradient(
@@ -3109,18 +3112,20 @@ html:not(.dark) #app-dialog {
                         this.y += this.vy * speed;
                         this.angle += this.spin * speed;
 
-                        if (this.x < 0 || this.x > width) this.vx *= -1;
-                        if (this.y < 0 || this.y > height) this.vy *= -1;
-
                         if (mouse.active) {
                             const dx = mouse.x - this.x;
                             const dy = mouse.y - this.y;
                             const dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist < 100) {
+                            if (dist > 0.001 && dist < 100) {
                                 const force = (100 - dist) / 100;
-                                this.x -= (dx / dist) * force * 1.5;
-                                this.y -= (dy / dist) * force * 1.5;
+                                this.x -= (dx / dist) * force * 1.2;
+                                this.y -= (dy / dist) * force * 1.2;
                             }
+                        }
+                        if (!Number.isFinite(this.x) || !Number.isFinite(this.y) ||
+                            this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                            this.reset();
+                            return;
                         }
                     }
 
