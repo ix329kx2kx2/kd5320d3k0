@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta property="og:title" content="SCYTHED">
-    <meta property="og:description" content="MENADŻER HASEŁ - publiczne wydanie 3">
+    <meta property="og:description" content="MENADŻER HASEŁ - publiczne wydanie 4">
     <meta property="og:image" content="https://i.imgur.com/jIS4wrD.png">
     <meta property="og:url" content="https://scythed.xyz">
     <meta property="og:type" content="website">
@@ -433,7 +433,7 @@
     </div>
 
     <div class="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-1">
-        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">publiczne wydanie demo 3</span>
+        <span class="text-[9px] font-mono text-zinc-500 dark:text-gray-500 pr-1 tracking-wider">publiczne wydanie demo 4</span>
         <button onclick="window.scythedApp.openSettingsModal()" class="w-12 h-12 rounded-2xl bg-white/95 dark:bg-black/95 border border-zinc-200 dark:border-brand-border text-brand-red hover:scale-105 active:scale-95 shadow-2xl backdrop-blur-md flex items-center justify-center text-xl transition-all glow-effect" title="Ustawienia & System">
             <i class="fas fa-gear"></i>
         </button>
@@ -1497,25 +1497,24 @@
                         this.y += this.vy * headerAnimationSpeed;
                         this.angle += this.spin * headerAnimationSpeed;
 
-                        if (this.x < 0 || this.x > width) this.vx *= -1;
-                        if (this.y < 0 || this.y > height) this.vy *= -1;
-
                         if (mouse.active) {
                             const dx = mouse.x - this.x;
                             const dy = mouse.y - this.y;
                             const dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist < 100 && dist > 0.001) {
+                            if (dist > 0.001 && dist < 100) {
                                 const force = (100 - dist) / 100;
-                                this.x -= (dx / dist) * force * 1.5;
-                                this.y -= (dy / dist) * force * 1.5;
+                                this.x -= (dx / dist) * force * 1.2;
+                                this.y -= (dy / dist) * force * 1.2;
                             }
                         }
 
-                        const pad = this.size + 2;
-                        if (this.x < pad) { this.x = pad; this.vx = Math.abs(this.vx); }
-                        else if (this.x > width - pad) { this.x = width - pad; this.vx = -Math.abs(this.vx); }
-                        if (this.y < pad) { this.y = pad; this.vy = Math.abs(this.vy); }
-                        else if (this.y > height - pad) { this.y = height - pad; this.vy = -Math.abs(this.vy); }
+                        // Po wyjściu poza obszar nagłówka cząsteczka pojawia się ponownie
+                        // w losowym miejscu, zamiast odbijać się od krawędzi.
+                        if (!Number.isFinite(this.x) || !Number.isFinite(this.y) ||
+                            this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                            this.reset();
+                            return;
+                        }
                     }
 
                     draw(rgb, isLightMode) {
