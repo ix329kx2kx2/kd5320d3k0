@@ -2198,9 +2198,32 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                 } catch (err) {
                     void 0;
                 }
+
+                // Usunięcie obrazu przywraca bazowy wygląd tła i czyści efekty,
+                // aby nie wpływały na domyślne tło ani na kolejny obraz.
+                appBgBlur = 0;
+                appBgOverlayColor = '#000000';
+                appBgOverlayOpacity = 40;
+                localStorage.removeItem(STORAGE_KEYS.APP_BG_BLUR);
+                localStorage.removeItem(STORAGE_KEYS.APP_BG_OVERLAY_COLOR);
+                localStorage.removeItem(STORAGE_KEYS.APP_BG_OVERLAY_OPACITY);
+
+                const blurSlider = document.getElementById('bg-blur-slider');
+                const blurLabel = document.getElementById('bg-blur-val');
+                const colorPicker = document.getElementById('bg-overlay-color');
+                const colorLabel = document.getElementById('bg-overlay-hex');
+                const opacitySlider = document.getElementById('bg-opacity-slider');
+                const opacityLabel = document.getElementById('bg-opacity-val');
+                if (blurSlider) blurSlider.value = '0';
+                if (blurLabel) blurLabel.innerText = '0%';
+                if (colorPicker) colorPicker.value = appBgOverlayColor;
+                if (colorLabel) colorLabel.innerText = appBgOverlayColor.toUpperCase();
+                if (opacitySlider) opacitySlider.value = '40';
+                if (opacityLabel) opacityLabel.innerText = '40%';
+
                 applyAppBackgroundUI();
                 await saveEncryptedState();
-                showToast('Usunięto własne tło aplikacji.', 'info');
+                showToast('Usunięto własne tło i przywrócono podstawowy wygląd.', 'info');
                 playSound('click');
             }
 
@@ -2251,6 +2274,9 @@ html.dark #profile-badges-container .profile-badge-tooltip > i {
                     } else {
                         bgEl.style.backgroundImage = 'none';
                         bgEl.style.opacity = '0';
+                        bgEl.style.setProperty('--app-bg-blur', '0px');
+                        document.documentElement.style.setProperty('--app-bg-overlay-color', 'rgba(0, 0, 0, 0)');
+                        if (overlayEl) overlayEl.style.backgroundColor = 'transparent';
                         document.body.classList.remove('has-custom-bg');
                         if (removeBtn) removeBtn.classList.add('hidden');
                         if (effectsPanel) effectsPanel.classList.add('hidden');
