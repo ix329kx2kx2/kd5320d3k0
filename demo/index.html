@@ -313,12 +313,12 @@
     </div>
 
     <header class="border-b border-zinc-200 dark:border-brand-border bg-white/85 dark:bg-black/85 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 py-3 flex items-center justify-between transition-colors duration-300">
-        <div class="flex items-center space-x-3">
-            <a href="https://scythed.xyz" class="w-10 h-10 md:w-12 md:h-12 rounded-lg border border-transparent bg-transparent flex items-center justify-center overflow-hidden cursor-pointer" title="Przejdź do scythed.xyz" aria-label="SCYTHED — strona główna">
-                <img src="assets/logos/logo.gif" alt="SCYTHED Logo" class="brand-logo w-full h-full object-contain p-0.5">
-            </a>
-            <a href="https://scythed.xyz" class="font-orbitron font-extrabold text-xl md:text-2xl tracking-wider text-zinc-900 dark:text-white streamer-scythed-name no-underline cursor-pointer" title="Przejdź do scythed.xyz">SCYTH<span class="text-brand-red">ED</span></a>
-        </div>
+        <a href="https://scythed.xyz" class="flex items-center gap-3 no-underline cursor-pointer rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red" title="Przejdź do scythed.xyz" aria-label="SCYTHED — strona główna">
+            <span class="w-10 h-10 md:w-12 md:h-12 rounded-lg border border-transparent bg-transparent flex items-center justify-center overflow-hidden flex-shrink-0">
+                <img src="assets/logos/logo.gif" alt="" class="brand-logo w-full h-full object-contain p-0.5">
+            </span>
+            <span class="font-orbitron font-extrabold text-xl md:text-2xl tracking-wider text-zinc-900 dark:text-white streamer-scythed-name no-underline">SCYTH<span class="text-brand-red">ED</span></span>
+        </a>
 
         <div class="flex items-center gap-2 md:gap-3">
             <a href="https://scythed.xyz/panel/" class="px-3 py-1.5 bg-brand-red hover:bg-brand-hoverRed text-white text-xs font-bold rounded-lg border border-brand-red/70 transition flex items-center gap-1.5 shadow-sm" title="Otwórz pełną wersję">
@@ -416,11 +416,11 @@
         <div class="w-full h-full bg-black/95 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md relative">
             <div class="absolute inset-x-0 top-0 h-16 bg-black"></div>
             <div class="absolute left-3.5 top-[46px] flex items-center gap-3 right-3.5">
-                <div id="profile-avatar-display" class="w-[64px] h-[64px] rounded-xl bg-red-600 border-2 border-brand-red flex items-center justify-center overflow-hidden shadow-lg flex-shrink-0">
+                <div id="profile-avatar-display" class="w-[64px] h-[64px] rounded-xl border-2 border-brand-red flex items-center justify-center overflow-hidden shadow-lg flex-shrink-0">
                     <img id="avatar-img-preview" src="assets/logos/avatar.png" alt="Avatar Demo User" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='assets/logos/avatar.png';">
                 </div>
                 <div class="overflow-hidden flex-1 min-w-0 pt-2">
-                    <div class="font-orbitron font-extrabold text-[15px] text-brand-red truncate">Demo</div>
+                    <div class="font-orbitron font-extrabold text-[15px] animated-gradient-text truncate">Demo</div>
                     <div id="profile-created-date" class="text-[9px] text-zinc-500 font-mono mt-0.5">Konto od: -</div>
                 </div>
             </div>
@@ -1507,8 +1507,6 @@
                             }
                         }
 
-                        // Keep particles inside the header canvas so mouse interaction
-                        // can never push the effects beyond the card's border.
                         const pad = this.size + 2;
                         if (this.x < pad) { this.x = pad; this.vx = Math.abs(this.vx); }
                         else if (this.x > width - pad) { this.x = width - pad; this.vx = -Math.abs(this.vx); }
@@ -2425,7 +2423,6 @@
             }
 
             function setupDemoSearchFocusBehavior() {
-                // Filtry kategorii/platform/tagów pozostają widoczne również podczas wyszukiwania.
                 const filters = document.querySelectorAll('.vault-toolbar-filter');
                 filters.forEach(el => el.classList.remove('hidden'));
                 document.getElementById('vault-toolbar')?.classList.remove('searching');
